@@ -12,7 +12,7 @@ const RequireAuthRoot = ({ userRoles, fixerRoles }) => {
                 ? <Navigate to='/fixers' state={{ from: location }} replace />
                 : auth?.accessToken
                     ? <Navigate to='/unauthorized' state={{ from: location }} replace />
-                    : <Navigate to='/' state={{ from: location }} replace />
+                    : <Navigate to='/welcome' state={{ from: location }} replace />
     );
 }
 

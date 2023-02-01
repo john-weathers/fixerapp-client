@@ -1,3 +1,5 @@
+/* CSS reset */
+
 html {
   box-sizing: border-box;
   font-size: 16px;
@@ -22,6 +24,46 @@ img {
   height: auto;
 }
 
+/* NavLinks - placeholder ruleset */
+
+nav ul li {
+  color: rgb(14, 57, 14);
+}
+
 .active {
   background-color: rgb(221, 185, 170);
+}
+
+/* GetStarted component - placeholder rulesets */
+.userInfoOn {
+  display: flex;
+}
+
+.userInfoOff {
+  display: none;
+}
+
+.fixerInfoOn {
+  display: flex;
+}
+
+.fixerInfoOff {
+  display: none;
+}
+
+.moreUserInfo {
+  background-color: white;
+}
+
+.moreFixerInfo {
+  background-color: white;
+}
+
+/* Error page - basic, revisit */
+#error-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
