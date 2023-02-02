@@ -59,6 +59,61 @@ nav ul li {
   background-color: white;
 }
 
+/* Login - placeholders */
+#login {
+  display: flex;
+}
+
+#login .errmsg {
+  display: flex;
+}
+
+#login .offscreen {
+  display: flex;
+}
+
+.persistCheck {
+  display: flex;
+}
+
+.needAccount {
+  display: flex;
+}
+
+/* Registration - placeholders */
+
+#registration {
+  display: flex;
+}
+
+#registration .errmsg {
+  display: flex;
+}
+
+#registration .offscreen {
+  display: flex;
+}
+
+#registration .valid {
+  display: flex;
+}
+
+#registration .hide {
+  display: flex;
+}
+
+#registration .invalid {
+  display: flex;
+}
+
+#registration .instructions {
+  display: flex;
+}
+
+.dontNeedAccount {
+  display: flex;
+}
+
 /* Error page - basic, revisit */
 #error-page {
   display: flex;

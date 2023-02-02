@@ -1,14 +1,21 @@
 import { useLocation, Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import jwt_decode from 'jwt-decode';
 
 const RequireAuthRoot = ({ userRoles, fixerRoles }) => {
     const { auth } = useAuth();
     const location = useLocation();
 
+    const decoded = auth?.accessToken
+        ? jwt_decode(auth.accessToken)
+        : undefined
+
+    const roles = decoded?.userInfo?.roles || []
+
     return (
-        auth?.roles.find(role => userRoles?.includes(role))
+        roles.find(role => userRoles?.includes(role))
             ? <Outlet />
-            : auth?.roles.find(role => fixerRoles?.includes(role))
+            : roles.find(role => fixerRoles?.includes(role))
                 ? <Navigate to='/fixers' state={{ from: location }} replace />
                 : auth?.accessToken
                     ? <Navigate to='/unauthorized' state={{ from: location }} replace />

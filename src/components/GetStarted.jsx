@@ -19,21 +19,23 @@ const GetStarted = () => {
 
   const handleUserClick2 = () => {
     setUserDisplay(prev => !prev);
-    setShowUserInfo(false);
-    setShowFixerInfo(true);
+    setShowUserInfo(prev => !prev);
+    setFixerDisplay(prev => !prev);
+    setShowFixerInfo(prev => !prev);
   }
 
   const handleFixerClick2 = () => {
     setFixerDisplay(prev => !prev);
-    setShowFixerInfo(false);
-    setShowUserInfo(true);
+    setShowFixerInfo(prev => !prev);
+    setUserDisplay(prev => !prev);
+    setShowUserInfo(prev => !prev);
   }
   
   return (
     <div>
-        <div onClick={handleUserClick} className={userDisplay ? 'userInfoOn' : 'userInfoOff'}>
+        <div className={userDisplay ? 'userInfoOn' : 'userInfoOff'}>
           {!showUserInfo 
-            ? <h2>Learn about the user process</h2>
+            ? <button type='button' onClick={handleUserClick}>Learn about the user process</button>
             : <div className='moreUserInfo'>
                 <h2>With a few clicks you can start hiring repair professionals</h2>
                 <h2>Here's how it works</h2>
@@ -43,9 +45,9 @@ const GetStarted = () => {
               </div>
           }
         </div>
-        <div onClick={handleFixerClick} className={fixerDisplay ? 'fixerInfoOn' : 'fixerInfoOff'}>
+        <div className={fixerDisplay ? 'fixerInfoOn' : 'fixerInfoOff'}>
         {!showFixerInfo 
-            ? <h2>Learn about the fixer process</h2>
+            ? <button type='button' onClick={handleFixerClick}>Learn about the fixer process</button>
             : <div className='moreFixerInfo'>
                 <h2>Want to start fixing and earning money? Read on!</h2>
                 <h2>The first step is signing up and submitting an application</h2>
