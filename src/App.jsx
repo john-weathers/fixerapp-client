@@ -11,8 +11,16 @@ import FixerLogin, { action as fixerLoginAction } from './components/FixerLogin'
 import PersistLogin from './components/PersistLogin';
 import RequireAuthRoot from './components/RequireAuthRoot';
 import RequireAuth from './components/RequireAuth';
-
-
+import DemoApp from './components/DemoApp';
+import Unauthorized from './components/Unauthorized';
+import UserHome from './components/UserHome';
+import UserHowTo from './components/UserHowTo';
+import FindFixer from './components/FindFixer';
+import UserSettings from './components/UserSettings';
+import FixerHome from './components/FixerHome';
+import FixerHowTo from './components/FixerHowTo';
+import FindWork from './components/FindWork';
+import FixerSettings from './components/FixerSettings';
 
 const ROLES = {
   user: 2505,
@@ -36,18 +44,18 @@ function App() {
 
       <Route element={<PersistLogin userRoles={[ROLES.user, ROLES.premiumUser]} fixerRoles={[ROLES.fixer, ROLES.premiumFixer]} />}>
         <Route element={<RequireAuthRoot userRoles={[ROLES.user, ROLES.premiumUser]} fixerRoles={[ROLES.fixer, ROLES.premiumFixer]} />}>
-          <Route path='/' element={<UserHome />} loader={userLoader}>
+          <Route path='/' element={<UserHome />} /*loader={userLoader}*/>
             <Route index element={<UserHowTo />} />
-            <Route path='get-help' element={<FindFixer />} action/>
-            <Route path='settings' element={<UserSettings />}/>
+            <Route path='get-help' element={<FindFixer />} /*loader action={appLoader}*//>
+            <Route path='settings' element={<UserSettings /*loader action*/ />}/>
           </Route>
         </Route>
 
         <Route element={<RequireAuth allowedRoles={[ROLES.fixer, ROLES.premiumFixer]} />}>
-          <Route path='/fixers' element={<FixerHome />} loader={fixerLoader}>
+          <Route path='/fixers' element={<FixerHome />} /*loader={fixerLoader}*/ >
             <Route index element={<FixerHowTo />} />
-            <Route path='find-work' element={<FindWork />} loader={workLoader} />
-            <Route path='settings' element={<FixerSettings />} />
+            <Route path='find-work' element={<FindWork />} /*loader={workLoader}* action*/ />
+            <Route path='settings' element={<FixerSettings />} /*loader action */ />
           </Route>
         </Route>
 
