@@ -36,7 +36,7 @@ nav ul li {
 
 /* GetStarted component - placeholder rulesets */
 .userInfoOn {
-  display: flex;
+  display: inline-block;
 }
 
 .userInfoOff {
@@ -44,7 +44,7 @@ nav ul li {
 }
 
 .fixerInfoOn {
-  display: flex;
+  display: inline-block;
 }
 
 .fixerInfoOff {
@@ -83,31 +83,43 @@ nav ul li {
 /* Registration - placeholders */
 
 #registration {
-  display: flex;
+  display: inline-block;
 }
 
 #registration .errmsg {
-  display: flex;
+  display: inline;
+}
+
+#useremail {
+  display: block;
+}
+
+#password {
+  display: block;
+}
+
+#confirm_pwd {
+  display: block;
 }
 
 #registration .offscreen {
-  display: flex;
+  display: none;
 }
 
 #registration .valid {
-  display: flex;
+  color: green;
 }
 
 #registration .hide {
-  display: flex;
+  display: none;
 }
 
 #registration .invalid {
-  display: flex;
+  color: red;
 }
 
 #registration .instructions {
-  display: flex;
+  display: block;
 }
 
 .dontNeedAccount {

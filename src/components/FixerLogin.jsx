@@ -51,7 +51,8 @@ const FixerLogin = () => {
   const errRef = useRef();
 
   const [errMsg, setErrMsg] = useState('');
-  setErrMsg(useActionData() || '');
+  const actionData = useActionData();
+  if (actionData) setErrMsg(actionData);
   if (errMsg) errRef.current.focus();
 
   
@@ -87,6 +88,7 @@ const FixerLogin = () => {
           required
         />
         <button type='submit'>Sign In</button>
+        <p>Trust this device?</p>
         <div className='persistCheck'>
           <input
             type='checkbox'
@@ -94,7 +96,7 @@ const FixerLogin = () => {
             onChange={toggleCheck}
             checked={check}
           />
-          <label htmlFor='persist'>Trust This Device?<br/>Click to Stay Logged In</label>
+          <label htmlFor='persist'>Click to stay logged in</label>
         </div>
       </Form>
       <p>

@@ -1,4 +1,8 @@
-import { Route } from 'react-router-dom';
+import {
+  Route,
+  createBrowserRouter,
+  createRoutesFromElements, 
+} from 'react-router-dom';
 import Layout from './components/Layout';
 import ErrorPage from './components/ErrorPage';
 import Missing from './components/Missing';
@@ -29,9 +33,8 @@ const ROLES = {
   premiumFixer: 5326,
 }
 
-function App() {
-
-  return (
+export const router = createBrowserRouter(
+  createRoutesFromElements(
     <Route path='/' element={<Layout />} errorElement={<ErrorPage />}>
         <Route path='welcome' element={<Landing />} />
         <Route path='get-started' element={<GetStarted />} />
@@ -64,6 +67,4 @@ function App() {
       <Route path='*' element={<Missing />} />
     </Route>
   )
-}
-
-export default App
+)

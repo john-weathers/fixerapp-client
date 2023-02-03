@@ -94,8 +94,10 @@ const FixerRegistration = () => {
           <form onSubmit={handleSubmit}>
             <label htmlFor='useremail'>
               Email:
-              <FontAwesomeIcon icon={faCheck} className={validEmail ? 'valid' : 'hide'} />
-              <FontAwesomeIcon icon={faTimes} className={validEmail || !email ? 'hide' : 'invalid'} />
+              {
+              /*<FontAwesomeIcon icon={faCheck} className={validEmail ? 'valid' : 'hide'} />
+              <FontAwesomeIcon icon={faTimes} className={validEmail || !email ? 'hide' : 'invalid'} />*/
+              }
             </label>
             <input
               type='text'
@@ -110,10 +112,12 @@ const FixerRegistration = () => {
               onFocus={() => setEmailFocus(true)}
               onBlur={() => setEmailFocus(false)}
             />
-            <p id='uidnote' className={emailFocus && email && !validEmail ? 'instructions' : 'offscreen'}>
+            {
+            /*<p id='uidnote' className={emailFocus && email && !validEmail ? 'instructions' : 'offscreen'}>
               <FontAwesomeIcon icon={faInfoCircle} />
               Enter a valid email address.
-            </p>
+            </p>*/
+            }
 
 
             <label htmlFor='password'>
@@ -167,7 +171,7 @@ const FixerRegistration = () => {
           <p>
             Already registered?<br />
             <span className='dontNeedAccount'>
-              <Link to='/fixer-login'>Fixer Sign In</Link>
+              <Link to='/fixer-login'>Sign In</Link>
             </span>
           </p>
         </section>

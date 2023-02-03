@@ -20,10 +20,11 @@ const Landing = () => {
         </div>
         <div>
           <h2>How it works</h2>
-          <p>Homeowners in need of help can get it with a few clicks</p>
-          <br/>
+          <p>Hire a professional in a few clicks</p>
+          <p>Get help now or schedule it for later</p>
           <Link to='/how-it-works'>Check out the app</Link>
-          <br/>
+        </div>
+        <div>
           <p>Repair professional looking for work?</p>
           <Link to='/fixer-registration'>Apply now</Link>
         </div>
