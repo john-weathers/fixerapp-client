@@ -8,9 +8,9 @@ const useRefreshToken = () => {
     let refreshURL;
 
     if (userType === 'fixer') {
-        refreshURL = '/fixerRefresh';
+        refreshURL = '/fixer/refresh';
     } else {
-        refreshURL = '/userRefresh';
+        refreshURL = '/user/refresh';
     }
 
     const refresh = async () => {

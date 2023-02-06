@@ -47,10 +47,13 @@ export const router = createBrowserRouter(
 
       <Route element={<PersistLogin userRoles={[ROLES.user, ROLES.premiumUser]} fixerRoles={[ROLES.fixer, ROLES.premiumFixer]} />}>
         <Route element={<RequireAuthRoot userRoles={[ROLES.user, ROLES.premiumUser]} fixerRoles={[ROLES.fixer, ROLES.premiumFixer]} />}>
-          <Route path='/' element={<UserHome />} /*loader={userLoader}*/>
+          <Route path='/' element={<UserHome />} /*loader={userLoader}*/ >
             <Route index element={<UserHowTo />} />
-            <Route path='get-help' element={<FindFixer />} /*loader action={appLoader}*//>
-            <Route path='settings' element={<UserSettings /*loader action*/ />}/>
+            <Route path='get-help' element={<FindFixer />} /*loader action={appLoader}*/ />
+            {
+            /*<Route path='planning-tool' loader action />
+            <Route path='settings' element={<UserSettings loader action />}/>*/
+            }
           </Route>
         </Route>
 
@@ -58,7 +61,10 @@ export const router = createBrowserRouter(
           <Route path='/fixers' element={<FixerHome />} /*loader={fixerLoader}*/ >
             <Route index element={<FixerHowTo />} />
             <Route path='find-work' element={<FindWork />} /*loader={workLoader}* action*/ />
-            <Route path='settings' element={<FixerSettings />} /*loader action */ />
+            {
+            /*<Route path='schedule' loader action />
+            <Route path='settings' element={<FixerSettings />} loader action />*/
+            }
           </Route>
         </Route>
 

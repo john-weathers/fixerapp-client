@@ -4,7 +4,7 @@ import { Link, Form, useNavigate, useLocation, useActionData } from 'react-route
 import useToggle from '../hooks/useToggle';
 import axios from '../api/axios';
 
-const LOGIN_URL = '/fixerAuth';
+const LOGIN_URL = '/fixer/auth';
 
 // action function for form submission
 // use React Router Form component
@@ -68,10 +68,10 @@ const FixerLogin = () => {
       <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
       <h1>Fixer Sign In</h1>
       <Form method='post'>
-        <label htmlFor='username'>Email:</label>
+        <label htmlFor='useremail'>Email Address:</label>
         <input
           type='text'
-          id='username'
+          id='useremail'
           ref={userRef}
           autoComplete='off'
           name='email'

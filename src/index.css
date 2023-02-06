@@ -31,7 +31,7 @@ nav ul li {
 }
 
 .active {
-  background-color: rgb(221, 185, 170);
+  background-color: rgb(236, 220, 194);
 }
 
 /* GetStarted component - placeholder rulesets */
@@ -61,7 +61,11 @@ nav ul li {
 
 /* Login - placeholders */
 #login {
-  display: flex;
+  background-color: white;
+}
+
+#login input {
+  display: block;
 }
 
 #login .errmsg {
@@ -90,11 +94,7 @@ nav ul li {
   display: inline;
 }
 
-#useremail {
-  display: block;
-}
-
-#password {
+#registration input {
   display: block;
 }
 

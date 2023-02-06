@@ -6,7 +6,9 @@ import { Link } from 'react-router-dom';
 
 const EMAIL_REGEX = /^.{1,64}@.{1,255}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
-const REGISTER_URL = '/fixerRegister';
+const NAME_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ]{1,30}$/;
+const PHONE_REGEX = /^[\+0-9]{0,4}[-\s\.]?[(]?[0-9]{1,3}[)]?[-\s\.]?[0-9]{2,4}[-\s\.]?[0-9]{2,4}[-\s\.]?[0-9]{2,4}$/;
+const REGISTER_URL = '/fixer/register';
 
 // ENSURE ALL CONSOLE.LOGS ARE REMOVED PRIOR TO PRODUCTION
 
@@ -26,6 +28,18 @@ const FixerRegistration = () => {
   const [validMatch, setValidMatch] = useState(false);
   const [matchFocus, setMatchFocus] = useState(false);
 
+  const [firstName, setFirstName] = useState('');
+  const [validFirst, setValidFirst] = useState(false);
+  const [firstFocus, setFirstFocus] = useState(false);
+
+  const [lastName, setLastName] = useState('');
+  const [validLast, setValidLast] = useState(false);
+  const [lastFocus, setLastFocus] = useState(false);
+
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [validNumber, setValidNumber] = useState(false);
+  const [phoneFocus, setPhoneFocus] = useState(false);
+
   const [errMsg, setErrMsg] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -43,6 +57,18 @@ const FixerRegistration = () => {
   }, [pwd, matchPwd]);
 
   useEffect(() => {
+    setValidFirst(NAME_REGEX.test(firstName));
+  }, [firstName]);
+
+  useEffect(() => {
+    setValidLast(NAME_REGEX.test(lastName));
+  }, [lastName]);
+
+  useEffect(() => {
+    setValidNumber(PHONE_REGEX.test(phoneNumber));
+  }, [phoneNumber]);
+
+  useEffect(() => {
     setErrMsg('');
   }, [email, pwd, matchPwd]);
 
@@ -51,13 +77,24 @@ const FixerRegistration = () => {
 
     const v1 = EMAIL_REGEX.test(email);
     const v2 = PWD_REGEX.test(pwd);
-    if (!v1 || !v2) {
+    const v3 = NAME_REGEX.test(firstName);
+    const v4 = NAME_REGEX.test(lastName);
+    const v5 = PHONE_REGEX.test(phoneNumber);
+
+    if (!v1 || !v2 || !v3 || !v4 || !v5) {
       setErrMsg('Invalid Entry');
       return;
     }
+
     try {
       const response = await axios.post(REGISTER_URL,
-        { email, pwd },
+        {
+          email,
+          pwd,
+          firstName,
+          lastName,
+          phoneNumber
+        },
         {
           withCredentials: true,
         },
@@ -68,6 +105,9 @@ const FixerRegistration = () => {
       setEmail('');
       setPwd('');
       setMatchPwd('');
+      setFirstName('');
+      setLastName('');
+      setPhoneNumber('');
     } catch (err) {
       if (!err?.response) {
         setErrMsg('No Server Response');
@@ -85,7 +125,7 @@ const FixerRegistration = () => {
       {success ? (
         <section>
           <h1>Success!</h1>
-          <Link to='/fixerLogin'>Sign In</Link>
+          <Link to='/fixer-login'>Sign In</Link>
         </section>
       ) : (
         <section id='registration'>
@@ -93,7 +133,7 @@ const FixerRegistration = () => {
           <h1>Fixer Registration</h1>
           <form onSubmit={handleSubmit}>
             <label htmlFor='useremail'>
-              Email:
+              Email Address:
               {
               /*<FontAwesomeIcon icon={faCheck} className={validEmail ? 'valid' : 'hide'} />
               <FontAwesomeIcon icon={faTimes} className={validEmail || !email ? 'hide' : 'invalid'} />*/
@@ -166,7 +206,55 @@ const FixerRegistration = () => {
               Must match the first password input field.
             </p>
 
-            <button disabled={!validEmail || !validPwd || !validMatch ? true : false}>Sign Up</button>
+
+            <label>
+              First Name:
+            </label>
+            <input
+              type='text'
+              id='first_name'
+              onChange={(e) => setFirstName(e.target.value)}
+              value={firstName}
+              required
+              aria-invalid={validFirst ? 'false' : 'true'}
+              aria-describedby='firstnamenote'
+              onFocus={() => setFirstFocus(true)}
+              onBlur={() => setFirstFocus(false)}
+            />
+
+
+            <label>
+              Last Name:
+            </label>
+            <input
+              type='text'
+              id='last_name'
+              onChange={(e) => setLastName(e.target.value)}
+              value={lastName}
+              required
+              aria-invalid={validLast ? 'false' : 'true'}
+              aria-describedby='lastnamenote'
+              onFocus={() => setLastFocus(true)}
+              onBlur={() => setLastFocus(false)}
+            />
+
+
+            <label>
+              Phone Number:
+            </label>
+            <input
+              type='text'
+              id='phone_number'
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              value={phoneNumber}
+              required
+              aria-invalid={validNumber ? 'false' : 'true'}
+              aria-describedby='phonenumbernote'
+              onFocus={() => setPhoneFocus(true)}
+              onBlur={() => setPhoneFocus(false)}
+            />
+
+            <button disabled={!validEmail || !validPwd || !validMatch || !validFirst || !validLast || !validNumber ? true : false}>Sign Up</button>
           </form>
           <p>
             Already registered?<br />

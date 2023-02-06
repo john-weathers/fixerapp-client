@@ -8,15 +8,15 @@ const useLogout = () => {
   let logoutURL;
 
   if (userType === 'fixer') {
-    logoutURL = '/fixerLogout';
+    logoutURL = '/fixer/logout';
   } else {
-    logoutURL = '/userLogout';
+    logoutURL = '/user/logout';
   }
 
   const logout = async () => {
     setAuth({});
     try { 
-      const response = await axios(logoutURL, {
+      const response = await axios.post(logoutURL, {
         withCredentials: true
       });
     } catch (err) {

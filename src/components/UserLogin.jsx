@@ -4,7 +4,7 @@ import { Link, Form, useNavigate, useLocation, useActionData } from 'react-route
 import useToggle from '../hooks/useToggle';
 import axios from '../api/axios';
 
-const LOGIN_URL = '/userAuth';
+const LOGIN_URL = '/user/auth';
 
 // action function for form submission
 // use React Router Form component
@@ -68,7 +68,7 @@ const UserLogin = () => {
       <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
       <h1>User Sign In</h1>
       <Form method='post'>
-        <label htmlFor='useremail'>Email:</label>
+        <label htmlFor='useremail'>Email Address:</label>
         <input
           type='text'
           id='useremail'
