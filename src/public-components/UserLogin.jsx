@@ -1,81 +1,82 @@
 import { useRef, useState, useEffect } from 'react';
 import useAuth from '../hooks/useAuth';
-import { Link, Form, useNavigate, useLocation, useActionData } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import useInput from '../hooks/useInput';
 import useToggle from '../hooks/useToggle';
 import axios from '../api/axios';
 
-const LOGIN_URL = '/fixer/auth';
+const LOGIN_URL = '/user/auth';
 
-// action function for form submission
 // use React Router Form component
 // useNavigation for optimistic ui?
 // set usertype in local storage
 
-export const action = async ({ request }) => {
+const UserLogin = () => {
+  const { setAuth } = useAuth();
+
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
-  const { setAuth } = useAuth();
 
-  try {
-    const formData = await request.formData();
-    const email = formData.get('email');
-    const pwd = formData.get('pwd');
-
-
-    const response = await axios.post(LOGIN_URL,
-      { email, pwd },
-      {
-        withCredentials: true,
-      },
-    );
-    const accessToken = response?.data?.accessToken;
-    
-    setAuth({ email, accessToken });
-    navigate(from, { replace: true });
-  } catch (err) {
-    if (!err?.response) {
-      return 'No Server Response';
-    } else if (err.response?.status === 400) {
-      return 'Missing Username or Password';
-    } else if (err.response?.status === 401) {
-      return 'Unauthorized';
-    } else {
-      return 'Login Failed';
-    }
-  }
-}
-
-const FixerLogin = () => {
   const userRef = useRef();
   const errRef = useRef();
 
+  const [email, resetEmail, emailAttribs] = useInput('email', '');
+  const [pwd, setPwd] = useState('');
   const [errMsg, setErrMsg] = useState('');
-  const actionData = useActionData();
-  if (actionData) setErrMsg(actionData);
-  if (errMsg) errRef.current.focus();
-
-  
   const [check, toggleCheck] = useToggle('persist', false);
-  localStorage.setItem('userType', 'fixer');
+  localStorage.setItem('userType', 'user');
 
   useEffect(() => {
     userRef.current.focus();
   }, []);
 
+  useEffect(() => {
+    setErrMsg('');
+  }, [email, pwd]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+        const response = await axios.post(LOGIN_URL,
+          { email, pwd },
+          {
+            withCredentials: true,
+          },
+        );
+        const accessToken = response?.data?.accessToken;
+        
+        setAuth({ email, accessToken });
+        resetEmail();
+        setPwd('');
+        navigate(from, { replace: true });
+    } catch (err) {
+        if (!err?.response) {
+            setErrMsg('No Server Response');
+        } else if (err.response?.status === 400) {
+            setErrMsg('Missing Username or Password');
+        } else if (err.response?.status === 401) {
+            setErrMsg('Unauthorized');
+        } else {
+            setErrMsg('Login Failed');
+        }
+        errRef.current.focus();
+    }
+}
+
   return (
     <div id='login'>
       <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
-      <h1>Fixer Sign In</h1>
-      <Form method='post'>
+      <h1>User Sign In</h1>
+      <form onSubmit={handleSubmit}>
         <label htmlFor='useremail'>Email Address:</label>
         <input
           type='text'
           id='useremail'
           ref={userRef}
           autoComplete='off'
-          name='email'
-          onChange={() => setErrMsg('')}
+          {...emailAttribs}
           required
         />
 
@@ -83,11 +84,11 @@ const FixerLogin = () => {
         <input
           type='password'
           id='password'
-          name='pwd'
-          onChange={() => setErrMsg('')}
+          onChange={(e) => setPwd(e.target.value)}
+          value={pwd}
           required
         />
-        <button type='submit'>Sign In</button>
+        <button>Sign In</button>
         <p>Trust this device?</p>
         <div className='persistCheck'>
           <input
@@ -98,15 +99,15 @@ const FixerLogin = () => {
           />
           <label htmlFor='persist'>Click to stay logged in</label>
         </div>
-      </Form>
+      </form>
       <p>
           Need an Account?<br />
           <span className='needAccount'>
-            <Link to='/fixer-registration'>Sign Up</Link>
+            <Link to='/user-registration'>Sign Up</Link>
           </span>
       </p>
     </div>
   )
 }
 
-export default FixerLogin;
+export default UserLogin;
