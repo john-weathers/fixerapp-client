@@ -11,7 +11,7 @@ const PROFILE_URL = '/fixers/profile';
 
 const QuickFix = () => {
   const axiosPrivate = useAxiosPrivate();
-  const { isLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
+  const { isLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL); // implement some profile data
   const geolocationResult = useGeolocation();
   const [currentLocation, setCurrentLocation] = useState(geolocationResult?.data?.longitude 
     ? [geolocationResult?.data?.longitude, geolocationResult?.data?.latitude] : null);
@@ -85,6 +85,7 @@ const QuickFix = () => {
     </Map>
     {!searching &&
       <div className='sidebar'>
+        {isLoading || isError ? <h2>Welcome</h2> : <h2>Welcome {profileData.firstName}</h2>}
         <h2>Choose your work area</h2>
         <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>Problem getting current location<br />Try again or use custom location</p>
         <form autocomplete='off' onSubmit={handleSubmit}>
