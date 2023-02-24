@@ -11,7 +11,7 @@ const PROFILE_URL = '/fixers/profile';
 
 const QuickFix = () => {
   const axiosPrivate = useAxiosPrivate();
-  const { isLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL); // implement some profile data
+  const { isLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
   const geolocationResult = useGeolocation();
   const [currentLocation, setCurrentLocation] = useState(geolocationResult?.data?.longitude 
     ? [geolocationResult?.data?.longitude, geolocationResult?.data?.latitude] : null);

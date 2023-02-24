@@ -61,6 +61,7 @@ export const router = createBrowserRouter(
           <Route path='/' element={<UserHome />} >
             <Route index element={<UserIndex />} />
             <Route path='quick-fix' element={<QuickFixUser />} /*loader action={appLoader}*/ />
+            <Route path='confirmation' element={<UserConfirmation />} />
             <Route path='proposals' element={<Proposals />} />
             <Route path='schedule' element={<UserSchedule />} />
             {

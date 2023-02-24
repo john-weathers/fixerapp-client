@@ -83,6 +83,7 @@ const UserRegistration = () => {
 
     if (!v1 || !v2 || !v3 || !v4 || !v5) {
       setErrMsg('Invalid Entry');
+      errRef.current.focus();
       return;
     }
 
@@ -113,6 +114,8 @@ const UserRegistration = () => {
         setErrMsg('No Server Response');
       } else if (err.response?.status === 409) {
         setErrMsg('Email Taken');
+      } else if (err.response?.status === 400) {
+        setErrMsg('Complete all fields as instructed');
       } else {
         setErrMsg('Registration Failed');
       }
