@@ -173,7 +173,7 @@ const QuickFixUser = () => {
             <input id='choosecurrent' type='radio' name='location' onClick={handleCurrentClick} checked={currentLocation ? true : false}/>
             <label htmlFor='choosecustom'>Custom location</label>
             <input id='choosecustom' type='radio' name='location' onClick={handleCustomClick} />
-            <div id='querycontainer' className={toggleLocation ? 'show' : 'hide'}> { /* using className here might be unnecessary/redundant or should only be used on this div? */ }
+            <div id='querycontainer' className={toggleLocation ? 'show' : 'hide'}>
               <input 
                 id='customlocation' 
                 type='text'
@@ -191,7 +191,7 @@ const QuickFixUser = () => {
                 </ul>
               )}
             </div>
-            <button type='submit' disabled={currentLocation.length || validCustomLocation.length ? false : true} >Find Work</button>
+            <button type='submit' disabled={currentLocation.length || validCustomLocation.length ? false : true} >Find Fixer</button>
           </form>
         </div>
       ) : requesting && !searching
