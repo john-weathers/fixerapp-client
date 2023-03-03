@@ -6,12 +6,12 @@ import { faSpinnerThird } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
 const mapboxClient = mapboxSdk({ accessToken: MAPBOX_TOKEN })
 const PROFILE_URL = '/fixers/profile';
 const FIND_WORK_URL = '/fixers/work/find';
-const CANCEL_URL = '/users/work/cancel';
 
 // NEXT STEPS: build out function for currentWork api request on b/e, set up both user and fixer confirmation pages, see best way to handle caching
 // e.g., should the findWork api request share a cache (and thus also return values from the matched request object) with the currentWork api request
@@ -19,7 +19,7 @@ const CANCEL_URL = '/users/work/cancel';
 const QuickFix = () => {
   const axiosPrivate = useAxiosPrivate();
   const { isLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
-  // const 
+  // const workStatusResult = useWorkStatus(); add useQuery (most likely) to react query hooks
   const geolocationResult = useGeolocation();
   const [currentLocation, setCurrentLocation] = useState(geolocationResult?.data?.longitude 
     ? [geolocationResult?.data?.longitude, geolocationResult?.data?.latitude] : null);
@@ -37,6 +37,7 @@ const QuickFix = () => {
     latitude: geolocationResult?.data?.latitude || 37.7749,
     zoom: 12.5,
   });
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   
 
@@ -89,6 +90,7 @@ const QuickFix = () => {
         const searchResponse = await axiosPrivate.post(FIND_WORK_URL, {
           location: coordinates,
         });
+        queryClient.setQueryData(['request'], searchResponse?.data); // revisit query key naming
         navigate('/fixers/confirmation');
       } catch (err) {
         setCount(prev => prev + 1);
@@ -100,7 +102,7 @@ const QuickFix = () => {
     setIntervalId(interval);
   }
   
-  const handleCancel = async () => {
+  const handleCancel = () => {
     setSearching(false);
     setCount(0);
     if (intervalId) {
@@ -110,13 +112,6 @@ const QuickFix = () => {
     setCustomLocation('');
     setCurrentLocation(null);
     setValidCustomLocation(null);
-    try {
-      const response = await axiosPrivate.post(CANCEL_URL, {
-        empty: 'body',
-      });
-    } catch (err) {
-      console.log(err) // remove before production
-    }
   }
 
   return (

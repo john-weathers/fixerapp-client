@@ -6,19 +6,19 @@ import { faSpinnerThird } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
 const mapboxClient = mapboxSdk({ accessToken: MAPBOX_TOKEN })
 const PROFILE_URL = '/users/profile';
 const REQUEST_URL = '/users/request/new';
-const SEARCH_URL = '/users/request/search';
+const CURRENT_URL = '/users/request/current';
 const CANCEL_URL = '/users/request/cancel'
 
 const QuickFixUser = () => {
   const axiosPrivate = useAxiosPrivate();
   const { isLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
-  // thinking that adding a query here for already matched requests is best
-  // in the event that a request is already in progress we can navigate to that from the beginning (could add option to cancel existing request at same time)
+  // const currentRequestResult = useRequestStatus(); add useQuery (most likely) to react query hooks
   const geolocationResult = useGeolocation();
   const [currentLocation, setCurrentLocation] = useState(geolocationResult?.data?.longitude 
     ? [geolocationResult?.data?.longitude, geolocationResult?.data?.latitude] : null);
@@ -37,6 +37,7 @@ const QuickFixUser = () => {
     latitude: geolocationResult?.data?.latitude || 37.7749,
     zoom: 12.5,
   });
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   
 
@@ -74,7 +75,6 @@ const QuickFixUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setRequesting(true);
-    // api call for creating request document
     const coordinates = currentLocation || validCustomLocation;
     if (!coordinates.length) {
       setErrMsg('Invalid submission');
@@ -86,20 +86,23 @@ const QuickFixUser = () => {
     }
 
     try {
+      // create request document
       const requestResponse = await axiosPrivate.post(REQUEST_URL, {
         location: coordinates,
       });
       console.log(requestResponse?.data) // remove before production
       setSearching(true);
       const interval = setInterval(async () => {
+        // search for matched request
         try {
-          const searchResponse = await axiosPrivate.get(SEARCH_URL);
+          const matchResponse = await axiosPrivate.get(CURRENT_URL);
+          queryClient.setQueryData(['request'], matchResponse?.data); // revisit query key naming
           navigate('/confirmation');
         } catch (err) {
           setCount(prev => prev + 1);
           if (count > 15) {
             setErrMsg(['No fixers in your area at this time', 'Continuing to search for a match']);
-          }
+          } // TODO: consider adding a timeout at X minutes (currently using 2 minutes as mark for stale requests on b/e...can be more or less depending on what's best)
         }
       }, 4000);
       setIntervalId(interval);
@@ -115,10 +118,6 @@ const QuickFixUser = () => {
       setRequesting(false);
       errRef.current.focus();
     }
-    // setInterval to follow up on status until fulfilled or user cancels
-    // counter for number of interval requests that are not fulfilled? this way we can alert the user that there may not be any
-    // fixers in the area at this time, giving them additional info to decide if they want to cancel the request or not
-    
   }
   
   const handleCancel = async () => {
@@ -133,11 +132,13 @@ const QuickFixUser = () => {
     setCurrentLocation(null);
     setValidCustomLocation(null);
     try {
-      const response = await axiosPrivate.post(CANCEL_URL, {
-        empty: 'body',
-      });
+      await axiosPrivate.delete(CANCEL_URL);
     } catch (err) {
-      console.log(err) // remove before production
+      if (!err?.response) {
+        setErrMsg('No server response');
+      } else {
+        setErrMsg('Request cancellation failed')
+      }
     }
   }
 
