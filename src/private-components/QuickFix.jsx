@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useProfile, useGeolocation } from '../hooks/reactQueryHooks';
+import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks';
 import Map, { Marker } from 'react-map-gl';
 import { faSpinnerThird } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
@@ -12,14 +12,12 @@ const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
 const mapboxClient = mapboxSdk({ accessToken: MAPBOX_TOKEN })
 const PROFILE_URL = '/fixers/profile';
 const FIND_WORK_URL = '/fixers/work/find';
-
-// NEXT STEPS: build out function for currentWork api request on b/e, set up both user and fixer confirmation pages, see best way to handle caching
-// e.g., should the findWork api request share a cache (and thus also return values from the matched request object) with the currentWork api request
+const CURRENT_URL = '/fixers/work/current';
 
 const QuickFix = () => {
   const axiosPrivate = useAxiosPrivate();
-  const { isLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
-  // const workStatusResult = useWorkStatus(); add useQuery (most likely) to react query hooks
+  const { isLoading: profileLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
+  const { isLoading: requestLoading, isSuccess } = useRequest(axiosPrivate, CURRENT_URL);
   const geolocationResult = useGeolocation();
   const [currentLocation, setCurrentLocation] = useState(geolocationResult?.data?.longitude 
     ? [geolocationResult?.data?.longitude, geolocationResult?.data?.latitude] : null);
@@ -114,6 +112,10 @@ const QuickFix = () => {
     setValidCustomLocation(null);
   }
 
+  if (requestLoading) return <div>Loading...</div>;
+
+  if (isSuccess) navigate('/fixers/confirmation');
+
   return (
     <>
       <Map
@@ -130,7 +132,7 @@ const QuickFix = () => {
       </Map>
       {!searching ? ( 
         <div className='sidebar'>
-          {isLoading || isError ? <h2>Welcome</h2> : <h2>Welcome {profileData.firstName}</h2>}
+          {profileLoading || isError ? <h2>Welcome</h2> : <h2>Welcome {profileData.firstName}</h2>}
           <h2>Choose your work area</h2>
           <div className={errMsg ? 'errmsg' : 'offscreen'}>
             <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />

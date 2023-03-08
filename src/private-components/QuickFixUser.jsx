@@ -1,12 +1,12 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useProfile, useGeolocation } from '../hooks/reactQueryHooks';
+import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks';
 import Map, { Marker } from 'react-map-gl';
 import { faSpinnerThird } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
 const mapboxClient = mapboxSdk({ accessToken: MAPBOX_TOKEN })
@@ -17,8 +17,8 @@ const CANCEL_URL = '/users/request/cancel'
 
 const QuickFixUser = () => {
   const axiosPrivate = useAxiosPrivate();
-  const { isLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
-  // const currentRequestResult = useRequestStatus(); add useQuery (most likely) to react query hooks
+  const { isLoading: profileLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
+  const { isLoading: requestLoading, isSuccess } = useRequest(axiosPrivate, CURRENT_URL);
   const geolocationResult = useGeolocation();
   const [currentLocation, setCurrentLocation] = useState(geolocationResult?.data?.longitude 
     ? [geolocationResult?.data?.longitude, geolocationResult?.data?.latitude] : null);
@@ -142,6 +142,10 @@ const QuickFixUser = () => {
     }
   }
 
+  if (requestLoading) return <div>Loading...</div>;
+
+  if (isSuccess) navigate('/confirmation');
+
   return (
     <>
       <Map
@@ -158,7 +162,7 @@ const QuickFixUser = () => {
       </Map>
       {!requesting ? ( 
         <div className='sidebar'>
-          {isLoading || isError ? <h2>Welcome</h2> : <h2>Welcome {profileData.firstName}</h2>}
+          {profileLoading || isError ? <h2>Welcome</h2> : <h2>Welcome {profileData.firstName}</h2>}
           <h2>Where do you need help?</h2>
           <div className={errMsg ? 'errmsg' : 'offscreen'}>
             <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />

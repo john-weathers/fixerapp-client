@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 
-export const profileQuery = (axios, url) => ({
+const profileQuery = (axios, url) => ({
   queryKey: ['profile'],
   queryFn: async () => {
-    const data = await axios.get(url);
+    const  { data } = await axios.get(url);
     return data;
-  }
+  },
+  staleTime: Infinity,
+  cacheTime: 1000 * 60 * 30, // may need to revisit...I could see infinity being a more logical choice here.
 });
 
 export const useProfile = (axios, url) => {
@@ -20,7 +22,7 @@ export const prefetchProfile = async (client, axios, url) => {
   }
 }
 
-export const geolocationQuery = {
+const geolocationQuery = {
   queryKey: ['location', 'current'],
   queryFn: () => {
     return new Promise((resolve, reject) => {
@@ -49,4 +51,16 @@ export const prefetchGeolocation = async (client) => {
   } catch (err) {
     console.log(err);
   }
+}
+
+const requestQuery = (axios, url) => ({
+  queryKey: ['request'],
+  queryFn: async () => {
+    const { data } = await axios.get(url);
+    return data;
+  }
+});
+
+export const useRequest = (axios, url) => {
+  return useQuery(requestQuery(axios, url));
 }
