@@ -1,1 +1,8 @@
-// use react query to load matching request data, build tracker interface (map could be useful to show occassional positional updates from incoming fixer)
+// payment could be integrated with something like Stripe or similar
+
+const UserConfirmation = () => {
+  return (
+    <div>UserConfirmation</div>
+  )
+}
+export default UserConfirmation;

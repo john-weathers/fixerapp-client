@@ -9,11 +9,19 @@ import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { useQueryClient } from '@tanstack/react-query';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
-const mapboxClient = mapboxSdk({ accessToken: MAPBOX_TOKEN })
+const mapboxClient = mapboxSdk({ accessToken: MAPBOX_TOKEN });
 const PROFILE_URL = '/users/profile';
 const REQUEST_URL = '/users/request/new';
 const CURRENT_URL = '/users/request/current';
-const CANCEL_URL = '/users/request/cancel'
+const CANCEL_URL = '/users/request/cancel';
+
+// NOTE: better system would probably be requiring an address here rather than using coordinates/current location
+// can still make use of useGeolocation or something similar, reverse geocoding then offering a placeholder address
+// simplest solution would be to just remove geolocation and require address
+// on the other hand, if this were expanded into all types of repairs (e.g., including car repairs and anything else),
+// might be best to categorize and then use system suited for that situation
+// ultimately, and most practically, more information should be gathered ahead of time and matching
+// would include criteria for appropriate expertise
 
 const QuickFixUser = () => {
   const axiosPrivate = useAxiosPrivate();

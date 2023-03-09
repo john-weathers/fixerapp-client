@@ -1,9 +1,9 @@
 import useProfile from '../hooks/useProfile';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
-const Bids = () => {
+const Bid = () => {
   return (
     <div>Bids</div>
   )
 }
-export default Bids
+export default Bid;

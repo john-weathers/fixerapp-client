@@ -58,9 +58,11 @@ const requestQuery = (axios, url) => ({
   queryFn: async () => {
     const { data } = await axios.get(url);
     return data;
-  }
+  },
+  staleTime: 1000 * 15, // not 100% sure about this staleTime...could see lower (0 maybe) being better
 });
 
 export const useRequest = (axios, url) => {
   return useQuery(requestQuery(axios, url));
 }
+

@@ -21,10 +21,10 @@ const PrivateNavBar = ({ navOptions }) => {
                 <HoverNav title={<FontAwesomeIcon icon={faUser}/>}>
                 <ul>
                     <li>
-                        <NavLink to='/profile'>Profile</NavLink>
+                        <NavLink to='profile'>Profile</NavLink>
                     </li>
                     <li>
-                        <NavLink to='/settings'>Settings</NavLink>
+                        <NavLink to='settings'>Settings</NavLink>
                     </li>
                 </ul>
                 </HoverNav>

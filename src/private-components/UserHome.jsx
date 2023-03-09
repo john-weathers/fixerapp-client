@@ -1,67 +1,27 @@
 import { Outlet } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { prefetchProfile, prefetchGeolocation } from '../hooks/reactQueryHooks';
+import { prefetchProfile, prefetchGeolocation, useRequest } from '../hooks/reactQueryHooks';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import PrivateNavBar from '../base-components/PrivateNavbar';
 
 const PROFILE_URL = '/users/profile';
+const CURRENT_URL = '/users/request/current';
 
 const UserHome = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
+  const { isLoading, isSuccess } = useRequest(axiosPrivate, CURRENT_URL);
 
   prefetchProfile(queryClient, axiosPrivate, PROFILE_URL);
   prefetchGeolocation(queryClient);
 
-  /*
-  const { profile, setProfile } = useProfile();
-  const profileResult = useQuery(profileQuery(axiosPrivate));
-  const geolocationResult = useQuery(geolocationQuery);
-
-  useEffect(() => {
-    if (profileResult.status === 'success') {
-      setProfile(prev => {
-        return {
-          ...prev,
-          ...profileResult.data,
-        }
-      });
-    }
-  }, [profileResult.status])
-
-  useEffect(() => {
-    if (geolocationResult.status === 'success') {
-      setProfile(prev => {
-        return {
-          ...prev,
-          currentLocation: [geolocationResult.data.longitude, geolocationResult.data.latitude],
-        }
-      });
-    } else if (geolocationResult.status === 'error') {
-      setProfile(prev => {
-        return {
-          ...prev,
-          currentLocation: null,
-        }
-      })
-    }
-  }, [geolocationResult.status])
-
-  if (profileResult.isLoading) {
-    return <div>Loading...</div>
-  }
-
-  if (profileResult.isError) {
-    return <div>Error: {error.message}</div>
-  }
-  */
-
+  if (isLoading) return <div>Loading...</div>;
 
   return (
     <div>
       <PrivateNavBar navOptions={{
-        leftUrl: 'quick-fix',
-        leftTitle: 'Quick Fix',
+        leftUrl: isSuccess ? 'confirmation' : 'quick-fix',
+        leftTitle: isSuccess ? 'Active Job' : 'Quick Fix',
         midUrl: 'proposals',
         midTitle: 'Proposals',
         rightUrl: 'schedule',
