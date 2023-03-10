@@ -25,15 +25,19 @@ const FixerConfirmation = () => {
         })
       }
       const pos = await getPosition();
+      // think about adding/using a geofence or similar to check if fixer is within close proximity of user
+      // if so, we can instead make an api call to update trackerStage to arriving
       return await axiosPrivate.patch(DIRECTIONS_URL, {
-        location: [pos.coords.longitude, pos.coords.latitude],
+        fixerLocation: [pos.coords.longitude, pos.coords.latitude],
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['request'] });
     },
     onError: (error) => {
-      console.log(error.message); // NOTE: revisit error handling (React and React Router have good built in error handling that could probably be utilized)
+      console.log(error.message); // NOTE: revisit error handling during testing for at least two reasons
+      // 1. certain errors may indicate the need to delete or repair the Request document or develop certain contingencies
+      // 2. could utilize React or React Router error handling
     }
   })
   
@@ -53,8 +57,38 @@ const FixerConfirmation = () => {
 
   if (isError) return <div>Error: {error.message}</div>
 
+  if (jobDetails.trackerStage === 'en route') return (
+    <>
+    
+    </>
+  )
+
+  if (jobDetails.trackerStage === 'arriving') return (
+    <>
+    
+    </>
+  )
+
+  if (jobDetails.trackerStage === 'estimating') return (
+    <div>
+
+    </div>
+  )
+
+  if (jobDetails.trackerStage === 'fixing') return (
+    <div>
+
+    </div>
+  )
+
+  if (jobDetails.trackerStage === 'complete') return (
+    <div>
+      
+    </div>
+  )
+
   return (
-    <div>FixerConfirmation</div>
+    <div>FixerConfirmation</div> // default return? would indicate some type of issue so could be a fallback to cancel the Request or similar
   )
 }
 export default FixerConfirmation;
