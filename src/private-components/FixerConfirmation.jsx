@@ -16,7 +16,14 @@ const FixerConfirmation = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
   const { isLoading, isError, error, data: jobDetails } = useRequest(axiosPrivate, CURRENT_URL);
+  const errRef = useRef();
+  const [errMsg, setErrMsg] = useState('');
   const [intervalId, setIntervalId] = useState(null);
+  const [viewState, setViewState] = useState()
+
+  // can use bbox, lineString (from turf) and fitBounds (from mapbox) to orient map once directions are available
+  // might be best to return the fixer location (for fixers) to use as a starting point to orient the map
+  // or do the initial directions api call in the findWork function (could be best)
   const mutation = useMutation({
     mutationFn: async () => {
       function getPosition() {
@@ -25,8 +32,6 @@ const FixerConfirmation = () => {
         })
       }
       const pos = await getPosition();
-      // think about adding/using a geofence or similar to check if fixer is within close proximity of user
-      // if so, we can instead make an api call to update trackerStage to arriving
       return await axiosPrivate.patch(DIRECTIONS_URL, {
         fixerLocation: [pos.coords.longitude, pos.coords.latitude],
       });

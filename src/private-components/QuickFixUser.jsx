@@ -27,21 +27,19 @@ const CANCEL_URL = '/users/request/cancel';
 const QuickFixUser = () => {
   const axiosPrivate = useAxiosPrivate();
   const { isLoading: profileLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
-  const { isLoading: requestLoading, isSuccess } = useRequest(axiosPrivate, CURRENT_URL);
+  const { isSuccess } = useRequest(axiosPrivate, CURRENT_URL);
   const geolocationResult = useGeolocation(); 
   const errRef = useRef();
   const [errMsg, setErrMsg] = useState('');
   const [customLocation, setCustomLocation] = useState('');
   const [queryResponse, setQueryResponse] = useState([]);
   const [validCustomLocation, setValidCustomLocation] = useState(null);
-  const [requesting, setRequesting] = useState(false);
   const [searching, setSearching] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
-  const [count, setCount] = useState(0);
   const [viewState, setViewState] = useState({
     longitude: -122.4194,
     latitude: 37.7749,
-    zoom: 12.5,
+    zoom: 12,
   });
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -71,56 +69,55 @@ const QuickFixUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setRequesting(true);
+    setSearching(true);
     if (!validCustomLocation.length) {
+      setSearching(false);
       setErrMsg('Invalid submission');
+      errRef.current.focus();
       return;
     }
     if (intervalId) {
       clearInterval(intervalId);
       setIntervalId(null);
     }
-
+    const interval = setInterval(() => {
+      setErrMsg(['No fixers in your area at this time', 'Continuing to search for a match']);
+      errRef.current.focus();
+    }, 30000);
+    setIntervalId(interval);
     try {
-      // create request document
-      const requestResponse = await axiosPrivate.post(REQUEST_URL, {
+      const matchResponse = await axiosPrivate.post(REQUEST_URL, {
         location: validCustomLocation,
         address: customLocation,
       });
-      console.log(requestResponse?.data) // remove before production
-      setSearching(true);
-      const interval = setInterval(async () => {
-        // search for matched request
-        try {
-          const matchResponse = await axiosPrivate.get(CURRENT_URL);
-          queryClient.setQueryData(['request'], matchResponse?.data); // revisit query key naming
-          navigate('/confirmation');
-        } catch (err) {
-          setCount(prev => prev + 1);
-          if (count > 15) {
-            setErrMsg(['No fixers in your area at this time', 'Continuing to search for a match']);
-          } // TODO: consider adding a timeout at X minutes (currently using 2 minutes as mark for stale requests on b/e...can be more or less depending on what's best)
-        }
-      }, 4000);
-      setIntervalId(interval);
-
+      queryClient.setQueryData(['request'], matchResponse?.data);
+      if (intervalId) {
+        clearInterval(intervalId);
+        setIntervalId(null);
+      }
+      console.log(matchResponse?.data) // remove before production
+      navigate('/confirmation');
     } catch (err) {
+      setSearching(false);
+      if (intervalId) {
+        clearInterval(intervalId);
+        setIntervalId(null);
+      }
       if (!err?.response) {
         setErrMsg('No server response');
       } else if (err.response?.status === 400) {
-        setErrMsg('Missing location data') 
+        setErrMsg('Missing location data'); 
+      } else if (err.response?.status === 408) {
+        setErrMsg('Request timed out');
       } else {
-        setErrMsg('Request failed')
+        setErrMsg('Request failed');
       }
-      setRequesting(false);
       errRef.current.focus();
     }
   }
   
   const handleCancel = async () => {
-    setRequesting(false);
     setSearching(false);
-    setCount(0);
     if (intervalId) {
       clearInterval(intervalId);
       setIntervalId(null);
@@ -133,12 +130,11 @@ const QuickFixUser = () => {
       if (!err?.response) {
         setErrMsg('No server response');
       } else {
-        setErrMsg('Request cancellation failed')
+        setErrMsg('Request cancellation failed');
       }
+      errRef.current.focus();
     }
   }
-
-  if (requestLoading) return <div>Loading...</div>;
 
   if (isSuccess) navigate('/confirmation');
 
@@ -153,9 +149,9 @@ const QuickFixUser = () => {
         mapStyle='mapbox://styles/mapbox/streets-v12'
         mapboxAccessToken={MAPBOX_TOKEN}
       >
-        {(validCustomLocation && requesting) && <Marker longitude={validCustomLocation[0]} latitude={validCustomLocation[1]} anchor='bottom' />}
+        {(validCustomLocation && searching) && <Marker longitude={validCustomLocation[0]} latitude={validCustomLocation[1]} anchor='bottom' />}
       </Map>
-      {!requesting ? ( 
+      {!searching ? ( 
         <div className='sidebar'>
           {profileLoading || isError ? <h2>Welcome</h2> : <h2>Welcome {profileData.firstName}</h2>}
           <h2>Where do you need help?</h2>
@@ -188,37 +184,21 @@ const QuickFixUser = () => {
             <button type='submit' disabled={validCustomLocation.length ? false : true} >Find Fixer</button>
           </form>
         </div>
-      ) : requesting && !searching
-          ? (
-          <div className='sidebar'>
-            <div className={errMsg ? 'errmsg' : 'offscreen'}>
-              <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-              {Array.isArray(errMsg) ? (
-                <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-                <br />{errMsg[1]}</p>
-              ) : (
-                <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-              )}
-            </div>     
-            <FontAwesomeIcon icon={faSpinnerThird} />
-            <h2>Submitting your request for help...</h2>
-            <button type='button' onClick={handleCancel}>Cancel</button>
-          </div>
-          ) : (
-            <div className='sidebar'>
-              <div className={errMsg ? 'errmsg' : 'offscreen'}>
-                <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-                {Array.isArray(errMsg) ? (
-                  <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-                  <br />{errMsg[1]}</p>
-                ) : (
-                  <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-                )}
-              </div>     
-              <FontAwesomeIcon icon={faSpinnerThird} />
-              <h2>Searching for Fixer...</h2>
-              <button type='button' onClick={handleCancel}>Cancel</button>
-            </div>
+      ) : (
+        <div className='sidebar'>
+          <div className={errMsg ? 'errmsg' : 'offscreen'}>
+            <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+            {Array.isArray(errMsg) ? (
+              <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+              <br />{errMsg[1]}</p>
+            ) : (
+              <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+            )}
+          </div>     
+          <FontAwesomeIcon icon={faSpinnerThird} />
+          <h2>Searching for Fixer...</h2>
+          <button type='button' onClick={handleCancel}>Cancel</button>
+        </div>
       )}
     </>
   )

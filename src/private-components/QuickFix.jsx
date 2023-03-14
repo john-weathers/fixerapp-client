@@ -33,7 +33,7 @@ const QuickFix = () => {
   const [viewState, setViewState] = useState({
     longitude: geolocationResult?.data?.longitude || -122.4194,
     latitude: geolocationResult?.data?.latitude || 37.7749,
-    zoom: 12.5,
+    zoom: 12,
   });
   const queryClient = useQueryClient();
   const navigate = useNavigate();

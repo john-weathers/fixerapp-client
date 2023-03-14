@@ -59,7 +59,7 @@ const requestQuery = (axios, url) => ({
     const { data } = await axios.get(url);
     return data;
   },
-  staleTime: 1000 * 15, // not 100% sure about this staleTime...could see lower (0 maybe) being better
+  staleTime: 0, // NOTE: keep on eye on staleTime and adjust if needed
 });
 
 export const useRequest = (axios, url) => {
