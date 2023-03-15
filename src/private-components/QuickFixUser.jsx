@@ -164,7 +164,7 @@ const QuickFixUser = () => {
               <p ref={errRef} aria-live='assertive'>{errMsg}</p>
             )}
           </div>          
-          <form autocomplete='off' onSubmit={handleSubmit}>
+          <form autoComplete='off' onSubmit={handleSubmit}>
             <input 
               id='address' 
               type='text'

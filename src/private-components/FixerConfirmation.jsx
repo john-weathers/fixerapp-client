@@ -31,8 +31,8 @@ const FixerConfirmation = () => {
           navigator.geolocation.getCurrentPosition(res, rej, { timeout: 10000 })
         })
       }
-      const pos = await getPosition();
-      return await axiosPrivate.patch(DIRECTIONS_URL, {
+      const pos = await getPosition(); // can include an onClick handler on the Map component to update the location manually for testing purposes
+      return await axiosPrivate.patch(DIRECTIONS_URL, { // NOTE: consider updating this to a socket based system
         fixerLocation: [pos.coords.longitude, pos.coords.latitude],
       });
     },
@@ -64,7 +64,7 @@ const FixerConfirmation = () => {
 
   if (jobDetails.trackerStage === 'en route') return (
     <>
-    
+
     </>
   )
 

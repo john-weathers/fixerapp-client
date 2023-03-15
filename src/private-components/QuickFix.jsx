@@ -143,7 +143,7 @@ const QuickFix = () => {
               <p ref={errRef} aria-live='assertive'>{errMsg}</p>
             )}
           </div>          
-          <form autocomplete='off' onSubmit={handleSubmit}>
+          <form autoComplete='off' onSubmit={handleSubmit}>
             <label htmlFor='choosecurrent'>Current location</label>
             <input id='choosecurrent' type='radio' name='location' onClick={handleCurrentClick} checked={currentLocation ? true : false}/>
             <label htmlFor='choosecustom'>Custom location</label>
