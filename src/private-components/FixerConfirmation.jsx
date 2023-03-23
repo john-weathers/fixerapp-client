@@ -4,58 +4,59 @@ import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks
 import Map, { Marker } from 'react-map-gl';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import circle from '@turf/circle';
+import bbox from '@turf/bbox';
+import { lineString } from '@turf/helpers';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
 const mapboxClient = mapboxSdk({ accessToken: MAPBOX_TOKEN });
-const PROFILE_URL = '/fixers/profile';
 const CURRENT_URL = '/fixers/work/current';
 const DIRECTIONS_URL = '/fixers/work/directions';
 const ESTIMATE_URL = '/fixers/work/estimate';
+let geofence;
 
-const FixerConfirmation = () => {
+const FixerConfirmation = ({ socket }) => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
-  const { isLoading, isError, error, data: jobDetails } = useRequest(axiosPrivate, CURRENT_URL);
+  const { data: jobDetails } = useRequest(axiosPrivate, CURRENT_URL);
   const errRef = useRef();
   const [errMsg, setErrMsg] = useState('');
-  const [intervalId, setIntervalId] = useState(null);
+  const [watchId, setWatchId] = useState(null);
   const [viewState, setViewState] = useState()
+
+  useEffect(() => {
+    geofence = circle(jobDetails.userLocation, 0.25, { units: 'miles' });
+  }, [])
 
   // can use bbox, lineString (from turf) and fitBounds (from mapbox) to orient map once directions are available
   // might be best to return the fixer location (for fixers) to use as a starting point to orient the map
   // or do the initial directions api call in the findWork function (could be best)
-  const mutation = useMutation({
-    mutationFn: async () => {
-      function getPosition() {
-        return new Promise((res, rej) => {
-          navigator.geolocation.getCurrentPosition(res, rej, { timeout: 10000 })
-        })
-      }
-      const pos = await getPosition(); // can include an onClick handler on the Map component to update the location manually for testing purposes
-      return await axiosPrivate.patch(DIRECTIONS_URL, { // NOTE: consider updating this to a socket based system
-        fixerLocation: [pos.coords.longitude, pos.coords.latitude],
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['request'] });
-    },
-    onError: (error) => {
-      console.log(error.message); // NOTE: revisit error handling during testing for at least two reasons
-      // 1. certain errors may indicate the need to delete or repair the Request document or develop certain contingencies
-      // 2. could utilize React or React Router error handling
-    }
-  })
   
   useEffect(() => {
-    mutation.mutate();
-    const interval = setInterval(() => {
-      mutation.mutate();
-    }, 1000 * 15)
-    setIntervalId(interval);
+    const success = pos => {
+      const coords = [pos.coords.longitude, pos.coords.latitude];
+      if (booleanPointInPolygon(coords, geofence)) {
+        socket.emit('arriving', jobDetails.jobId, (response) => {
 
-    return () => {
-      if (intervalId) clearInterval(intervalId);
+        });
+      } else {
+        socket.emit('update location', {
+          location: coords,
+          jobId: jobDetails.jobId,
+        });
+      }
+
     }
+
+    const error = err => {
+
+    }
+
+    const id = navigator.geolocation.watchPosition(success, error, { timeout: 5000 })
+    setWatchId(id);
+
+    return () => navigator.geolocation.clearWatch(id);
   }, [])
 
   if (isLoading) return <div>Loading...</div>;

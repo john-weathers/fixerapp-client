@@ -30,10 +30,10 @@ const geolocationQuery = {
         enableHighAccuracy: true,
         timeout: 10000,
       }
-      function success(pos) {
+      const success = pos => {
         resolve(pos.coords);
       }
-      function error(err) {
+      const error = err => {
         reject(err)
       }
       navigator.geolocation.getCurrentPosition(success, error, options);
@@ -60,6 +60,7 @@ const requestQuery = (axios, url) => ({
     return data;
   },
   staleTime: 0, // NOTE: keep on eye on staleTime and adjust if needed
+  retry: 1,
 });
 
 export const useRequest = (axios, url) => {

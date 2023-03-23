@@ -1,12 +1,15 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks';
+import useAuth from '../hooks/useAuth';
+import useRefreshToken from '../hooks/useRefreshToken';
 import Map, { Marker } from 'react-map-gl';
 import { faSpinnerThird } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { useQueryClient } from '@tanstack/react-query';
+import FixerConfirmation from './FixerConfirmation';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
 const mapboxClient = mapboxSdk({ accessToken: MAPBOX_TOKEN });
@@ -16,8 +19,10 @@ const CURRENT_URL = '/fixers/work/current';
 
 const QuickFix = () => {
   const axiosPrivate = useAxiosPrivate();
+  const { auth } = useAuth();
+  const refresh = useRefreshToken();
   const { isLoading: profileLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
-  const { isLoading: requestLoading, isSuccess } = useRequest(axiosPrivate, CURRENT_URL);
+  const { data: jobDetails } = useRequest(axiosPrivate, CURRENT_URL);
   const geolocationResult = useGeolocation();
   const [currentLocation, setCurrentLocation] = useState(geolocationResult?.data?.longitude 
     ? [geolocationResult?.data?.longitude, geolocationResult?.data?.latitude] : null);
@@ -35,9 +40,53 @@ const QuickFix = () => {
     latitude: geolocationResult?.data?.latitude || 37.7749,
     zoom: 12,
   });
+  const [retryAttempts, setRetryAttempts] = useState(2);
+  const [retry, setRetry] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   
+  useEffect(() => {
+    socket = io('http://localhost:8000/fixer', {
+      extraHeaders: {
+        'Authorization': `Bearer ${auth.accessToken}`,
+      }
+    });
+
+    socket.on('connect', () => {
+      setIsConnected(true);
+    });
+
+    socket.on('connect_error', async (err) => {
+      if (err.message === 'Authentication error') {
+        const newAccessToken = await refresh();
+        socket.io.opts.extraHeaders = {
+          'Authorization': `Bearer ${newAccessToken}`,
+        }
+        socket.connect(); // should work, but if issues occur might solve them to disconnect before connecting
+      } else if (err.message === 'Unauthorized') {
+        navigate('/unauthorized', { replace: true, state: { from: location } });
+      } else {
+        console.log(err.message); // need to see cases that might come up...may or may not make sense to setErrMsg in this case
+      }
+    });
+
+    socket.on('job update', (jobDetails) => {
+      queryClient.setQueryData(['request'], oldData => {
+        return {
+          ...oldData,
+          ...jobDetails,
+        }
+      })
+    });
+
+    socket.on('disconnect', () => {
+      setIsConnected(false);
+    });
+
+    return () => {
+      socket.removeAllListeners();
+    }
+  }, []);
 
   const handleCurrentClick = async () => {
     setToggleLocation(false);
@@ -73,23 +122,59 @@ const QuickFix = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSearching(true);
-    // api call for creating request document
     const coordinates = currentLocation || validCustomLocation;
     if (!coordinates.length) {
-      setErrMsg('Invalid submission');
+      setErrMsg('Missing location data');
       return;
     }
-    if (intervalId) {
-      clearInterval(intervalId);
-      setIntervalId(null);
+    clearInterval(intervalId);
+    setIntervalId(null);
+    try {
+      const searchResponse = await axiosPrivate.post(FIND_WORK_URL, {
+        location: coordinates,
+      });
+      queryClient.setQueryData(['request'], searchResponse.data);
+      while (retryAttempts) {
+        socket.emit('work found', (response) => {
+          if (response.status === 'NOK') {
+            setRetryAttempts(prev => prev - 1);
+            setRetry(true);
+          } else {
+            setRetry(false);
+          }
+        });
+        if (retry) {
+          continue;
+        } else {
+          return;
+        }
+      }
+    } catch (err) {
+      setCount(prev => prev + 1);
     }
     const interval = setInterval(async () => {
       try {
         const searchResponse = await axiosPrivate.post(FIND_WORK_URL, {
           location: coordinates,
         });
-        queryClient.setQueryData(['request'], searchResponse?.data); // revisit query key naming
-        navigate('/fixers/confirmation');
+        queryClient.setQueryData(['request'], searchResponse.data);
+        while (retryAttempts) {
+          socket.emit('work found', (response) => {
+            if (response.status === 'NOK') {
+              setRetryAttempts(prev => prev - 1);
+              setRetry(true);
+            } else {
+              setRetry(false);
+            }
+          });
+          if (retry) {
+            continue;
+          } else {
+            break;
+          }
+        }
+        clearInterval(intervalId);
+        setIntervalId(null);
       } catch (err) {
         setCount(prev => prev + 1);
         if (count > 15) {
@@ -103,18 +188,15 @@ const QuickFix = () => {
   const handleCancel = () => {
     setSearching(false);
     setCount(0);
-    if (intervalId) {
-      clearInterval(intervalId);
-      setIntervalId(null);
-    }
+    clearInterval(intervalId);
+    setIntervalId(null);
     setCustomLocation('');
     setCurrentLocation(null);
     setValidCustomLocation(null);
   }
 
-  if (requestLoading) return <div>Loading...</div>;
-
-  if (isSuccess) navigate('/fixers/confirmation');
+  // using jobDetails rather than something like isSuccess because a failed fetch, even after we have data set, seems to cause isSuccess to revert to false
+  if (jobDetails) return <FixerConfirmation socket={socket} />;
 
   return (
     <>
@@ -181,7 +263,7 @@ const QuickFix = () => {
             )}
           </div>     
           <FontAwesomeIcon icon={faSpinnerThird} />
-          <h2>Searching for work...</h2>
+          <h2>Searching for work near you...</h2>
           <button type='button' onClick={handleCancel}>Cancel</button>
         </div>
       )}

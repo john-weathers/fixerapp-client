@@ -14,6 +14,8 @@ const useRefreshToken = () => {
     }
 
     const refresh = async () => {
+        // additional error handling needed? Determine best course in testing, but catching and setting auth to empty object (probably better than just "deleting" the access token)
+        // then navigating to home page seems sufficient
         const response = await axios.get(refreshURL, {
             withCredentials: true
         });
