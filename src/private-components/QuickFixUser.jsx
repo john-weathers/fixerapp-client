@@ -87,8 +87,9 @@ const QuickFixUser = () => {
             ...oldData,
             ...jobDetails,
           }
-        })
+        });
       }
+
     });
 
     socket.on('disconnect', () => {
@@ -169,7 +170,7 @@ const QuickFixUser = () => {
      })
   }
   
-  const handleCancel = async () => {
+  const handleCancel = () => {
     setRequesting(false);
     setSearching(false);
     clearInterval(intervalId);
