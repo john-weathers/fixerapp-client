@@ -224,10 +224,6 @@ const UserRegistration = () => {
               onFocus={() => setFirstFocus(true)}
               onBlur={() => setFirstFocus(false)}
             />
-            <p id='confirmnote' className={matchFocus && !validMatch ? 'instructions' : 'offscreen'}>
-              <FontAwesomeIcon icon={faInfoCircle} />
-              Must match the first password input field.
-            </p>
 
 
             <label>

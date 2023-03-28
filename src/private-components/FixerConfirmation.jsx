@@ -14,8 +14,8 @@ const mapboxClient = mapboxSdk({ accessToken: MAPBOX_TOKEN }); // should be able
 const CURRENT_URL = '/fixers/work/current';
 const ARRIVAL_URL = '/fixers/work/arrival';
 const DIRECTIONS_URL = '/fixers/work/directions';
-const CANCEL_URL = '/fixer/work/cancel';
-const ESTIMATE_URL = '/fixers/work/estimate';
+const QUOTE_URL = '/fixers/work/quote';
+const REVISED_COST_URL = '/fixers/work/revise-cost'
 
 const pointLayerStyle = {
   id: 'point',
@@ -76,6 +76,12 @@ const FixerConfirmation = ({ socket }) => {
     }
   }]
   })
+  const [quote, setQuote] = useState(0);
+  const [notes, setNotes] = useState('');
+  const [jobNotes, setJobNotes] = useState('');
+  const [toggleWorkScope, setToggleWorkScope] = useState(false);
+  const [revisedCost, setRevisedCost] = useState(0);
+  const [additionalNotes, setAdditionalNotes] = useState('');
 
   // can use bbox, lineString (from turf) and fitBounds (from mapbox) to orient map once directions are available
   // might be best to return the fixer location (for fixers) to use as a starting point to orient the map
@@ -197,6 +203,27 @@ const FixerConfirmation = ({ socket }) => {
     });
   }
 
+  const handleSubmitQuote = async (e) => {
+    e.preventDefault();
+    if (!quote || notes.length > 1000) {
+      setErrMsg('Invalid entry');
+      errRef.current.focus();
+      return;
+    }
+
+    try {
+      await axiosPrivate.patch(QUOTE_URL, {
+        quote,
+        notes,
+        jobId: jobDetails.jobId,
+      });
+  
+      setQuote(0);
+    } catch (err) {
+      setErrMsg('Failed to submit quote')
+    }
+  }
+
   const handleCancel = () => {
     socket.emit('cancel job', {
       jobId: jobDetails.jobId, // add cancellation reason once the functionality is incorporated
@@ -210,7 +237,37 @@ const FixerConfirmation = ({ socket }) => {
     });
   }
 
-  if (jobDetails.trackerStage === 'en route') return (
+  const handleRevisedCost = async (e) => {
+    e.preventDefault();
+    if (!revisedCost || additionalNotes.length > 500) {
+      setErrMsg('Invalid entry');
+      errRef.current.focus();
+      return;
+    }
+
+    await axiosPrivate.patch(REVISED_COST_URL, {
+      revisedCost,
+      notes: additionalNotes,
+      jobId: jobDetails.jobId,
+    });
+  }
+
+  const handleComplete = async () => {
+    try {
+      
+    } catch (err) {
+
+    }
+  }
+
+  if (cancelled) return (
+    <div>
+      <h2>Job cancelled</h2>
+      <Link to='/fixers'>Return to home page</Link>
+    </div>
+  )
+
+  if (jobDetails?.trackerStage === 'en route') return (
     <>
       <Map
         {...viewState}
@@ -250,7 +307,7 @@ const FixerConfirmation = ({ socket }) => {
           <ol>
             {jobDetails.route.instructions.map((step, index) => <li key={index}>{step}</li>)}
           </ol>
-          <p>ETA: {jobDetails.toLocaleTimeString('en-US', { timeStyle: 'short' })}</p>
+          <p>ETA: {jobDetails.eta.toLocaleTimeString('en-US', { timeStyle: 'short' })}</p>
           <button type='button' onClick={handleArrival}>I've arrived</button>
           {!callToggle ? <div onClick={() => setCallToggle(true)} >Contact Client</div> : <div>{jobDetails.phoneNumber}</div>}
         </div>
@@ -260,34 +317,119 @@ const FixerConfirmation = ({ socket }) => {
     </>
   )
 
-  if (jobDetails.trackerStage === 'arriving') return (
-    <>
-    
-    </>
+  if (jobDetails?.trackerStage === 'arriving') return (
+    <div>
+      {!jobDetails?.quote?.pending ? (
+      <>
+        <div className={errMsg ? 'errmsg' : 'offscreen'}>
+          <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+          {Array.isArray(errMsg) ? (
+            <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+            <br />{errMsg[1]}</p>
+          ) : (
+            <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+          )}
+        </div>
+        <form onSubmit={handleSubmitQuote}>
+          {jobDetails?.quote?.pending === undefined  
+            ? <label htmlFor='quote'>Client quote: $</label>
+            : <label htmlFor='quote'>Updated client quote: $</label>
+          }
+          <input 
+            id='quote'
+            type='number'
+            required
+            value={quote || ''}
+            step='0.01'
+            onChange={e => setQuote(e.target.value)}
+          />
+          <textarea
+            id='notes'
+            value={notes}
+            rows='30' // not sure about manually specifying this here...should consider other ways of doing this
+            cols='75'
+            onChange={e => {
+              if (notes.length >= 1000) {
+                setErrMsg('Notes must be 1000 characters or less');
+              }
+              setNotes(e.target.value);
+            }}
+          >
+            Describe quote details (1,000 characters or less){/* keep an eye on in the case this throws an error but don't think there's a syntax/escaping issue here */}
+          </textarea>
+          <button disabled={!quote || notes.length > 1000 ? true : false }>Send quote</button>
+        </form>
+      </>
+      ) : <p>Client reviewing quote...</p>
+      }
+      <button type='button' onClick={handleCancel}>Cancel Job</button>
+    </div> 
   )
 
-  if (jobDetails.trackerStage === 'estimating') return (
+  if (jobDetails?.trackerStage === 'fixing') return (
     <div>
-
+      {!jobDetails.quote.pending ? (
+        <div>
+          <h2>Work started</h2>
+          <textarea
+            id='jobnotes'
+            value={jobNotes}
+            rows='30'
+            cols='75'
+            onChange={e => {
+              if (jobNotes.length >= 1000) {
+                setErrMsg('Job notes must be 1000 characters or less');
+              }
+              setJobNotes(e.target.value);
+            }}
+          >
+            Job notes (1,000 characters or less)
+          </textarea>
+          <p>Time started: {jobDetails?.workStartedAt?.toLocaleTimeString('en-US', { timeStyle: 'short' })}</p>
+          {!callToggle ? <div onClick={() => setCallToggle(true)} >Contact Client</div> : <div>{jobDetails.phoneNumber}</div>}
+          {!toggleWorkScope
+            ? <button type='button' onClick={() => setToggleWorkScope(true)}>Update Work Scope</button>
+            : (
+              <form onSubmit={handleRevisedCost}>
+                <label htmlFor='scopechange'>Revised Cost: $</label>
+                <input
+                  id='scopechange'
+                  type='number'
+                  step='0.01'
+                  value={revisedCost || ''}
+                  required
+                  placeholder='Enter new total cost'
+                  onChange={e => setRevisedCost(e.target.value)}
+                />
+                <textarea
+                  id='additionalnotes'
+                  value={additionalNotes}
+                  rows='30'
+                  cols='75'
+                  onChange={e => {
+                    if (additionalNotes.length >= 500) {
+                      setErrMsg('Additional notes must be 1000 characters or less');
+                    }
+                    setAdditionalNotes(e.target.value);
+                  }}
+                >
+                  Details regarding revised cost (500 characters or less)
+                </textarea>
+                <button disabled={!revisedCost || additionalNotes.length > 1000 ? true : false }>Submit Revised Cost</button>
+              </form>
+            )}
+          <button type='button' onClick={handleComplete}>Job Complete</button>
+        </div>
+      ) : (
+        <p>Client reviewing revised cost...</p>
+      )}
+      <button type='button' onClick={handleCancel}>Cancel Job</button>
     </div>
   )
 
-  if (jobDetails.trackerStage === 'fixing') return (
-    <div>
-
-    </div>
-  )
-
-  if (jobDetails.trackerStage === 'complete') return (
+  if (jobDetails?.trackerStage === 'complete') return (
     <div>
       
-    </div>
-  )
-
-  if (cancelled) return (
-    <div>
-      <h2>Job cancelled</h2>
-      <Link to='/fixers'>Return to home page</Link>
     </div>
   )
 
