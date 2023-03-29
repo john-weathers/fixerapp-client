@@ -21,14 +21,12 @@ import Unauthorized from './public-components/Unauthorized';
 import UserHome from './private-components/UserHome';
 import UserIndex from './private-components/UserIndex';
 import QuickFixUser from './private-components/QuickFixUser';
-import UserConfirmation from './private-components/UserConfirmation';
 import Proposals from './private-components/Proposals';
 import UserSchedule from './private-components/UserSchedule';
 import UserSettings from './private-components/UserSettings';
 import FixerHome from './private-components/FixerHome';
 import FixerIndex from './private-components/FixerIndex';
 import QuickFix from './private-components/QuickFix';
-import FixerConfirmation from './private-components/FixerConfirmation';
 import Bid from './private-components/Bid';
 import FixerSchedule from './private-components/FixerSchedule';
 import FixerSettings from './private-components/FixerSettings';
@@ -65,7 +63,6 @@ export const router = createBrowserRouter(
           <Route path='/' element={<UserHome />} >
             <Route index element={<UserIndex />} />
             <Route path='quick-fix' element={<QuickFixUser />} /*loader action={appLoader}*/ />
-            <Route path='confirmation' element={<UserConfirmation />} />
             <Route path='proposals' element={<Proposals />} />
             <Route path='schedule' element={<UserSchedule />} />
             {
@@ -79,7 +76,6 @@ export const router = createBrowserRouter(
           <Route path='/fixers' element={<FixerHome />} >
             <Route index element={<FixerIndex />} />
             <Route path='quick-fix' element={<QuickFix />} />
-            <Route path='confirmation' element={<FixerConfirmation />} />
             <Route path='bid' element={<Bid />}/>
             <Route path='schedule' element={<FixerSchedule />}/>
             {

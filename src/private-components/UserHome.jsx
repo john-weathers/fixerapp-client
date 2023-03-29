@@ -10,18 +10,16 @@ const CURRENT_URL = '/users/request/current';
 const UserHome = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
-  const { isLoading, isSuccess } = useRequest(axiosPrivate, CURRENT_URL);
+  const { data } = useRequest(axiosPrivate, CURRENT_URL);
 
   prefetchProfile(queryClient, axiosPrivate, PROFILE_URL);
   prefetchGeolocation(queryClient);
 
-  if (isLoading) return <div>Loading...</div>;
-
   return (
     <div>
       <PrivateNavBar navOptions={{
-        leftUrl: isSuccess ? 'confirmation' : 'quick-fix',
-        leftTitle: isSuccess ? 'Active Job' : 'Quick Fix',
+        leftUrl: 'quick-fix',
+        leftTitle: data ? 'Active Job' : 'Quick Fix',
         midUrl: 'proposals',
         midTitle: 'Proposals',
         rightUrl: 'schedule',

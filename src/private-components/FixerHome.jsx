@@ -10,18 +10,16 @@ const CURRENT_URL = '/fixers/work/current';
 const FixerHome = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
-  const { isLoading, isSuccess } = useRequest(axiosPrivate, CURRENT_URL);
+  const { data } = useRequest(axiosPrivate, CURRENT_URL);
 
   prefetchProfile(queryClient, axiosPrivate, PROFILE_URL);
   prefetchGeolocation(queryClient);
 
-  if (isLoading) return <div>Loading...</div>;
-
   return (
     <div>
       <PrivateNavBar navOptions={{
-        leftUrl: isSuccess ? 'confirmation' : 'quick-fix',
-        leftTitle: isSuccess ? 'Active Job' : 'Quick Fix',
+        leftUrl: 'quick-fix',
+        leftTitle: data ? 'Active Job' : 'Quick Fix',
         midUrl: 'bid',
         midTitle: 'Bid',
         rightUrl: 'schedule',

@@ -10,12 +10,13 @@ import bbox from '@turf/bbox';
 import { lineString } from '@turf/helpers';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
-const mapboxClient = mapboxSdk({ accessToken: MAPBOX_TOKEN }); // should be able to remove this and associated CDN reference
 const CURRENT_URL = '/fixers/work/current';
 const ARRIVAL_URL = '/fixers/work/arrival';
 const DIRECTIONS_URL = '/fixers/work/directions';
 const QUOTE_URL = '/fixers/work/quote';
-const REVISED_COST_URL = '/fixers/work/revise-cost'
+const REVISED_COST_URL = '/fixers/work/revise-cost';
+const COMPLETE_URL = '/fixers/work/complete';
+const RATING_URL = '/fixers/work/rate-client';
 
 const pointLayerStyle = {
   id: 'point',
@@ -41,7 +42,7 @@ const routeLayerStyle = {
   }
 }
 
-const FixerConfirmation = ({ socket }) => {
+const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, cancellation }) => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
   const { data: jobDetails } = useRequest(axiosPrivate, CURRENT_URL);
@@ -52,8 +53,8 @@ const FixerConfirmation = ({ socket }) => {
   const [watchId, setWatchId] = useState(null);
   const [timeoutId, setTimeoutId] = useState(null);
   const [viewState, setViewState] = useState({
-    longitude: jobDetails.fixerLocation[0],
-    latitude: jobDetails.fixerLocation[1],
+    longitude: jobDetails?.fixerLocation[0],
+    latitude: jobDetails?.fixerLocation[1],
     zoom: 12,
   });
   const [currentCoords, setCurrentCoords] = useState([]);
@@ -63,7 +64,7 @@ const FixerConfirmation = ({ socket }) => {
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: jobDetails.route.coordinates,
+      coordinates: jobDetails?.route?.coordinates,
     }
   })
   const [geojsonPoint, setGeojsonPoint] = useState({
@@ -72,7 +73,7 @@ const FixerConfirmation = ({ socket }) => {
     type: 'Feature',
     geometry: {
       type: 'Point',
-      coordinates: jobDetails.fixerLocation.coordinates,
+      coordinates: jobDetails?.fixerLocation?.coordinates,
     }
   }]
   })
@@ -82,10 +83,9 @@ const FixerConfirmation = ({ socket }) => {
   const [toggleWorkScope, setToggleWorkScope] = useState(false);
   const [revisedCost, setRevisedCost] = useState(0);
   const [additionalNotes, setAdditionalNotes] = useState('');
-
-  // can use bbox, lineString (from turf) and fitBounds (from mapbox) to orient map once directions are available
-  // might be best to return the fixer location (for fixers) to use as a starting point to orient the map
-  // or do the initial directions api call in the findWork function (could be best)
+  const [clientName, setClientName] = useState('');
+  const [jobId, setJobId] = useState('');
+  const [rated, setRated] = useState(false);
   
   useEffect(() => {
     const geofence = circle(jobDetails.userLocation, 0.25, { units: 'miles' });
@@ -106,6 +106,7 @@ const FixerConfirmation = ({ socket }) => {
               clearTimeout(timeoutId);
             } catch (err) {
               setErrMsg('Error updating tracker stage');
+              errRef.current.focus();
             }
           }
         });
@@ -129,6 +130,7 @@ const FixerConfirmation = ({ socket }) => {
 
     const error = err => {
       setErrMsg(err.message); // might want more sophisticated error handling here
+      errRef.current.focus();
     }
 
     const id = navigator.geolocation.watchPosition(success, error, { timeout: 5000 });
@@ -140,7 +142,7 @@ const FixerConfirmation = ({ socket }) => {
   }, []);
 
   useEffect(() => {
-    if (jobDetails.eta && jobDetails.trackerStage === 'en route') {
+    if (jobDetails?.eta && jobDetails?.trackerStage === 'en route') {
     const etaTimeout = jobDetails.eta - new Date();
     
       const id = setTimeout(async () => {
@@ -168,6 +170,7 @@ const FixerConfirmation = ({ socket }) => {
           });
         } catch (err) {
           setErrMsg('Error occurred when trying to update directions data');
+          errRef.current.focus();
         }
       }, etaTimeout);
       setTimeoutId(id);
@@ -176,7 +179,7 @@ const FixerConfirmation = ({ socket }) => {
     return () => {
       clearTimeout(timeoutId);
     }
-  }, [jobDetails.eta])
+  }, [jobDetails?.eta])
 
   const handleLoad = () => {
     const line = lineString(route);
@@ -198,6 +201,7 @@ const FixerConfirmation = ({ socket }) => {
           clearTimeout(timeoutId);
         } catch (err) {
           setErrMsg('Error updating tracker stage');
+          errRef.current.focus();
         }
       }
     });
@@ -221,6 +225,7 @@ const FixerConfirmation = ({ socket }) => {
       setQuote(0);
     } catch (err) {
       setErrMsg('Failed to submit quote')
+      errRef.current.focus();
     }
   }
 
@@ -230,6 +235,7 @@ const FixerConfirmation = ({ socket }) => {
     }, (response) => {
       if (response.status === 'NOK') {
         setErrMsg('Job cancellation failed');
+        errRef.current.focus();
       } else {
         setCancelled(true);
         queryClient.removeQueries({ queryKey: ['request'], exact: true });
@@ -245,20 +251,64 @@ const FixerConfirmation = ({ socket }) => {
       return;
     }
 
-    await axiosPrivate.patch(REVISED_COST_URL, {
-      revisedCost,
-      notes: additionalNotes,
-      jobId: jobDetails.jobId,
-    });
+    try {
+      await axiosPrivate.patch(REVISED_COST_URL, {
+        revisedCost,
+        notes: additionalNotes,
+        jobId: jobDetails.jobId,
+      });
+    } catch (err) {
+      setErrMsg('Failed to update cost');
+      errRef.current.focus();
+    }
+    
   }
 
+  // not adding payment functionality at the moment but could easily add something like Stripe in the future
   const handleComplete = async () => {
     try {
-      
+      setClientName(jobDetails.firstName);
+      setJobId(jobDetails.jobId);
+      setFinalizing(true);
+      await axiosPrivate.patch(COMPLETE_URL, {
+        jobId: jobDetails.jobId,
+      }); // could have this be an emitter and leave room on back end
     } catch (err) {
-
+      setFinalizing(false);
+      setErrMsg('Failed to update job status');
+      errRef.current.focus();
     }
   }
+
+  const handleRating = async (e) => {
+    e.preventDefault();
+    const rating = e.currentTarget.rating.value;
+    if (!rating || rating < 1 || rating > 5) {
+      setErrMsg('Invalid entry');
+      errRef.current.focus();
+      return;
+    }
+    setRated(true);
+    try {
+      await axiosPrivate.patch(RATING_URL, {
+        jobId,
+        rating,
+      });
+    queryClient.removeQueries({ queryKey: ['request'], exact: true });
+    } catch (err) {
+      setRated(false);
+      setErrMsg('Error submitting rating');
+      errRef.current.focus();
+    }
+  }
+
+  if (cancellation) return ( // could list cancellation reason here in future build
+    <div>
+      <h2>The client has cancelled the job</h2>
+      <p>Please contact us if you have any questions or concerns</p>
+      <Link to='/fixers'>Return to home page</Link>
+    </div>
+  )
 
   if (cancelled) return (
     <div>
@@ -283,7 +333,7 @@ const FixerConfirmation = ({ socket }) => {
         <Source id='fixer-location' type='geojson' data={geojsonPoint}>
           <Layer {...pointLayerStyle} />
         </Source>
-        <Marker longitude={jobDetails.userLocation[0]} latitude={jobDetails.userLocation[1]} anchor='bottom' color='#c70a0a'/>
+        <Marker longitude={jobDetails.userLocation[0]} latitude={jobDetails.userLocation[1]} color='#c70a0a'/>
         <Source id='route-data' type='geojson' data={route}>
           <Layer {...routeLayerStyle} />
         </Source>
@@ -319,17 +369,17 @@ const FixerConfirmation = ({ socket }) => {
 
   if (jobDetails?.trackerStage === 'arriving') return (
     <div>
+      <div className={errMsg ? 'errmsg' : 'offscreen'}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+        {Array.isArray(errMsg) ? (
+          <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+          <br />{errMsg[1]}</p>
+        ) : (
+          <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+        )}
+      </div>
       {!jobDetails?.quote?.pending ? (
       <>
-        <div className={errMsg ? 'errmsg' : 'offscreen'}>
-          <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-          {Array.isArray(errMsg) ? (
-            <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-            <br />{errMsg[1]}</p>
-          ) : (
-            <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-          )}
-        </div>
         <form onSubmit={handleSubmitQuote}>
           {jobDetails?.quote?.pending === undefined  
             ? <label htmlFor='quote'>Client quote: $</label>
@@ -351,6 +401,7 @@ const FixerConfirmation = ({ socket }) => {
             onChange={e => {
               if (notes.length >= 1000) {
                 setErrMsg('Notes must be 1000 characters or less');
+                errRef.current.focus();
               }
               setNotes(e.target.value);
             }}
@@ -368,6 +419,15 @@ const FixerConfirmation = ({ socket }) => {
 
   if (jobDetails?.trackerStage === 'fixing') return (
     <div>
+      <div className={errMsg ? 'errmsg' : 'offscreen'}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+        {Array.isArray(errMsg) ? (
+          <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+          <br />{errMsg[1]}</p>
+        ) : (
+          <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+        )}
+      </div>
       {!jobDetails.quote.pending ? (
         <div>
           <h2>Work started</h2>
@@ -379,6 +439,7 @@ const FixerConfirmation = ({ socket }) => {
             onChange={e => {
               if (jobNotes.length >= 1000) {
                 setErrMsg('Job notes must be 1000 characters or less');
+                errRef.current.focus();
               }
               setJobNotes(e.target.value);
             }}
@@ -409,13 +470,14 @@ const FixerConfirmation = ({ socket }) => {
                   onChange={e => {
                     if (additionalNotes.length >= 500) {
                       setErrMsg('Additional notes must be 1000 characters or less');
+                      errRef.current.focus();
                     }
                     setAdditionalNotes(e.target.value);
                   }}
                 >
                   Details regarding revised cost (500 characters or less)
                 </textarea>
-                <button disabled={!revisedCost || additionalNotes.length > 1000 ? true : false }>Submit Revised Cost</button>
+                <button disabled={!revisedCost || additionalNotes.length > 500 ? true : false }>Submit Revised Cost</button>
               </form>
             )}
           <button type='button' onClick={handleComplete}>Job Complete</button>
@@ -427,27 +489,36 @@ const FixerConfirmation = ({ socket }) => {
     </div>
   )
 
-  if (jobDetails?.trackerStage === 'complete') return (
+  if (jobDetails?.trackerStage === 'complete' || finalizing) return (
     <div>
-      
+      <div className={errMsg ? 'errmsg' : 'offscreen'}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+        {Array.isArray(errMsg) ? (
+          <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+          <br />{errMsg[1]}</p>
+        ) : (
+          <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+        )}
+      </div>
+      {!rated ? (
+        <div>
+          <h2>Job complete!</h2>
+          <p>Rate {clientName}</p>
+          <form className='rating' onChange={handleRating}>
+            <input type='radio' id='1-star' name='rating' value='1' />
+            <input type='radio' id='2-star' name='rating' value='2' />
+            <input type='radio' id='3-star' name='rating' value='3' />
+            <input type='radio' id='4-star' name='rating' value='4' />
+            <input type='radio' id='5-star' name='rating' value='5' />
+          </form>
+        </div>
+      ) : (
+        <div>
+          <h2>Thank you for your feedback!</h2>
+          <Link to='/fixers'>Return to home page</Link>
+        </div>
+      )}
     </div>
-  )
-
-  return (
-    <div>FixerConfirmation</div> // default return? would indicate some type of issue so could be a fallback to cancel the Request or similar
   )
 }
 export default FixerConfirmation;
-
-// with tracker stages:
-// en route: display map and directions (can reverseGeocode to get address...in production would likely require an address) setInterval for updating Fixer's location server side,
-// method of updating tracker stage (could be a button on f/e or based on proximity), clear interval
-// promiximity might be preferable for ease of use...for testing purposes we can use a button
-
-// arriving: could potentially show customer details at this point (name, profile photo, etc.) or add more details once at this stage, such as showing the photo
-// could also add functionality/information to give more details about repair issue earlier in the process and/or at this point
-// prompt for estimated job cost, should go to customer, once accepted we move to fixing stage
-
-// fixing: could possibly show timer on how long fix has been ongoing, but mainly we need to display a button to indicate job being finished
-// this could trigger payment for customer (other option would be to handle payment when job starts, or a hybrid such as taking a deposit and charging the final amount
-// depending on the job)

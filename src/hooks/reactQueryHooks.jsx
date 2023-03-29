@@ -66,4 +66,3 @@ const requestQuery = (axios, url) => ({
 export const useRequest = (axios, url) => {
   return useQuery(requestQuery(axios, url));
 }
-

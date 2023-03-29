@@ -11,17 +11,13 @@ import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { useQueryClient } from '@tanstack/react-query';
+import mbxGeocoding from '@mapbox/mapbox-sdk/services/geocoding';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
-const mapboxClient = mapboxSdk({ accessToken: MAPBOX_TOKEN });
+const geocodingService = mbxGeocoding({ accessToken: MAPBOX_TOKEN });
 const PROFILE_URL = '/users/profile';
-const REQUEST_URL = '/users/request/new';
 const CURRENT_URL = '/users/request/current';
-const CANCEL_URL = '/users/request/cancel';
 let socket;
-
-// add callback for emitters...setErrMsg here
-// 'NOK' will be the generic error code for that emitter and should result in an appropriate generic message being set
 
 const QuickFixUser = () => {
   const axiosPrivate = useAxiosPrivate();
@@ -46,6 +42,8 @@ const QuickFixUser = () => {
   });
   const [count, setCount] = useState(0);
   const [firstUpdate, setFirstUpdate] = useState(true);
+  const [finalizing, setFinalizing] = useState(false);
+  const [fixerCancelled, setFixerCancelled] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();
@@ -81,6 +79,12 @@ const QuickFixUser = () => {
         queryClient.invalidateQueries({ queryKey: ['request'], refetchType: 'all' }); // not sure refetchType: 'all' is necessary here...need to find out more in testing
         setFirstUpdate(false);
       } else {
+        if (jobDetails.currentStatus === 'cancelled') {
+          setUserCancelled(true);
+          queryClient.removeQueries({ queryKey: ['request'], exact: true });
+          return;
+        }
+        if (jobDetails.currentStatus === 'fulfilled') setFinalizing(true);
         // subsequent updates can overwrite old cache data
         queryClient.setQueryData(['request'], oldData => {
           return {
@@ -123,7 +127,7 @@ const QuickFixUser = () => {
   const handleChange = (e) => {
     setCustomLocation(e.target.value);
     if (customLocation.length > 5) {
-      mapboxClient.geocoding.forwardGeocode({
+      geocodingService.forwardGeocode({
         query: customLocation,
       })
         .send()
@@ -184,7 +188,7 @@ const QuickFixUser = () => {
   }
 
   // using jobDetails rather than something like isSuccess because a failed fetch, even after we have data set, seems to cause isSuccess to revert to false
-  if (jobDetails) return <UserConfirmation socket={socket} />
+  if (jobDetails || finalizing || fixerCancelled) return <UserConfirmation socket={socket} finalizing={finalizing} cancellation={fixerCancelled} />
 
   return (
     <>
@@ -197,7 +201,7 @@ const QuickFixUser = () => {
         mapStyle='mapbox://styles/mapbox/streets-v12'
         mapboxAccessToken={MAPBOX_TOKEN}
       >
-        {(validCustomLocation && searching) && <Marker longitude={validCustomLocation[0]} latitude={validCustomLocation[1]} anchor='bottom' />}
+        {(validCustomLocation && searching) && <Marker longitude={validCustomLocation[0]} latitude={validCustomLocation[1]} />}
       </Map>
       {!requesting ? ( 
         <div className='sidebar'>

@@ -10,9 +10,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { useQueryClient } from '@tanstack/react-query';
 import FixerConfirmation from './FixerConfirmation';
+import mbxGeocoding from '@mapbox/mapbox-sdk/services/geocoding';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
-const mapboxClient = mapboxSdk({ accessToken: MAPBOX_TOKEN });
+const geocodingService = mbxGeocoding({ accessToken: MAPBOX_TOKEN });
 const PROFILE_URL = '/fixers/profile';
 const FIND_WORK_URL = '/fixers/work/find';
 const CURRENT_URL = '/fixers/work/current';
@@ -43,6 +44,8 @@ const QuickFix = () => {
   });
   const [retryAttempts, setRetryAttempts] = useState(2);
   const [retry, setRetry] = useState(false);
+  const [finalizing, setFinalizing] = useState(false);
+  const [userCancelled, setUserCancelled] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   
@@ -72,6 +75,11 @@ const QuickFix = () => {
     });
 
     socket.on('job update', (jobDetails) => {
+      if (jobDetails.currentStatus === 'cancelled') {
+        setUserCancelled(true);
+        queryClient.removeQueries({ queryKey: ['request'], exact: true });
+        return;
+      }
       queryClient.setQueryData(['request'], oldData => {
         return {
           ...oldData,
@@ -108,7 +116,7 @@ const QuickFix = () => {
   const handleChange = (e) => {
     setCustomLocation(e.target.value);
     if (customLocation.length > 5) {
-      mapboxClient.geocoding.forwardGeocode({
+      geocodingService.forwardGeocode({
         query: customLocation,
       })
         .send()
@@ -197,7 +205,7 @@ const QuickFix = () => {
   }
 
   // using jobDetails rather than something like isSuccess because a failed fetch, even after we have data set, seems to cause isSuccess to revert to false
-  if (jobDetails) return <FixerConfirmation socket={socket} />;
+  if (jobDetails || finalizing || userCancelled) return <FixerConfirmation socket={socket} finalizing={{ finalizing, setFinalizing }} cancellation={userCancelled} />;
 
   return (
     <>
@@ -210,8 +218,8 @@ const QuickFix = () => {
         mapStyle='mapbox://styles/mapbox/streets-v12'
         mapboxAccessToken={MAPBOX_TOKEN}
       >
-        {(currentLocation && searching) && <Marker longitude={currentLocation[0]} latitude={currentLocation[1]} anchor='bottom' />}
-        {(validCustomLocation && searching) && <Marker longitude={validCustomLocation[0]} latitude={validCustomLocation[1]} anchor='bottom' />}
+        {(currentLocation && searching) && <Marker longitude={currentLocation[0]} latitude={currentLocation[1]} />}
+        {(validCustomLocation && searching) && <Marker longitude={validCustomLocation[0]} latitude={validCustomLocation[1]} />}
       </Map>
       {!searching ? ( 
         <div className='sidebar'>
