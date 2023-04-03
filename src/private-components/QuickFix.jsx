@@ -4,7 +4,7 @@ import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks
 import useAuth from '../hooks/useAuth';
 import useRefreshToken from '../hooks/useRefreshToken';
 import Map, { Marker } from 'react-map-gl';
-import { faSpinnerThird } from '@fortawesome/free-solid-svg-icons';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
@@ -271,7 +271,7 @@ const QuickFix = () => {
               <p ref={errRef} aria-live='assertive'>{errMsg}</p>
             )}
           </div>     
-          <FontAwesomeIcon icon={faSpinnerThird} />
+          <FontAwesomeIcon icon={faSpinner} />
           <h2>Searching for work near you...</h2>
           <button type='button' onClick={handleCancel}>Cancel</button>
         </div>

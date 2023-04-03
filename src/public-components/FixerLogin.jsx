@@ -7,10 +7,6 @@ import axios from '../api/axios';
 
 const LOGIN_URL = '/fixer/auth';
 
-// use React Router Form component
-// useNavigation for optimistic ui?
-// set usertype in local storage
-
 const FixerLogin = () => {
   const { setAuth } = useAuth();
 
@@ -25,7 +21,7 @@ const FixerLogin = () => {
   const [pwd, setPwd] = useState('');
   const [errMsg, setErrMsg] = useState('');
   const [check, toggleCheck] = useToggle('persist', false);
-  localStorage.setItem('userType', 'fixer');
+  localStorage.setItem('userType', JSON.stringify('fixer'));
 
   useEffect(() => {
     userRef.current.focus();

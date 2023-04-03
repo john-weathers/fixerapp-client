@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks';
 import Map, { Marker } from 'react-map-gl';
 import UserConfirmation from './UserConfirmation';
-import { faSpinnerThird } from '@fortawesome/free-solid-svg-icons';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
@@ -247,7 +247,7 @@ const QuickFixUser = () => {
               <p ref={errRef} aria-live='assertive'>{errMsg}</p>
             )}
           </div>     
-          <FontAwesomeIcon icon={faSpinnerThird} spin />
+          <FontAwesomeIcon icon={faSpinner} spin />
           <h2>Submitting request...</h2>
           <button type='button' onClick={handleCancel}>Cancel</button>
         </div>
@@ -262,7 +262,7 @@ const QuickFixUser = () => {
               <p ref={errRef} aria-live='assertive'>{errMsg}</p>
             )}
           </div>     
-          <FontAwesomeIcon icon={faSpinnerThird} spin />
+          <FontAwesomeIcon icon={faSpinner} spin />
           <h2>Searching for fixer near you...</h2>
           <button type='button' onClick={handleCancel}>Cancel</button>
         </div>

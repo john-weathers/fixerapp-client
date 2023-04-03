@@ -23,12 +23,14 @@ import UserIndex from './private-components/UserIndex';
 import QuickFixUser from './private-components/QuickFixUser';
 import Proposals from './private-components/Proposals';
 import UserSchedule from './private-components/UserSchedule';
+import UserProfile from './private-components/UserProfile';
 import UserSettings from './private-components/UserSettings';
 import FixerHome from './private-components/FixerHome';
 import FixerIndex from './private-components/FixerIndex';
 import QuickFix from './private-components/QuickFix';
 import Bid from './private-components/Bid';
 import FixerSchedule from './private-components/FixerSchedule';
+import FixerProfile from './private-components/FixerProfile';
 import FixerSettings from './private-components/FixerSettings';
 
 export const queryClient = new QueryClient({
@@ -65,6 +67,8 @@ export const router = createBrowserRouter(
             <Route path='quick-fix' element={<QuickFixUser />} /*loader action={appLoader}*/ />
             <Route path='proposals' element={<Proposals />} />
             <Route path='schedule' element={<UserSchedule />} />
+            <Route path='profile' element={<UserProfile />}/>
+            <Route path='settings' element={<UserSettings />}/>
             {
             /*<Route path='planning-tool' loader action />
             <Route path='settings' element={<UserSettings loader action />}/>*/
@@ -78,6 +82,8 @@ export const router = createBrowserRouter(
             <Route path='quick-fix' element={<QuickFix />} />
             <Route path='bid' element={<Bid />}/>
             <Route path='schedule' element={<FixerSchedule />}/>
+            <Route path='profile' element={<FixerProfile />}/>
+            <Route path='settings' element={<UserSettings />}/>
             {
             /*<Route path='schedule' loader action />
             <Route path='settings' element={<FixerSettings />} loader action />*/

@@ -2,8 +2,10 @@ import { NavLink, Outlet } from "react-router-dom"
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import HoverNav from './HoverNav';
+import useLogout from "../hooks/useLogout";
 
 const PrivateNavBar = ({ navOptions }) => {
+    // const logout = useLogout();
 
   return (
     <nav>
