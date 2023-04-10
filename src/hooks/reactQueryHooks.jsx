@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
+import axios from '../api/axios';
 
-const profileQuery = (axios, url) => ({
+export const profileQuery = (axios, url) => ({
   queryKey: ['profile'],
   queryFn: async () => {
     const  { data } = await axios.get(url);
@@ -65,4 +66,24 @@ const requestQuery = (axios, url) => ({
 
 export const useRequest = (axios, url) => {
   return useQuery(requestQuery(axios, url));
+}
+
+const refreshQuery = (auth, persist, refresh) => ({
+  queryKey: ['refresh'],
+  queryFn: async () => {
+    if (!auth?.accessToken && persist) {
+      const accessToken = await refresh();
+      return accessToken;
+    } else if (auth?.accessToken) {
+      return auth.accessToken;
+    } else {
+      return null;
+    }
+  },
+  retry: 0, // current setup seems to be functioning properly but might think about amending this to 1 or 2 if helpful
+  staleTime: 0,
+})
+
+export const useRefresh = (auth, persist, refresh, queryClient) => {
+  return useQuery(refreshQuery(auth, persist, refresh));
 }

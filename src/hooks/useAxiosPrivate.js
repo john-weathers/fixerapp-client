@@ -1,10 +1,12 @@
 import { axiosPrivate } from "../api/axios";
 import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import useRefreshToken from "./useRefreshToken";
 import useAuth from "./useAuth";
 
 const useAxiosPrivate = () => {
     const refresh = useRefreshToken();
+    const queryClient = useQueryClient();
     const { auth } = useAuth();
 
     useEffect(() => {
@@ -23,6 +25,7 @@ const useAxiosPrivate = () => {
             async (error) => {
                 const prevRequest = error?.config;
                 if (error?.response?.status === 403 && !prevRequest?.sent) {
+                    console.log('interceptor firing');
                     prevRequest.sent = true;
                     const newAccessToken = await refresh();
                     prevRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;

@@ -1,9 +1,11 @@
 import axios from '../api/axios';
 import useAuth from './useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 import useLocalStorage from './useLocalStorage';
 
 const useRefreshToken = () => {
-    const { setAuth } = useAuth();
+    const { auth, setAuth } = useAuth();
+    const queryClient = useQueryClient();
     const [userType] = useLocalStorage('userType', null);
     let refreshURL;
 
@@ -19,6 +21,7 @@ const useRefreshToken = () => {
         const response = await axios.get(refreshURL, {
             withCredentials: true
         });
+        console.log(response);
         setAuth(prev => {
             console.log(JSON.stringify(prev));
             console.log(response.data.accessToken);
@@ -27,7 +30,9 @@ const useRefreshToken = () => {
                 accessToken: response.data.accessToken
             }
         });
+        if (response.data?.doubleRefresh) console.log('double refresh occurred');
         return response.data.accessToken;
+        
     }
     return refresh;
 };
