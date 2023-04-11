@@ -126,6 +126,14 @@ nav ul li {
   display: flex;
 }
 
+#logout {
+  text-decoration: underline;
+}
+
+#logout:hover {
+  cursor: pointer;
+}
+
 /* Error page - basic, revisit */
 #error-page {
   display: flex;

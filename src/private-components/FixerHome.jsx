@@ -18,6 +18,7 @@ const FixerHome = () => {
   return (
     <div>
       <PrivateNavBar navOptions={{
+        homeUrl: '/fixers',
         leftUrl: 'quick-fix',
         leftTitle: data ? 'Active Job' : 'Quick Fix',
         midUrl: 'bid',

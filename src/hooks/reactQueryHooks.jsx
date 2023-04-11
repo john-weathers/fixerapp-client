@@ -61,7 +61,7 @@ const requestQuery = (axios, url) => ({
     return data;
   },
   staleTime: 0, // NOTE: keep on eye on staleTime and adjust if needed
-  retry: 1,
+  retry: 0,
 });
 
 export const useRequest = (axios, url) => {

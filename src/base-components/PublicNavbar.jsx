@@ -1,5 +1,7 @@
 import { NavLink, Outlet } from "react-router-dom"
 import HoverNav from './HoverNav';
+import { faHouse } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const NavBar = () => {
 
@@ -7,7 +9,9 @@ const NavBar = () => {
     <nav>
         <ul>
             <li>
-                <NavLink to='/welcome'>Welcome</NavLink>
+                <NavLink to='/'>
+                    <FontAwesomeIcon icon={faHouse} id='home-public'/>
+                </NavLink>
             </li>
             <li>
                 <NavLink to='/get-started'>Get Started</NavLink>

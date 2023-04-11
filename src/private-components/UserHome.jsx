@@ -23,6 +23,7 @@ const UserHome = () => {
   return (
     <div>
       <PrivateNavBar navOptions={{
+        homeUrl: '/',
         leftUrl: 'quick-fix',
         leftTitle: data ? 'Active Job' : 'Quick Fix',
         midUrl: 'proposals',
