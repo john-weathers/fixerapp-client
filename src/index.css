@@ -126,12 +126,30 @@ nav ul li {
   display: flex;
 }
 
+/* Nav */
+
 #logout {
   text-decoration: underline;
 }
 
 #logout:hover {
   cursor: pointer;
+}
+
+/* Quick Fix */
+
+.offscreen {
+  display: none;
+}
+
+.sidebar {
+  position: absolute;
+  width: 20%;
+  top: 92px; /* temporary fix...this needs to somehow be positioned in relation to the nav bar */ 
+  height: 80vh;
+  padding: 20px;
+  border-right: 10px solid whitesmoke;
+  background-color: white;
 }
 
 /* Error page - basic, revisit */

@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { faCheck, faTimes, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import NavBar from '../base-components/PublicNavbar';
 import axios from '../api/axios';
 import { Link } from 'react-router-dom';
 
@@ -132,6 +133,7 @@ const UserRegistration = () => {
         </section>
       ) : (
         <section id='registration'>
+          <NavBar />
           <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
           <h1>User Registration</h1>
           <form onSubmit={handleSubmit}>

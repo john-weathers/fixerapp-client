@@ -10,7 +10,7 @@ const RequireAuthRoot = ({ userRoles, fixerRoles }) => {
         ? jwt_decode(auth.accessToken)
         : undefined
 
-    const roles = decoded?.userInfo?.roles || []
+    const roles = decoded?.userInfo?.roles || [];
 
     return (
         roles.find(role => userRoles?.includes(role))

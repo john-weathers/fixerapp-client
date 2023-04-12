@@ -6,11 +6,13 @@ import useAuth from '../hooks/useAuth';
 import useLocalStorage from "../hooks/useLocalStorage";
 
 const PersistLogin = () => {
-    const { auth } = useAuth();
+    const { auth, setAuth } = useAuth();
     // const [isLoading, setIsLoading] = useState(true);
     const refresh = useRefreshToken();
     const [persist] = useLocalStorage('persist', false);
-    const { isLoading } = useRefresh(auth, persist, refresh);
+    // probably would prefer useEffect along with some type of middleware to catch multiple successive refresh calls
+    // but using useQuery in this situation for now in development to limit the refresh calls
+    const { isLoading } = useRefresh(auth, persist, refresh, setAuth);
 
     /*useEffect(() => {
         let isMounted = true;

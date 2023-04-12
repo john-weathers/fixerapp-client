@@ -1,19 +1,18 @@
 import { useRef, useState, useEffect } from 'react';
 import useAuth from '../hooks/useAuth';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import useInput from '../hooks/useInput';
 import useToggle from '../hooks/useToggle';
+import NavBar from '../base-components/PublicNavbar';
 import axios from '../api/axios';
 
 const LOGIN_URL = '/fixer/auth';
 
 const FixerLogin = () => {
-  const { setAuth } = useAuth();
+  const { auth, setAuth } = useAuth();
 
-  const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/';
-
+  const from = location.state?.from?.pathname || '/fixers';
   const userRef = useRef();
   const errRef = useRef();
 
@@ -21,6 +20,7 @@ const FixerLogin = () => {
   const [pwd, setPwd] = useState('');
   const [errMsg, setErrMsg] = useState('');
   const [check, toggleCheck] = useToggle('persist', false);
+  const [loading, setLoading] = useState(false);
   localStorage.setItem('userType', JSON.stringify('fixer'));
 
   useEffect(() => {
@@ -44,9 +44,7 @@ const FixerLogin = () => {
         const accessToken = response?.data?.accessToken;
         
         setAuth({ email, accessToken });
-        resetEmail();
-        setPwd('');
-        navigate(from, { replace: true });
+        setLoading(true);
     } catch (err) {
         if (!err?.response) {
             setErrMsg('No Server Response');
@@ -61,48 +59,59 @@ const FixerLogin = () => {
     }
 }
 
-  return (
-    <div id='login'>
-      <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
-      <h1>Fixer Sign In</h1>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor='useremail'>Email Address:</label>
-        <input
-          type='text'
-          id='useremail'
-          ref={userRef}
-          autoComplete='off'
-          {...emailAttribs}
-          required
-        />
+  if (auth?.accessToken) return <Navigate to={from} replace={true} />
 
-        <label htmlFor='password'>Password:</label>
-        <input
-          type='password'
-          id='password'
-          onChange={(e) => setPwd(e.target.value)}
-          value={pwd}
-          required
-        />
-        <button>Sign In</button>
-        <p>Trust this device?</p>
-        <div className='persistCheck'>
+  if (loading) return <p>Loading...</p>
+
+  return (
+    <>
+      {!auth?.accessToken ? (
+      <div id='login'>
+        <NavBar />
+        <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
+        <h1>Fixer Sign In</h1>
+        <form onSubmit={handleSubmit}>
+          <label htmlFor='useremail'>Email Address:</label>
           <input
-            type='checkbox'
-            id='persist'
-            onChange={toggleCheck}
-            checked={check}
+            type='text'
+            id='useremail'
+            ref={userRef}
+            autoComplete='off'
+            {...emailAttribs}
+            required
           />
-          <label htmlFor='persist'>Click to stay logged in</label>
-        </div>
-      </form>
-      <p>
-          Need an Account?<br />
-          <span className='needAccount'>
-            <Link to='/fixer-registration'>Sign Up</Link>
-          </span>
-      </p>
-    </div>
+
+          <label htmlFor='password'>Password:</label>
+          <input
+            type='password'
+            id='password'
+            onChange={(e) => setPwd(e.target.value)}
+            value={pwd}
+            required
+          />
+          <button>Sign In</button>
+          <p>Trust this device?</p>
+          <div className='persistCheck'>
+            <input
+              type='checkbox'
+              id='persist'
+              onChange={toggleCheck}
+              checked={check}
+            />
+            <label htmlFor='persist'>Click to stay logged in</label>
+          </div>
+        </form>
+        <p>
+            Need an Account?<br />
+            <span className='needAccount'>
+              <Link to='/fixer-registration'>Sign Up</Link>
+            </span>
+        </p>
+      </div>
+    ) : (
+      <Navigate to={from} replace={true} />
+    )}
+  </>
   )
 }
 

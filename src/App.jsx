@@ -83,7 +83,7 @@ export const router = createBrowserRouter(
             <Route path='bid' element={<Bid />}/>
             <Route path='schedule' element={<FixerSchedule />}/>
             <Route path='profile' element={<FixerProfile />}/>
-            <Route path='settings' element={<UserSettings />}/>
+            <Route path='settings' element={<FixerSettings />}/>
             {
             /*<Route path='schedule' loader action />
             <Route path='settings' element={<FixerSettings />} loader action />*/

@@ -102,6 +102,7 @@ const QuickFixUser = () => {
 
     return () => {
       socket.removeAllListeners();
+      socket.disconnect();
     }
   }, []);
 
@@ -136,6 +137,8 @@ const QuickFixUser = () => {
           setValidCustomLocation(result.features[0]?.geometry?.coordinates);
           setQueryResponse(result.features);
         });
+    } else {
+      setQueryResponse([]);
     }
   }
 
@@ -197,7 +200,7 @@ const QuickFixUser = () => {
         minZoom='11.5'
         maxZoom='19.5'
         onMove={e => setViewState(e.viewState)}
-        style={{width: '100vw', height: '100vh'}}
+        style={{width: '100vw', height: '80vh'}}
         mapStyle='mapbox://styles/mapbox/streets-v12'
         mapboxAccessToken={MAPBOX_TOKEN}
       >
@@ -224,7 +227,7 @@ const QuickFixUser = () => {
               placeholder='Enter property address' 
               onChange={handleChange} 
             />
-            {queryResponse.length && (
+            {queryResponse && (
               <ul>
               {queryResponse.map((feature) => <li key={feature.id} onClick={() => {
                 setCustomLocation(feature.place_name);
@@ -233,7 +236,7 @@ const QuickFixUser = () => {
               }}>{feature.place_name}</li>)}
               </ul>
             )}
-            <button type='submit' disabled={validCustomLocation.length ? false : true} >Find Fixer</button>
+            <button type='submit' disabled={validCustomLocation?.length ? false : true} >Find Fixer</button>
           </form>
         </div>
       ) : requesting && !searching ? (

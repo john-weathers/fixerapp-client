@@ -1,9 +1,11 @@
 import axios from "../api/axios";
 import useAuth from "./useAuth";
 import useLocalStorage from "./useLocalStorage";
+import { useQueryClient } from "@tanstack/react-query";
 
 const useLogout = () => {
   const { setAuth } = useAuth();
+  const queryClient = useQueryClient();
   const [userType] = useLocalStorage('userType', null);
   let logoutURL;
 
@@ -14,6 +16,8 @@ const useLogout = () => {
   }
 
   const logout = async () => {
+    queryClient.removeQueries(['profile']);
+    queryClient.removeQueries(['request']);
     setAuth({});
     try { 
       const response = await axios.get(logoutURL, {

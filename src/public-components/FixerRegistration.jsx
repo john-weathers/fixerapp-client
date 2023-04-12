@@ -3,6 +3,7 @@ import { faCheck, faTimes, faInfoCircle } from '@fortawesome/free-solid-svg-icon
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import axios from '../api/axios';
 import { Link } from 'react-router-dom';
+import NavBar from '../base-components/PublicNavbar';
 
 const EMAIL_REGEX = /^.{1,64}@.{1,255}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
@@ -132,6 +133,7 @@ const FixerRegistration = () => {
         </section>
       ) : (
         <section id='registration'>
+          <NavBar />
           <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
           <h1>Fixer Registration</h1>
           <form onSubmit={handleSubmit}>

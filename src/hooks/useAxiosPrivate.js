@@ -1,13 +1,13 @@
 import { axiosPrivate } from "../api/axios";
 import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import useLocalStorage from "./useLocalStorage";
 import useRefreshToken from "./useRefreshToken";
 import useAuth from "./useAuth";
 
 const useAxiosPrivate = () => {
     const refresh = useRefreshToken();
-    const queryClient = useQueryClient();
     const { auth } = useAuth();
+    const [persist] = useLocalStorage('persist', false);
 
     useEffect(() => {
 
@@ -24,7 +24,7 @@ const useAxiosPrivate = () => {
             response => response,
             async (error) => {
                 const prevRequest = error?.config;
-                if (error?.response?.status === 403 && !prevRequest?.sent) {
+                if (error?.response?.status === 403 && !prevRequest?.sent && persist) {
                     console.log('interceptor firing');
                     prevRequest.sent = true;
                     const newAccessToken = await refresh();
