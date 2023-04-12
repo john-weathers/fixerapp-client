@@ -15,6 +15,9 @@ const useRefreshToken = () => {
         refreshURL = '/user/refresh';
     }
 
+    // below is part of a temporary fix to the problem of multiple rapid successive refreshes
+    // long-term solution could be a middleware type implementation that ultimately causes only one http request to go out for each batch of refreshes
+    // the other attempted refresh calls turn into promises that are resolved or rejected with the single http response
     const refresh = async () => {
         const response = await axios.get(refreshURL, {
             withCredentials: true
