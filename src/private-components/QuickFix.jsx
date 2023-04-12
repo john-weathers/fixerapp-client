@@ -19,6 +19,8 @@ const FIND_WORK_URL = '/fixers/work/find';
 const CURRENT_URL = '/fixers/work/current';
 let socket;
 
+// NOTE: See QuickFixUser for some bug fixes to add here
+
 const QuickFix = () => {
   const axiosPrivate = useAxiosPrivate();
   const { auth } = useAuth();
