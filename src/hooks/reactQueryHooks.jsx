@@ -72,7 +72,7 @@ const refreshQuery = (auth, persist, refresh, setAuth) => ({
   queryKey: ['refresh'],
   queryFn: async () => {
     if (!auth?.accessToken && persist) {
-      const accessToken = await refresh();
+      await refresh();
       return 'token available';
     } else if (auth?.accessToken && !persist) {
       const decoded = jwt_decode(auth.accessToken);
