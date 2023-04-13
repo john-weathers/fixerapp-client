@@ -17,10 +17,16 @@ const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
 const geocodingService = mbxGeocoding({ accessToken: MAPBOX_TOKEN });
 const PROFILE_URL = '/users/profile';
 const CURRENT_URL = '/users/request/current';
+let retryAttempts = 2;
+let retry = false;
 let socket;
+
+// TODO: add re-join logic to re-join the room in the event of a disconnect mid-job (socket.io)
+// could simply be state that will indicate if a rejoin necessary, set to true once room is joined
 
 const QuickFixUser = () => {
   const axiosPrivate = useAxiosPrivate();
+  const queryClient = useQueryClient();
   const { auth } = useAuth();
   const refresh = useRefreshToken();
   const { isLoading: profileLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
@@ -35,16 +41,27 @@ const QuickFixUser = () => {
   const [requesting, setRequesting] = useState(false);
   const [searching, setSearching] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
-  const [viewState, setViewState] = useState({
-    longitude: -122.4194,
-    latitude: 37.7749,
-    zoom: 12,
+  const [viewState, setViewState] = useState(() => {
+    const data = queryClient.getQueryData({ queryKey: ['location', 'current'] });
+    if (data) {
+      return {
+        longitude: data.longitude,
+        latitude: data.latitude,
+        zoom: 12,
+      }
+    } else {
+      return {
+        longitude: -122.4194,
+        latitude: 37.7749,
+        zoom: 12,
+      }
+    }
   });
   const [count, setCount] = useState(0);
   const [firstUpdate, setFirstUpdate] = useState(true);
   const [finalizing, setFinalizing] = useState(false);
   const [fixerCancelled, setFixerCancelled] = useState(false);
-  const queryClient = useQueryClient();
+  const [roomJoined, setRoomJoined] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -80,7 +97,7 @@ const QuickFixUser = () => {
         setFirstUpdate(false);
       } else {
         if (jobDetails.currentStatus === 'cancelled') {
-          setUserCancelled(true);
+          setFixerCancelled(true);
           queryClient.removeQueries({ queryKey: ['request'], exact: true });
           return;
         }
@@ -107,12 +124,40 @@ const QuickFixUser = () => {
   }, []);
 
   useEffect(() => {
-    if (geolocationResult.isSuccess && geolocationResult?.data?.longitude) setViewState(prev => ({
-      ...prev,
-      longitude: geolocationResult.data.longitude,
-      latitude: geolocationResult.data.latitude,
-    }));
+    console.log('effect hook firing');
+    if (geolocationResult.isSuccess && geolocationResult?.data?.longitude && geolocationResult?.data?.longitude !== viewState.longitude) {
+      setViewState(prev => ({
+        ...prev,
+        longitude: geolocationResult.data.longitude,
+        latitude: geolocationResult.data.latitude,
+      }));
+    }
   }, [geolocationResult.isSuccess]) // should not have a problem here with an unwanted firing of useEffect after initial isSuccess === true, but keep an eye on in testing
+
+  useEffect(() => {
+    if (jobDetails?.jobId && !roomJoined) {
+      while (retryAttempts) {
+        socket.emit('current job', { 
+          jobId: jobDetails.jobId
+         }, async (response) => {
+          if (response?.status === 'OK') {
+            setRoomJoined(true);
+            retry = false;
+          } else {
+            retryAttempts -= 1;
+            retry = true;
+          }
+         });
+        if (retry) {
+          continue;
+        } else {
+          break;
+        }
+      }
+      retry = false;
+      retryAttempts = 2;
+    }
+  }, [jobDetails?.jobId]);
 
   useEffect(() => {
     if (count >= 4) {
@@ -145,7 +190,7 @@ const QuickFixUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setRequesting(true);
-    if (!validCustomLocation.length || !customLocation) {
+    if (!validCustomLocation?.length || !customLocation) {
       setRequesting(false);
       setErrMsg('Missing location data');
       errRef.current.focus();
@@ -161,9 +206,10 @@ const QuickFixUser = () => {
       location: validCustomLocation,
       address: customLocation,
      }, (response) => {
-      if (response.status === 'Created') {
+      if (response?.status === 'Created') {
         setSearching(true);
-      } else if (response.status === 'Missing location data') {
+        setRoomJoined(true);
+      } else if (response?.status === 'Missing location data') {
         setRequesting(false);
         clearInterval(intervalId);
         setErrMsg(response.status);
@@ -193,6 +239,7 @@ const QuickFixUser = () => {
   // using jobDetails rather than something like isSuccess because a failed fetch, even after we have data set, seems to cause isSuccess to revert to false
   if (jobDetails || finalizing || fixerCancelled) return <UserConfirmation socket={socket} finalizing={finalizing} cancellation={fixerCancelled} />
 
+  // TODO: move Mapbox logo to different area?
   return (
     <>
       <Map
@@ -232,6 +279,13 @@ const QuickFixUser = () => {
               {queryResponse.map((feature) => <li key={feature.id} onClick={() => {
                 setCustomLocation(feature.place_name);
                 setValidCustomLocation(feature.geometry.coordinates);
+                setViewState(prev => {
+                  return {
+                    ...prev,
+                    longitude: feature.geometry.coordinates[0],
+                    latitude: feature.geometry.coordinates[1],
+                  }
+                });
                 setQueryResponse([]);
               }}>{feature.place_name}</li>)}
               </ul>

@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useProfile, useRequest, useGeolocation, geolocationQuery } from '../hooks/reactQueryHooks';
 import useAuth from '../hooks/useAuth';
 import useRefreshToken from '../hooks/useRefreshToken';
+import io from 'socket.io-client';
 import Map, { Marker } from 'react-map-gl';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
@@ -17,21 +18,29 @@ const geocodingService = mbxGeocoding({ accessToken: MAPBOX_TOKEN });
 const PROFILE_URL = '/fixers/profile';
 const FIND_WORK_URL = '/fixers/work/find';
 const CURRENT_URL = '/fixers/work/current';
+let retryAttempts = 2;
+let retry = false;
 let socket;
-
-// NOTE: See QuickFixUser for some bug fixes to add here
 
 const QuickFix = () => {
   const axiosPrivate = useAxiosPrivate();
+  const queryClient = useQueryClient();
+  const geolocationResult = useGeolocation(); 
   const { auth } = useAuth();
   const refresh = useRefreshToken();
   const { isLoading: profileLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
   const { data: jobDetails } = useRequest(axiosPrivate, CURRENT_URL);
-  const geolocationResult = useGeolocation();
-  const [currentLocation, setCurrentLocation] = useState(geolocationResult?.data?.longitude 
-    ? [geolocationResult?.data?.longitude, geolocationResult?.data?.latitude] : null);
+  const [currentLocation, setCurrentLocation] = useState(() => {
+    const data = queryClient.getQueryData({ queryKey: ['location', 'current'] });
+    if (data) {
+      return [data.longitude, data.latitude];
+    } else {
+      return null;
+    }
+  });
   const errRef = useRef();
   const [errMsg, setErrMsg] = useState('');
+  const [isConnected, setIsConnected] = useState(false);
   const [customLocation, setCustomLocation] = useState('');
   const [queryResponse, setQueryResponse] = useState([]);
   const [validCustomLocation, setValidCustomLocation] = useState(null);
@@ -39,17 +48,26 @@ const QuickFix = () => {
   const [searching, setSearching] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
   const [count, setCount] = useState(0);
-  const [viewState, setViewState] = useState({
-    longitude: geolocationResult?.data?.longitude || -122.4194,
-    latitude: geolocationResult?.data?.latitude || 37.7749,
-    zoom: 12,
+  const [viewState, setViewState] = useState(() => {
+    if (currentLocation?.length) {
+      return {
+        longitude: currentLocation[0],
+        latitude: currentLocation[1],
+        zoom: 12,
+      }
+    } else {
+      return {
+        longitude: -122.4194,
+        latitude: 37.7749,
+        zoom: 12,
+      }
+    }
   });
-  const [retryAttempts, setRetryAttempts] = useState(2);
-  const [retry, setRetry] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
   const [userCancelled, setUserCancelled] = useState(false);
-  const queryClient = useQueryClient();
+  const [roomJoined, setRoomJoined] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   
   useEffect(() => {
     socket = io('http://localhost:8000/fixer', {
@@ -96,17 +114,63 @@ const QuickFix = () => {
 
     return () => {
       socket.removeAllListeners();
+      socket.disconnect();
     }
   }, []);
 
+  useEffect(() => {
+    console.log('effect hook firing');
+    if (geolocationResult.isSuccess && geolocationResult?.data?.longitude && geolocationResult?.data?.longitude !== viewState.longitude) {
+      setViewState(prev => ({
+        ...prev,
+        longitude: geolocationResult.data.longitude,
+        latitude: geolocationResult.data.latitude,
+      }));
+    }
+  }, [geolocationResult.isSuccess]);
+
+  useEffect(() => {
+    if (jobDetails?.jobId && !roomJoined) {
+      while (retryAttempts) {
+        socket.emit('current job', { 
+          jobId: jobDetails.jobId
+         }, async (response) => {
+          if (response?.status === 'OK') {
+            setRoomJoined(true);
+            retry = false;
+          } else {
+            retryAttempts -= 1;
+            retry = true;
+          }
+         });
+        if (retry) {
+          continue;
+        } else {
+          break;
+        }
+      }
+      retry = false;
+      retryAttempts = 2;
+    }
+  }, [jobDetails?.jobId]);
+
   const handleCurrentClick = async () => {
     setToggleLocation(false);
-    await queryClient.refetchQueries({ queryKey: ['location', 'current'] });
-    setCurrentLocation(geolocationResult?.data?.longitude 
-      ? [geolocationResult?.data?.longitude, geolocationResult?.data?.latitude] : null);
-    if (currentLocation === null) {
-      setErrMsg(['Problem getting current location', 'Try again or use custom location'])
-      errRef.current.focus();
+    try {
+      const data = await queryClient.fetchQuery(geolocationQuery);
+      console.log(data);
+      if (data) {
+        setCurrentLocation([data.longitude, data.latitude]);
+        setViewState(prev => ({
+          ...prev,
+          longitude: data.longitude,
+          latitude: data.latitude,
+        }));
+      } else {
+        setErrMsg('Could not get location data');
+      }
+    } catch (err) {
+      console.log(err);
     }
   }
 
@@ -134,8 +198,9 @@ const QuickFix = () => {
     e.preventDefault();
     setSearching(true);
     const coordinates = currentLocation || validCustomLocation;
-    if (!coordinates.length) {
+    if (!coordinates?.length) {
       setErrMsg('Missing location data');
+      setSearching(false);
       return;
     }
     clearInterval(intervalId);
@@ -144,23 +209,32 @@ const QuickFix = () => {
       const searchResponse = await axiosPrivate.post(FIND_WORK_URL, {
         location: coordinates,
       });
+      setRoomJoined(true);
       queryClient.setQueryData(['request'], searchResponse.data);
       while (retryAttempts) {
-        socket.emit('work found', (response) => {
-          if (response.status === 'NOK') {
-            setRetryAttempts(prev => prev - 1);
-            setRetry(true);
+        socket.emit('work found', async (response) => {
+          if (response?.status === 'NOK') {
+            retryAttempts -= 1;
+            if (!retryAttempts) setRoomJoined(false);
+            retry = true;
           } else {
-            setRetry(false);
+            retry = false;
           }
         });
         if (retry) {
           continue;
         } else {
+          retryAttempts = 2;
+          retry = false;
           return;
         }
       }
     } catch (err) {
+      if (err?.response?.status === 400) {
+        setErrMsg('Missing location data');
+        setSearching(false);
+        return;
+      }
       setCount(prev => prev + 1);
     }
     const interval = setInterval(async () => {
@@ -168,14 +242,16 @@ const QuickFix = () => {
         const searchResponse = await axiosPrivate.post(FIND_WORK_URL, {
           location: coordinates,
         });
+        setRoomJoined(true);
         queryClient.setQueryData(['request'], searchResponse.data);
         while (retryAttempts) {
-          socket.emit('work found', (response) => {
-            if (response.status === 'NOK') {
-              setRetryAttempts(prev => prev - 1);
-              setRetry(true);
+          socket.emit('work found', async (response) => {
+            if (response?.status === 'NOK') {
+              retryAttempts -= 1;
+              if (!retryAttempts) setRoomJoined(false);
+              retry = true;
             } else {
-              setRetry(false);
+              retry = false;
             }
           });
           if (retry) {
@@ -186,10 +262,12 @@ const QuickFix = () => {
         }
         clearInterval(intervalId);
         setIntervalId(null);
+        retryAttempts = 2;
+        retry = false;
       } catch (err) {
         setCount(prev => prev + 1);
         if (count > 15) {
-          setErrMsg(['No fixers in your area at this time', 'Continuing to search for a match']);
+          setErrMsg(['No jobs in your area at this time', 'Continuing to search for a match']);
         }
       }
     }, 4000);
@@ -201,6 +279,8 @@ const QuickFix = () => {
     setCount(0);
     clearInterval(intervalId);
     setIntervalId(null);
+    retryAttempts = 2;
+    retry = false;
     setCustomLocation('');
     setCurrentLocation(null);
     setValidCustomLocation(null);
@@ -216,7 +296,7 @@ const QuickFix = () => {
         minZoom='11.5'
         maxZoom='19.5'
         onMove={e => setViewState(e.viewState)}
-        style={{width: '100vw', height: '100vh'}}
+        style={{width: '100vw', height: '80vh'}}
         mapStyle='mapbox://styles/mapbox/streets-v12'
         mapboxAccessToken={MAPBOX_TOKEN}
       >
@@ -237,10 +317,10 @@ const QuickFix = () => {
             )}
           </div>          
           <form autoComplete='off' onSubmit={handleSubmit}>
+            <input id='choosecurrent' type='radio' name='location' onClick={handleCurrentClick} defaultChecked={currentLocation?.length ? true : false}/>
             <label htmlFor='choosecurrent'>Current location</label>
-            <input id='choosecurrent' type='radio' name='location' onClick={handleCurrentClick} checked={currentLocation ? true : false}/>
-            <label htmlFor='choosecustom'>Custom location</label>
             <input id='choosecustom' type='radio' name='location' onClick={handleCustomClick} />
+            <label htmlFor='choosecustom'>Custom location</label>
             <div id='querycontainer' className={toggleLocation ? 'show' : 'hide'}>
               <input 
                 id='customlocation' 
@@ -249,17 +329,24 @@ const QuickFix = () => {
                 placeholder='Address' 
                 onChange={handleChange} 
               />
-              {queryResponse.length && (
+              {queryResponse && (
                 <ul>
                 {queryResponse.map((feature) => <li key={feature.id} onClick={() => {
                   setCustomLocation(feature.place_name);
                   setValidCustomLocation(feature.geometry.coordinates);
+                  setViewState(prev => {
+                    return {
+                      ...prev,
+                      longitude: feature.geometry.coordinates[0],
+                      latitude: feature.geometry.coordinates[1],
+                    }
+                  });
                   setQueryResponse([]);
                 }}>{feature.place_name}</li>)}
                 </ul>
               )}
             </div>
-            <button type='submit' disabled={currentLocation.length || validCustomLocation.length ? false : true} >Find Work</button>
+            <button type='submit' disabled={currentLocation?.length || validCustomLocation?.length ? false : true} >Find Work</button>
           </form>
         </div>
       ) : (
