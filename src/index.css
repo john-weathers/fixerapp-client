@@ -152,6 +152,10 @@ nav ul li {
   background-color: white;
 }
 
+.hide {
+  display: none;
+}
+
 /* Error page - basic, revisit */
 #error-page {
   display: flex;
