@@ -18,6 +18,7 @@ const useLogout = () => {
   const logout = async () => {
     queryClient.removeQueries(['profile']);
     queryClient.removeQueries(['request']);
+    queryClient.removeQueries(['location']);
     setAuth({});
     try { 
       const response = await axios.get(logoutURL, {
