@@ -128,7 +128,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation }) => {
         <h2>{jobDetails.fixerName} is on the way to {jobDetails.userAddress}!</h2>
         <ul>
           {jobDetails.fixerRating && <li>Fixer rating: {jobDetails.fixerRating}/5</li>}
-          <li>ETA: {jobDetails.toLocaleTimeString('en-US', { timeStyle: 'short' })}</li>
+          <li>ETA: {jobDetails.eta.toLocaleTimeString('en-US', { timeStyle: 'short' })}</li>
         </ul>
         <button type='button' onClick={() => {
           const line = lineString([[jobDetails.userLocation[0], jobDetails.userLocation[1]], [jobDetails.fixerLocation[0], jobDetails.fixerLocation[1]]]);
