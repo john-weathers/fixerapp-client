@@ -39,7 +39,8 @@ export const geolocationQuery = {
       }
       navigator.geolocation.getCurrentPosition(success, error, options);
     });
-  }
+  },
+  staleTime: 1000 * 20,
 }
 
 export const useGeolocation = () => {
