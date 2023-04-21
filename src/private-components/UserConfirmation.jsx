@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useOutletContext } from 'react-router-dom';
 import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks';
 import Map, { Marker } from 'react-map-gl';
+import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import bbox from '@turf/bbox';
@@ -12,10 +14,10 @@ const CURRENT_URL = '/users/request/current';
 const QUOTE_DECISION_URL = '/users/request/quote';
 const RATING_URL = '/users/request/rate-fixer';
 
-const UserConfirmation = ({ socket, finalizing, cancellation }) => {
+const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId, fixerName }) => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
-  const { data: jobDetails } = useRequest(axiosPrivate, CURRENT_URL);
+  // const { data: jobDetails } = useRequest(axiosPrivate, CURRENT_URL);
   const [cancelled, setCancelled] = useState(false);
   const mapRef = useRef();
   const errRef = useRef();
@@ -27,8 +29,8 @@ const UserConfirmation = ({ socket, finalizing, cancellation }) => {
   });
   const [callToggle, setCallToggle] = useState(false);
   const [rated, setRated] = useState(false);
-  const [fixerName, setFixerName] = useState(jobDetails?.fixerName)
-  const [jobId, setJobId] = useState(jobDetails?.jobId);
+  const [active, setActive] = useOutletContext();
+  const navigate = useNavigate();
 
   const handleLoad = () => {
     const line = lineString([[jobDetails.userLocation[0], jobDetails.userLocation[1]], [jobDetails.fixerLocation[0], jobDetails.fixerLocation[1]]]);
@@ -51,14 +53,19 @@ const UserConfirmation = ({ socket, finalizing, cancellation }) => {
   }
 
   const handleCancel = () => {
+    setActive(false);
     socket.emit('cancel job', {
       jobId: jobDetails.jobId, // add cancellation reason once the functionality is incorporated
     }, (response) => {
       if (response.status === 'NOK') {
+        setActive(true);
         setErrMsg('Job cancellation failed');
       } else {
         setCancelled(true);
-        queryClient.removeQueries({ queryKey: ['request'], exact: true });
+        queryClient.removeQueries(['request']);
+        setTimeout(() => {
+          navigate('/');
+        }, 3000)
       }
     });
   }
@@ -72,12 +79,14 @@ const UserConfirmation = ({ socket, finalizing, cancellation }) => {
       return;
     }
     setRated(true);
+    console.log(jobId);
+    console.log(fixerName);
     try {
       await axiosPrivate.patch(RATING_URL, {
         jobId,
         rating,
       });
-    queryClient.removeQueries({ queryKey: ['request'], exact: true });
+    queryClient.removeQueries(['request']);
     } catch (err) {
       setRated(false);
       setErrMsg('Error submitting rating');
@@ -85,17 +94,17 @@ const UserConfirmation = ({ socket, finalizing, cancellation }) => {
     }
   }
 
+  if (cancelled) return (
+    <div>
+      <h2>Job cancelled</h2>
+      <p>Redirecting to home page...</p>
+    </div>
+  )
+
   if (cancellation) return ( // could list cancellation reason here in future build
     <div>
       <h2>The fixer has cancelled the job</h2>
       <p>Please contact us if you have any questions or concerns</p>
-      <Link to='/'>Return to home page</Link>
-    </div>
-  )
-
-  if (cancelled) return (
-    <div>
-      <h2>Job cancelled</h2>
       <Link to='/'>Return to home page</Link>
     </div>
   )
@@ -106,8 +115,6 @@ const UserConfirmation = ({ socket, finalizing, cancellation }) => {
         {...viewState}
         ref={mapRef}
         onLoad={handleLoad}
-        minZoom='11.5'
-        maxZoom='19.5'
         onMove={e => setViewState(e.viewState)}
         style={{width: '100vw', height: '100vh'}}
         mapStyle='mapbox://styles/mapbox/streets-v12'
@@ -128,7 +135,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation }) => {
         <h2>{jobDetails.fixerName} is on the way to {jobDetails.userAddress}!</h2>
         <ul>
           {jobDetails.fixerRating && <li>Fixer rating: {jobDetails.fixerRating}/5</li>}
-          <li>ETA: {jobDetails.eta.toLocaleTimeString('en-US', { timeStyle: 'short' })}</li>
+          <li>ETA: {new Date(jobDetails.eta).toLocaleTimeString('en-US', { timeStyle: 'short' })}</li>
         </ul>
         <button type='button' onClick={() => {
           const line = lineString([[jobDetails.userLocation[0], jobDetails.userLocation[1]], [jobDetails.fixerLocation[0], jobDetails.fixerLocation[1]]]);
@@ -156,7 +163,13 @@ const UserConfirmation = ({ socket, finalizing, cancellation }) => {
         )}
       </div>
       {jobDetails?.quote?.pending === undefined 
-        ? <h2>{jobDetails.fixerName} is arriving soon!</h2> 
+        ? (
+          <div>
+            <h2>{jobDetails.fixerName} is arriving soon!</h2>
+            <p>After arriving, {jobDetails.fixerName} will evaluate your repair needs<br />and send you a quote</p>
+          </div>
+          
+        )
         : jobDetails.quote.pending ? (
         <div>
           <h2>Your quote</h2>

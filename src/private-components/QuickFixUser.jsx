@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import useRefreshToken from '../hooks/useRefreshToken';
 import io from 'socket.io-client';
@@ -20,6 +20,7 @@ const CURRENT_URL = '/users/request/current';
 let retryAttempts = 2;
 let retry = false;
 let socket;
+let firstUpdate = true;
 
 // TODO: add re-join logic to re-join the room in the event of a disconnect mid-job (socket.io)
 // could simply be state that will indicate if a rejoin necessary, set to true once room is joined
@@ -58,10 +59,12 @@ const QuickFixUser = () => {
     }
   });
   const [count, setCount] = useState(0);
-  const [firstUpdate, setFirstUpdate] = useState(true);
   const [finalizing, setFinalizing] = useState(false);
+  const [fixerName, setFixerName] = useState('');
+  const [jobId, setJobId] = useState('');
   const [fixerCancelled, setFixerCancelled] = useState(false);
   const [roomJoined, setRoomJoined] = useState(false);
+  const [active, setActive] = useOutletContext();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -90,23 +93,33 @@ const QuickFixUser = () => {
       }
     });
 
-    socket.on('job update', (jobDetails) => {
+    socket.on('job update', (updatedDetails) => {
+      console.log(`IS FIRST UPDATE: ${firstUpdate}`);
       if (firstUpdate) {
+        setActive(true);
         // force a fetch if it's the first update from the watcher function to grab all the job details
         queryClient.invalidateQueries({ queryKey: ['request'], refetchType: 'all' }); // not sure refetchType: 'all' is necessary here...need to find out more in testing
-        setFirstUpdate(false);
+        firstUpdate = false;
       } else {
-        if (jobDetails.currentStatus === 'cancelled') {
+        if (updatedDetails.currentStatus === 'cancelled') {
+          setActive(false);
           setFixerCancelled(true);
-          queryClient.removeQueries({ queryKey: ['request'], exact: true });
+          queryClient.removeQueries(['request']);
           return;
         }
-        if (jobDetails.currentStatus === 'fulfilled') setFinalizing(true);
+        if (updatedDetails.currentStatus === 'fulfilled') {
+          setFinalizing(true);
+          setActive(false);
+          socket.emit('leave room', { jobId: jobId });
+          firstUpdate = true;
+        }
         // subsequent updates can overwrite old cache data
+        console.log(`job update: ${updatedDetails}`);
+        console.log(`FINALIZING STATUS: ${finalizing}`);
         queryClient.setQueryData(['request'], oldData => {
           return {
             ...oldData,
-            ...jobDetails,
+            ...updatedDetails,
           }
         });
       }
@@ -135,6 +148,11 @@ const QuickFixUser = () => {
   }, [geolocationResult.isSuccess]) // should not have a problem here with an unwanted firing of useEffect after initial isSuccess === true, but keep an eye on in testing
 
   useEffect(() => {
+    clearInterval(intervalId);
+    setIntervalId(null);
+    setCount(0);
+    setFixerName(jobDetails?.fixerName);
+    setJobId(jobDetails?.jobId);
     if (jobDetails?.jobId && !roomJoined) {
       while (retryAttempts) {
         socket.emit('current job', { 
@@ -237,7 +255,14 @@ const QuickFixUser = () => {
   }
 
   // using jobDetails rather than something like isSuccess because a failed fetch, even after we have data set, seems to cause isSuccess to revert to false
-  if (jobDetails || finalizing || fixerCancelled) return <UserConfirmation socket={socket} finalizing={finalizing} cancellation={fixerCancelled} />
+  if (jobDetails?.jobId || finalizing || fixerCancelled) return <UserConfirmation 
+    socket={socket} 
+    finalizing={finalizing} 
+    cancellation={fixerCancelled}
+    jobDetails={jobDetails}
+    fixerName={fixerName}
+    jobId={jobId}
+  />
 
   // TODO: move Mapbox logo to different area?
   return (

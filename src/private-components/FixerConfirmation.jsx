@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useOutletContext } from 'react-router-dom';
 import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks';
-import Map, { Marker } from 'react-map-gl';
+import Map, { Marker, Source, Layer } from 'react-map-gl';
+import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
@@ -42,22 +44,24 @@ const routeLayerStyle = {
   }
 }
 
-const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, cancellation }) => {
+let currentCoords;
+let watchId = null;
+let toId = null;
+
+const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, cancellation, jobDetails }) => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
-  const { data: jobDetails } = useRequest(axiosPrivate, CURRENT_URL);
+  // const { isSuccess, data: jobDetails } = useRequest(axiosPrivate, CURRENT_URL);
   const [cancelled, setCancelled] = useState(false);
   const mapRef = useRef();
   const errRef = useRef();
   const [errMsg, setErrMsg] = useState('');
-  const [watchId, setWatchId] = useState(null);
   const [timeoutId, setTimeoutId] = useState(null);
   const [viewState, setViewState] = useState({
-    longitude: jobDetails?.fixerLocation[0],
-    latitude: jobDetails?.fixerLocation[1],
+    longitude: jobDetails?.fixerLocation?.[0],
+    latitude: jobDetails?.fixerLocation?.[1],
     zoom: 12,
   });
-  const [currentCoords, setCurrentCoords] = useState([]);
   const [callToggle, setCallToggle] = useState(false);
   const [route, setRoute] = useState({
     type: 'Feature',
@@ -86,24 +90,57 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
   const [clientName, setClientName] = useState('');
   const [jobId, setJobId] = useState('');
   const [rated, setRated] = useState(false);
+  const [active, setActive] = useOutletContext();
+  const navigate = useNavigate();
+  const [testCoords, setTestCoords] = useState([jobDetails?.fixerLocation?.coordinates?.[0], jobDetails?.fixerLocation?.coordinates?.[1]]);
+
+  useEffect(() => {
+    if (jobDetails?.jobId) {
+      currentCoords = jobDetails?.fixerLocation.coordinates;
+      setRoute({
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: jobDetails.route.coordinates,
+        }
+      });
+      setGeojsonPoint({
+        type: 'FeatureCollection',
+        features: [{
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: jobDetails.fixerLocation.coordinates,
+        }
+      }]
+      })
+
+    }
+  }, [jobDetails?.jobId])
   
   useEffect(() => {
     const geofence = circle(jobDetails.userLocation, 0.25, { units: 'miles' });
 
     const success = pos => {
-      setCurrentCoords([pos.coords.longitude, pos.coords.latitude]);
-      if (booleanPointInPolygon(currentCoords, geofence)) {
+      const newCoords = [pos.coords.longitude, pos.coords.latitude]
+      currentCoords = newCoords;
+      if (booleanPointInPolygon(newCoords, geofence)) {
         socket.emit('arriving', jobDetails.jobId, async (response) => {
           if (response.status === 'OK') {
             navigator.geolocation.clearWatch(watchId);
+            watchId = null;
             clearTimeout(timeoutId);
+            setTimeoutId(null);
           } else {
             try {
               await axiosPrivate.patch(ARRIVAL_URL, {
                 jobId: jobDetails.jobId,
               });
               navigator.geolocation.clearWatch(watchId);
+              watchId = null;
               clearTimeout(timeoutId);
+              setTimeoutId(null);
             } catch (err) {
               setErrMsg('Error updating tracker stage');
               errRef.current.focus();
@@ -117,46 +154,66 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
           type: 'Feature',
           geometry: {
             type: 'Point',
-            coordinates: currentCoords,
+            coordinates: newCoords,
           }
         }]
-        })
+        });
+        console.log(geojsonPoint);
+        console.log(`new coordinates are: ${newCoords}`);
         socket.emit('update location', {
-          location: currentCoords,
+          location: newCoords,
           jobId: jobDetails.jobId,
         });
       }
     }
 
     const error = err => {
-      setErrMsg(err.message); // might want more sophisticated error handling here
+      setErrMsg('Failed to get location data'); // might want more sophisticated error handling here
       errRef.current.focus();
     }
 
-    const id = navigator.geolocation.watchPosition(success, error, { timeout: 5000 });
-    setWatchId(id);
-
+    if (jobDetails?.trackerStage === 'en route' && !watchId) {
+      console.log('setting watch')
+      const id = navigator.geolocation.watchPosition(success, error, { timeout: 5000 });
+      watchId = id;
+      console.log(`watch id is ${watchId}`);
+    }
+    
     return () => {
-      navigator.geolocation.clearWatch(id);
+      console.log(`clearing watch: ${watchId}`);
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
     }
   }, []);
 
   useEffect(() => {
+    if (timeoutId && jobDetails?.trackerStage && jobDetails.trackerStage !== 'en route') {
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
+    }
     if (jobDetails?.eta && jobDetails?.trackerStage === 'en route') {
-    const etaTimeout = jobDetails.eta - new Date();
-    
+      console.log(`eta is ${jobDetails.eta}`);
+      let etaTimeout = new Date(jobDetails.eta) - new Date();
+
+      console.log(`eta timeout is ${etaTimeout}`);
+
+      if (etaTimeout < 0) {
+        etaTimeout = 30000;
+      }
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
       const id = setTimeout(async () => {
         try {
           const directionsResponse = await axiosPrivate.patch(DIRECTIONS_URL, {
             jobId: jobDetails.jobId,
-            location: currentCoords,
+            location: currentCoords, // not sure if this will be stale. if it is, change to regular let variable
           });
           setRoute({
             type: 'Feature',
             properties: {},
             geometry: {
               type: 'LineString',
-              coordinates: directionsResponse.route.coordinates,
+              coordinates: directionsResponse.data.route.coordinates,
             }
           })
           const line = lineString(route);
@@ -174,12 +231,15 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
         }
       }, etaTimeout);
       setTimeoutId(id);
+      toId = id;
     }
 
     return () => {
-      clearTimeout(timeoutId);
+      clearTimeout(toId);
+      toId = null;
+      setTimeoutId(null);
     }
-  }, [jobDetails?.eta])
+  }, [jobDetails?.eta, jobDetails?.trackerStage])
 
   const handleLoad = () => {
     const line = lineString(route);
@@ -190,15 +250,20 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
   const handleArrival = () => {
     socket.emit('arriving', jobDetails.jobId, async (response) => {
       if (response.status === 'OK') {
+        console.log(`CLEARING WATCH: ${watchId}`);
         navigator.geolocation.clearWatch(watchId);
+        watchId = null;
         clearTimeout(timeoutId);
+        setTimeoutId(null);
       } else {
         try {
           await axiosPrivate.patch(ARRIVAL_URL, {
             jobId: jobDetails.jobId,
           })
           navigator.geolocation.clearWatch(watchId);
+          watchId = null;
           clearTimeout(timeoutId);
+          setTimeoutId(null);
         } catch (err) {
           setErrMsg('Error updating tracker stage');
           errRef.current.focus();
@@ -230,15 +295,20 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
   }
 
   const handleCancel = () => {
+    setActive(false);
     socket.emit('cancel job', {
       jobId: jobDetails.jobId, // add cancellation reason once the functionality is incorporated
     }, (response) => {
       if (response.status === 'NOK') {
+        setActive(true);
         setErrMsg('Job cancellation failed');
         errRef.current.focus();
       } else {
         setCancelled(true);
-        queryClient.removeQueries({ queryKey: ['request'], exact: true });
+        queryClient.removeQueries(['request']);
+        setTimeout(() => {
+          navigate('/fixers');
+        }, 3000)
       }
     });
   }
@@ -270,9 +340,12 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
       setClientName(jobDetails.firstName);
       setJobId(jobDetails.jobId);
       setFinalizing(true);
+      const temporaryJobId = jobDetails.jobId;
       await axiosPrivate.patch(COMPLETE_URL, {
         jobId: jobDetails.jobId,
       }); // could have this be an emitter and leave room on back end
+      setActive(false);
+      socket.emit('leave room', { jobId: temporaryJobId });
     } catch (err) {
       setFinalizing(false);
       setErrMsg('Failed to update job status');
@@ -289,12 +362,14 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
       return;
     }
     setRated(true);
+    console.log(jobId);
+    console.log(rating);
     try {
       await axiosPrivate.patch(RATING_URL, {
         jobId,
         rating,
       });
-    queryClient.removeQueries({ queryKey: ['request'], exact: true });
+    queryClient.removeQueries(['request']);
     } catch (err) {
       setRated(false);
       setErrMsg('Error submitting rating');
@@ -302,17 +377,17 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
     }
   }
 
+  if (cancelled) return (
+    <div>
+      <h2>Job cancelled</h2>
+      <p>Redirecting to home page...</p>
+    </div>
+  )
+
   if (cancellation) return ( // could list cancellation reason here in future build
     <div>
       <h2>The client has cancelled the job</h2>
       <p>Please contact us if you have any questions or concerns</p>
-      <Link to='/fixers'>Return to home page</Link>
-    </div>
-  )
-
-  if (cancelled) return (
-    <div>
-      <h2>Job cancelled</h2>
       <Link to='/fixers'>Return to home page</Link>
     </div>
   )
@@ -323,8 +398,6 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
         {...viewState}
         ref={mapRef}
         onLoad={handleLoad}
-        minZoom='11.5'
-        maxZoom='19.5'
         onMove={e => setViewState(e.viewState)}
         style={{width: '100vw', height: '100vh'}}
         mapStyle='mapbox://styles/mapbox/streets-v12'
@@ -357,7 +430,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
           <ol>
             {jobDetails.route.instructions.map((step, index) => <li key={index}>{step}</li>)}
           </ol>
-          <p>ETA: {jobDetails.eta.toLocaleTimeString('en-US', { timeStyle: 'short' })}</p>
+          <p>ETA: {new Date(jobDetails.eta).toLocaleTimeString('en-US', { timeStyle: 'short' })}</p>
           <button type='button' onClick={handleArrival}>I've arrived</button>
           {!callToggle ? <div onClick={() => setCallToggle(true)} >Contact Client</div> : <div>{jobDetails.phoneNumber}</div>}
         </div>
@@ -436,6 +509,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
             value={jobNotes}
             rows='30'
             cols='75'
+            placeholder='Job notes'
             onChange={e => {
               if (jobNotes.length >= 1000) {
                 setErrMsg('Job notes must be 1000 characters or less');
@@ -446,7 +520,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
           >
             Job notes (1,000 characters or less)
           </textarea>
-          <p>Time started: {jobDetails?.workStartedAt?.toLocaleTimeString('en-US', { timeStyle: 'short' })}</p>
+          <p>Time started: {new Date(jobDetails.workStartedAt).toLocaleTimeString('en-US', { timeStyle: 'short' })}</p>
           {!callToggle ? <div onClick={() => setCallToggle(true)} >Contact Client</div> : <div>{jobDetails.phoneNumber}</div>}
           {!toggleWorkScope
             ? <button type='button' onClick={() => setToggleWorkScope(true)}>Update Work Scope</button>
@@ -478,6 +552,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
                   Details regarding revised cost (500 characters or less)
                 </textarea>
                 <button disabled={!revisedCost || additionalNotes.length > 500 ? true : false }>Submit Revised Cost</button>
+                <button type='button' onClick={() => setToggleWorkScope(true)}>Cancel Scope Update</button>
               </form>
             )}
           <button type='button' onClick={handleComplete}>Job Complete</button>

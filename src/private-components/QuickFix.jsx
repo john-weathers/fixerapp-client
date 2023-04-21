@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useOutletContext } from 'react-router-dom';
 import { useProfile, useRequest, useGeolocation, geolocationQuery } from '../hooks/reactQueryHooks';
 import useAuth from '../hooks/useAuth';
 import useRefreshToken from '../hooks/useRefreshToken';
@@ -66,6 +66,7 @@ const QuickFix = () => {
   const [finalizing, setFinalizing] = useState(false);
   const [userCancelled, setUserCancelled] = useState(false);
   const [roomJoined, setRoomJoined] = useState(false);
+  const [active, setActive] = useOutletContext();
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -96,8 +97,9 @@ const QuickFix = () => {
 
     socket.on('job update', (jobDetails) => {
       if (jobDetails.currentStatus === 'cancelled') {
+        setActive(false);
         setUserCancelled(true);
-        queryClient.removeQueries({ queryKey: ['request'], exact: true });
+        queryClient.removeQueries(['request']);
         return;
       }
       queryClient.setQueryData(['request'], oldData => {
@@ -191,6 +193,8 @@ const QuickFix = () => {
           setValidCustomLocation(result.features[0]?.geometry?.coordinates);
           setQueryResponse(result.features);
         });
+    } else {
+      setQueryResponse([]);
     }
   }
 
@@ -210,6 +214,7 @@ const QuickFix = () => {
         location: coordinates,
       });
       setRoomJoined(true);
+      setActive(true);
       queryClient.setQueryData(['request'], searchResponse.data);
       while (retryAttempts) {
         socket.emit('work found', async (response) => {
@@ -242,7 +247,10 @@ const QuickFix = () => {
         const searchResponse = await axiosPrivate.post(FIND_WORK_URL, {
           location: coordinates,
         });
+        clearInterval(interval);
+        setIntervalId(null);
         setRoomJoined(true);
+        setActive(true);
         queryClient.setQueryData(['request'], searchResponse.data);
         while (retryAttempts) {
           socket.emit('work found', async (response) => {
@@ -260,8 +268,6 @@ const QuickFix = () => {
             break;
           }
         }
-        clearInterval(intervalId);
-        setIntervalId(null);
         retryAttempts = 2;
         retry = false;
       } catch (err) {
@@ -287,7 +293,12 @@ const QuickFix = () => {
   }
 
   // using jobDetails rather than something like isSuccess because a failed fetch, even after we have data set, seems to cause isSuccess to revert to false
-  if (jobDetails || finalizing || userCancelled) return <FixerConfirmation socket={socket} finalizing={{ finalizing, setFinalizing }} cancellation={userCancelled} />;
+  if (jobDetails?.jobId || finalizing || userCancelled) return <FixerConfirmation 
+    socket={socket} 
+    finalizing={{ finalizing, setFinalizing }} 
+    cancellation={userCancelled} 
+    jobDetails={jobDetails}
+  />;
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRequest, geolocationQuery } from '../hooks/reactQueryHooks';
@@ -11,6 +11,7 @@ const FixerHome = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
   const { data } = useRequest(axiosPrivate, CURRENT_URL);
+  const [active, setActive] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -18,18 +19,26 @@ const FixerHome = () => {
     })();
   }, [])
 
+  useEffect(() => {
+    if (data?.jobId) {
+      setActive(true)
+    } else {
+      setActive(false);
+    }
+  }, [data?.jobId])
+
   return (
     <div>
       <PrivateNavBar navOptions={{
         homeUrl: '/fixers',
         leftUrl: 'quick-fix',
-        leftTitle: data ? 'Active Job' : 'Quick Fix',
+        leftTitle: active ? 'Active Job' : 'Quick Fix',
         midUrl: 'bid',
         midTitle: 'Bid',
         rightUrl: 'schedule',
         rightTitle: 'Schedule',
       }}/>
-      <Outlet />
+      <Outlet context={[active, setActive]}/>
     </div>
   )
 }
