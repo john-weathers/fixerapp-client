@@ -97,6 +97,9 @@ const QuickFixUser = () => {
       console.log(`IS FIRST UPDATE: ${firstUpdate}`);
       if (firstUpdate) {
         setActive(true);
+        setRequesting(false);
+        setSearching(false);
+        clearInterval(intervalId);
         // force a fetch if it's the first update from the watcher function to grab all the job details
         queryClient.invalidateQueries({ queryKey: ['request'], refetchType: 'all' }); // not sure refetchType: 'all' is necessary here...need to find out more in testing
         firstUpdate = false;
