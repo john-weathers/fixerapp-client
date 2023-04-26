@@ -216,6 +216,7 @@ const QuickFix = () => {
       setRoomJoined(true);
       setActive(true);
       queryClient.setQueryData(['request'], searchResponse.data);
+      setSearching(false);
       while (retryAttempts) {
         socket.emit('work found', async (response) => {
           if (response?.status === 'NOK') {
@@ -371,7 +372,7 @@ const QuickFix = () => {
               <p ref={errRef} aria-live='assertive'>{errMsg}</p>
             )}
           </div>     
-          <FontAwesomeIcon icon={faSpinner} />
+          <FontAwesomeIcon icon={faSpinner} spin/>
           <h2>Searching for work near you...</h2>
           <button type='button' onClick={handleCancel}>Cancel</button>
         </div>
