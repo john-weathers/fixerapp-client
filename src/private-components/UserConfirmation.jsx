@@ -3,6 +3,8 @@ import { useNavigate, Link, useOutletContext } from 'react-router-dom';
 import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks';
 import Map, { Marker } from 'react-map-gl';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
+import { faCar } from '@fortawesome/free-solid-svg-icons';
+import { faHouse } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -12,6 +14,7 @@ import { lineString } from '@turf/helpers';
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
 const CURRENT_URL = '/users/request/current';
 const QUOTE_DECISION_URL = '/users/request/quote';
+const REVISED_QUOTE_DECISION_URL = '/users/request/revised-quote'
 const RATING_URL = '/users/request/rate-fixer';
 
 const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId, fixerName }) => {
@@ -35,7 +38,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
   const handleLoad = () => {
     const line = lineString([[jobDetails.userLocation[0], jobDetails.userLocation[1]], [jobDetails.fixerLocation[0], jobDetails.fixerLocation[1]]]);
     const boundingBox = bbox(line);
-    mapRef.current.fitBounds(boundingBox, { padding: 100 });
+    mapRef.current.fitBounds(boundingBox, { padding: 200 });
   }
 
   const handleAccept = async () => {
@@ -45,11 +48,25 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
     });
   }
 
+  const handleRevisedAccept = async () => {
+    await axiosPrivate.patch(REVISED_QUOTE_DECISION_URL, {
+      jobId: jobDetails.jobId,
+      accept: true,
+    })
+  }
+
   const handleDecline = async () => {
     await axiosPrivate.patch(QUOTE_DECISION_URL, {
       jobId: jobDetails.jobId,
       accept: false,
     });
+  }
+
+  const handleRevisedDecline = async () => {
+    await axiosPrivate.patch(REVISED_QUOTE_DECISION_URL, {
+      jobId: jobDetails.jobId,
+      accept: false,
+    })
   }
 
   const handleCancel = () => {
@@ -120,7 +137,12 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
         mapStyle='mapbox://styles/mapbox/streets-v12'
         mapboxAccessToken={MAPBOX_TOKEN}
       >
-        <Marker longitude={jobDetails.fixerLocation[0]} latitude={jobDetails.fixerLocation[1]} color='#c70a0a'/> {/* can add image of vehicle to Marker*/}
+        <Marker longitude={jobDetails.fixerLocation[0]} latitude={jobDetails.fixerLocation[1]}>
+          <FontAwesomeIcon icon={faCar} size='xl'/>
+        </Marker>
+        <Marker longitude={jobDetails.userLocation[0]} latitude={jobDetails.userLocation[1]}>
+          <FontAwesomeIcon icon={faHouse} size='xl'/>
+        </Marker>
       </Map>
       <div className='sidebar'>
         <div className={errMsg ? 'errmsg' : 'offscreen'}>
@@ -140,7 +162,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
         <button type='button' onClick={() => {
           const line = lineString([[jobDetails.userLocation[0], jobDetails.userLocation[1]], [jobDetails.fixerLocation[0], jobDetails.fixerLocation[1]]]);
           const boundingBox = bbox(line);
-          mapRef.current.fitBounds(boundingBox, { padding: 100 });
+          mapRef.current.fitBounds(boundingBox, { padding: 200 });
         }}>
           Re-center map
         </button>
@@ -187,7 +209,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
   // deal with updated quote potentially coming in
   if (jobDetails?.trackerStage === 'fixing') return (
     <div>
-      {!jobDetails.quote.pending ? (
+      {!jobDetails?.quote?.revisedPending ? (
         <div>
           <h2>{jobDetails.fixerName} is working on your repair!</h2>
           <p>If your initial estimated cost changes it will be sent to you for your review</p>
@@ -197,8 +219,8 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
           <h2>{jobDetails.fixerName} has sent you an updated estimate</h2>
           <p>Revised cost of work: ${jobDetails.quote.amount}</p>
           <p>Job details: {jobDetails.quote.details[jobDetails.quote.details.length - 1]}</p>
-          <button type='button' onClick={handleAccept}>Accept</button>
-          <button type='button' onClick={handleDecline}>Decline</button>
+          <button type='button' onClick={handleRevisedAccept}>Accept</button>
+          <button type='button' onClick={handleRevisedDecline}>Decline</button>
         </div>
       )}
       <p>Questions?</p>
