@@ -3,6 +3,9 @@ import { useNavigate, Link, useOutletContext } from 'react-router-dom';
 import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks';
 import Map, { Marker, Source, Layer } from 'react-map-gl';
 import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
+import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faCar } from '@fortawesome/free-solid-svg-icons';
+import { faHouse } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -48,6 +51,8 @@ let currentCoords;
 let watchId = null;
 let toId = null;
 
+let testCoords;
+
 const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, cancellation, jobDetails }) => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
@@ -77,13 +82,14 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
     type: 'Feature',
     geometry: {
       type: 'Point',
-      coordinates: jobDetails?.fixerLocation?.coordinates,
+      coordinates: jobDetails?.fixerLocation,
     }
   }]
   })
   const [quote, setQuote] = useState(0);
   const [notes, setNotes] = useState('');
   const [jobNotes, setJobNotes] = useState('');
+  const [quoteMsg, setQuoteMsg] = useState(false);
   const [toggleWorkScope, setToggleWorkScope] = useState(false);
   const [revisedCost, setRevisedCost] = useState(0);
   const [additionalNotes, setAdditionalNotes] = useState('');
@@ -92,11 +98,10 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
   const [rated, setRated] = useState(false);
   const [active, setActive] = useOutletContext();
   const navigate = useNavigate();
-  const [testCoords, setTestCoords] = useState([jobDetails?.fixerLocation?.coordinates?.[0], jobDetails?.fixerLocation?.coordinates?.[1]]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (jobDetails?.jobId) {
-      currentCoords = jobDetails?.fixerLocation.coordinates;
+      currentCoords = jobDetails?.fixerLocation;
       setRoute({
         type: 'Feature',
         properties: {},
@@ -105,7 +110,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
           coordinates: jobDetails.route.coordinates,
         }
       });
-      setGeojsonPoint({
+      /*setGeojsonPoint({
         type: 'FeatureCollection',
         features: [{
         type: 'Feature',
@@ -116,10 +121,13 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
       }]
       })
 
+      testCoords = [jobDetails?.fixerLocation?.[0], jobDetails?.fixerLocation?.[1]];
+
     }
-  }, [jobDetails?.jobId])
+  }, [jobDetails?.jobId])*/
   
-  useEffect(() => {
+  // for production
+  /*useEffect(() => {
     const geofence = circle(jobDetails.userLocation, 0.25, { units: 'miles' });
 
     const success = pos => {
@@ -184,7 +192,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
       navigator.geolocation.clearWatch(watchId);
       watchId = null;
     }
-  }, []);
+  }, []);*/
 
   useEffect(() => {
     if (timeoutId && jobDetails?.trackerStage && jobDetails.trackerStage !== 'en route') {
@@ -216,8 +224,8 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
               coordinates: directionsResponse.data.route.coordinates,
             }
           })
-          const line = lineString(route);
-          const boundingBox = bbox(line);
+          // const line = lineString(route);
+          const boundingBox = bbox(route);
           mapRef.current.fitBounds(boundingBox, { padding: 100 });
           queryClient.setQueryData(['request'], oldData => {
             return {
@@ -242,9 +250,58 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
   }, [jobDetails?.eta, jobDetails?.trackerStage])
 
   const handleLoad = () => {
-    const line = lineString(route);
-    const boundingBox = bbox(line);
+    // const line = lineString(route);
+    const boundingBox = bbox(route);
     mapRef.current.fitBounds(boundingBox, { padding: 100 });
+  }
+
+  // for testing purposes only
+  const handleTestMapClick = e => {
+    const geofence = circle(jobDetails.userLocation, 0.25, { units: 'miles' });
+
+    testCoords = [e.lngLat.lng, e.lngLat.lat];
+
+    if (booleanPointInPolygon(testCoords, geofence)) {
+      socket.emit('arriving', jobDetails.jobId, async (response) => {
+        if (response.status === 'OK') {
+          // navigator.geolocation.clearWatch(watchId);
+          watchId = null;
+          clearTimeout(timeoutId);
+          setTimeoutId(null);
+        } else {
+          try {
+            await axiosPrivate.patch(ARRIVAL_URL, {
+              jobId: jobDetails.jobId,
+            });
+            // navigator.geolocation.clearWatch(watchId);
+            watchId = null;
+            clearTimeout(timeoutId);
+            setTimeoutId(null);
+          } catch (err) {
+            setErrMsg('Error updating tracker stage');
+            errRef.current.focus();
+          }
+        }
+      });
+    } else {
+      setGeojsonPoint({
+        type: 'FeatureCollection',
+        features: [{
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: testCoords,
+        }
+      }]
+      });
+      console.log(geojsonPoint);
+      console.log(`new coordinates are: ${testCoords}`);
+      socket.emit('update location', {
+        location: testCoords,
+        jobId: jobDetails.jobId,
+      });
+    }
+
   }
 
   const handleArrival = () => {
@@ -327,6 +384,8 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
         notes: additionalNotes,
         jobId: jobDetails.jobId,
       });
+      setToggleWorkScope(false);
+      setQuoteMsg(true);
     } catch (err) {
       setErrMsg('Failed to update cost');
       errRef.current.focus();
@@ -398,15 +457,19 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
         {...viewState}
         ref={mapRef}
         onLoad={handleLoad}
+        onClick={handleTestMapClick}
         onMove={e => setViewState(e.viewState)}
         style={{width: '100vw', height: '100vh'}}
         mapStyle='mapbox://styles/mapbox/streets-v12'
         mapboxAccessToken={MAPBOX_TOKEN}
       >
+        
+        <Marker longitude={jobDetails.userLocation[0]} latitude={jobDetails.userLocation[1]}>
+          <FontAwesomeIcon icon={faHouse} size='xl' />
+        </Marker>
         <Source id='fixer-location' type='geojson' data={geojsonPoint}>
           <Layer {...pointLayerStyle} />
         </Source>
-        <Marker longitude={jobDetails.userLocation[0]} latitude={jobDetails.userLocation[1]} color='#c70a0a'/>
         <Source id='route-data' type='geojson' data={route}>
           <Layer {...routeLayerStyle} />
         </Source>
@@ -471,6 +534,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
             value={notes}
             rows='30' // not sure about manually specifying this here...should consider other ways of doing this
             cols='75'
+            placeholder='Description of quote...'
             onChange={e => {
               if (notes.length >= 1000) {
                 setErrMsg('Notes must be 1000 characters or less');
@@ -501,8 +565,18 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
           <p ref={errRef} aria-live='assertive'>{errMsg}</p>
         )}
       </div>
-      {!jobDetails.quote.pending ? (
+      {!jobDetails?.quote?.revisedPending ? (
         <div>
+          {(jobDetails?.quote?.revisedPending === false && quoteMsg) && (
+            <div>
+              <FontAwesomeIcon icon={faInfoCircle} />
+              {jobDetails.quote.revisedAccepted 
+                ? <p>Revised quote accepted</p>
+                : <p>Revised quote declined<br />Submit a new revised quote if client is interested</p>
+              }
+              <button type='button' onClick={() => setQuoteMsg(false)}>Close</button>
+            </div>
+          )}
           <h2>Work started</h2>
           <textarea
             id='jobnotes'
@@ -552,7 +626,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
                   Details regarding revised cost (500 characters or less)
                 </textarea>
                 <button disabled={!revisedCost || additionalNotes.length > 500 ? true : false }>Submit Revised Cost</button>
-                <button type='button' onClick={() => setToggleWorkScope(true)}>Cancel Scope Update</button>
+                <button type='button' onClick={() => setToggleWorkScope(false)}>Cancel Scope Update</button>
               </form>
             )}
           <button type='button' onClick={handleComplete}>Job Complete</button>
