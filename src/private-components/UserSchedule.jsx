@@ -1,6 +1,6 @@
 const UserSchedule = () => {
   return (
-    <div>UserSchedule</div>
+    <div>Feature under construction</div>
   )
 }
 export default UserSchedule

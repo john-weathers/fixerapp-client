@@ -3,7 +3,7 @@ import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
 const Bid = () => {
   return (
-    <div>Bids</div>
+    <div>Feature under construction</div>
   )
 }
 export default Bid;

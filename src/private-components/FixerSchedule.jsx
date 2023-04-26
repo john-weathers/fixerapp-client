@@ -1,6 +1,6 @@
 const FixerSchedule = () => {
   return (
-    <div>FixerSchedule</div>
+    <div>Feature under construction</div>
   )
 }
 export default FixerSchedule

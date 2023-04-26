@@ -1,6 +1,6 @@
 const Proposals = () => {
   return (
-    <div>Proposals</div>
+    <div>Feature under construction</div>
   )
 }
 export default Proposals
