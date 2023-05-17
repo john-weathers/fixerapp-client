@@ -2,42 +2,44 @@ import { NavLink, Outlet } from "react-router-dom"
 import HoverNav from './HoverNav';
 import { faHouse } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHammer } from "@fortawesome/free-solid-svg-icons";
 
-const NavBar = () => {
+const NavBar = ({ onClick }) => {
 
   return (
-    <nav>
-        <ul>
+    <nav id='header-public'>
+        <ul className='nav-container'>
             <li>
-                <NavLink to='/'>
-                    <FontAwesomeIcon icon={faHouse} id='home-public'/>
+                <NavLink to='/' className='nav-link'>
+                        <FontAwesomeIcon icon={faHammer} className='logo-img'/>
+                        <h1 className='logo-part1'>fixer<span className='logo-part2'>app</span></h1>
                 </NavLink>
             </li>
             <li>
-                <NavLink to='/get-started'>Get Started</NavLink>
+                <NavLink to='/get-started' onClick={onClick} className='nav-link'>Learn More</NavLink>
             </li>
             <li>
                 <HoverNav title='Login'>
                 <ul>
                     <li>
-                        <NavLink to='/user-login'>Users</NavLink>
+                        <NavLink to='/user-login' className='nav-link'>Clients</NavLink>
                     </li>
                     <li>
-                        <NavLink to='/fixer-login'>Fixers</NavLink>
+                        <NavLink to='/fixer-login' className='nav-link'>Fixers</NavLink>
                     </li>
                 </ul>
                 </HoverNav>
             </li>
             <li>
                 <HoverNav title='Sign Up'>
-                <ul>
-                    <li>
-                        <NavLink to='/user-registration'>Users</NavLink>
-                    </li>
-                    <li>
-                        <NavLink to='/fixer-registration'>Fixers</NavLink>
-                    </li>
-                </ul>
+                    <ul>
+                        <li>
+                            <NavLink to='/user-registration' className='nav-link'>Clients</NavLink>
+                        </li>
+                        <li>
+                            <NavLink to='/fixer-registration' className='nav-link'>Fixers</NavLink>
+                        </li>
+                    </ul>
                 </HoverNav>
             </li>
         </ul>

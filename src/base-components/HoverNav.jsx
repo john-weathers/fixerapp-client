@@ -8,7 +8,7 @@ const HoverNav = ({ children, title }) => {
         onMouseOver={() => setHover(prev => !prev)}
         onMouseOut={() => setHover(prev => !prev)}
         >
-            <div>{title}</div>
+            <div className='nav-title'>{title}</div>
             {hover &&
             <div>
                 {children}

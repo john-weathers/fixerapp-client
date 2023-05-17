@@ -69,9 +69,9 @@ const UserLogin = () => {
         <div id='login'>
           <NavBar />
           <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
-          <h1>User Sign In</h1>
+          <h1 className='part1'>fixer<span className='part2'>app</span></h1>
           <form onSubmit={handleSubmit}>
-            <label htmlFor='useremail'>Email Address:</label>
+            <label htmlFor='useremail'>Email Address</label>
             <input
               type='text'
               id='useremail'
@@ -81,7 +81,7 @@ const UserLogin = () => {
               required
             />
 
-            <label htmlFor='password'>Password:</label>
+            <label htmlFor='password'>Password</label>
             <input
               type='password'
               id='password'
@@ -89,24 +89,16 @@ const UserLogin = () => {
               value={pwd}
               required
             />
-            <button>Sign In</button>
-            <p>Trust this device?</p>
-            <div className='persistCheck'>
-              <input
-                type='checkbox'
-                id='persist'
-                onChange={toggleCheck}
-                checked={check}
-              />
-              <label htmlFor='persist'>Click to stay logged in</label>
-            </div>
+            <input
+              type='checkbox'
+              id='persist'
+              onChange={toggleCheck}
+              checked={check}
+            />
+            <label htmlFor='persist'>Keep me signed in</label>
+            <button>Login</button>
           </form>
-          <p>
-              Need an Account?<br />
-              <span className='needAccount'>
-                <Link to='/user-registration'>Sign Up</Link>
-              </span>
-          </p>
+          <p>Need an account? <Link to='/user-registration'>Sign up here</Link></p>
         </div>
       ) : (
         <Navigate to={from} replace={true} />

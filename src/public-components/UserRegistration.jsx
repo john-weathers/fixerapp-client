@@ -135,10 +135,10 @@ const UserRegistration = () => {
         <section id='registration'>
           <NavBar />
           <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
-          <h1>User Registration</h1>
+          <h1 className='part1'>fixer<span className='part2'>app</span></h1>
           <form onSubmit={handleSubmit}>
             <label htmlFor='useremail'>
-              Email Address:
+              Email Address
               {
                 /*<FontAwesomeIcon icon={faCheck} className={validEmail ? 'valid' : 'hide'} />
                 <FontAwesomeIcon icon={faTimes} className={validEmail || !email ? 'hide' : 'invalid'} />*/
@@ -166,7 +166,7 @@ const UserRegistration = () => {
 
 
             <label htmlFor='password'>
-              Password:
+              Password
               <FontAwesomeIcon icon={faCheck} className={validPwd ? 'valid' : 'hide'} />
               <FontAwesomeIcon icon={faTimes} className={validPwd || !pwd ? 'hide' : 'invalid'} />
             </label>
@@ -191,7 +191,7 @@ const UserRegistration = () => {
 
 
             <label htmlFor='confirm_pwd'>
-              Confirm Password:
+              Confirm Password
               <FontAwesomeIcon icon={faCheck} className={validMatch && matchPwd ? 'valid' : 'hide'} />
               <FontAwesomeIcon icon={faTimes} className={validMatch || !matchPwd ? 'hide' : 'invalid'} />
             </label>
@@ -212,8 +212,8 @@ const UserRegistration = () => {
             </p>
 
 
-            <label>
-              First Name:
+            <label htmlFor='first_name'>
+              First Name
             </label>
             <input
               type='text'
@@ -228,8 +228,8 @@ const UserRegistration = () => {
             />
 
 
-            <label>
-              Last Name:
+            <label htmlFor='last_name'>
+              Last Name
             </label>
             <input
               type='text'
@@ -244,8 +244,8 @@ const UserRegistration = () => {
             />
 
 
-            <label>
-              Phone Number:
+            <label htmlFor='phone_number'>
+              Phone Number
             </label>
             <input
               type='text'
@@ -259,14 +259,9 @@ const UserRegistration = () => {
               onBlur={() => setPhoneFocus(false)}
             />
 
-            <button disabled={!validEmail || !validPwd || !validMatch || !validFirst || !validLast || !validNumber ? true : false}>Sign Up</button>
+            <button disabled={!validEmail || !validPwd || !validMatch || !validFirst || !validLast || !validNumber ? true : false}>Sign up</button>
           </form>
-          <p>
-            Already registered?<br />
-            <span className='dontNeedAccount'>
-              <Link to='/user-login'>Sign In</Link>
-            </span>
-          </p>
+          <p>Already have an account? <Link to='/user-login'>Sign in here</Link></p>
         </section>
       )}
     </>
