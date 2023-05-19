@@ -3,16 +3,24 @@
 html {
   box-sizing: border-box;
   font-size: 16px;
+  scrollbar-gutter: stable;
 }
 
 *, *:before, *:after {
   box-sizing: inherit;
 }
 
+@font-face {
+  font-family: 'Heebo';
+  src: url('/Heebo-VariableFont_wght.ttf');
+  font-weight: 100 900;
+}
+
 body, h1, h2, h3, h4, h5, h6, p, ol, ul {
   margin: 0;
   padding: 0;
   font-weight: normal;
+  font-family: 'Heebo', sans-serif;
 }
 
 ol, ul {
@@ -24,45 +32,133 @@ img {
   height: auto;
 }
 
+
+
 /* Landing */
 
 
 /* NavLinks - placeholder ruleset */
 
+.header {
+  margin-top: 18px;
+  border-top: 1px solid rgba(54, 70, 82, 0.5);
+  border-bottom: 1px solid rgba(54, 70, 82, 0.5);
+}
+
 nav ul li {
   display: inline;
 }
 
-nav ul li h1 {
-  margin: 0;
-  padding: 0;
-}
-
 .nav-title {
   color: #364652;
+  cursor: default;
+  height: 85px;
+  line-height: 85px;
+}
+
+.nav-title-active {
+  color: #680982;
+  font-weight: 350;
+  cursor: default;
+  height: 85px;
+  line-height: 85px;
+}
+
+.logo-img {
+  color: black;
+  display: inline;
+  vertical-align: middle;
+  margin-bottom: 10px;
 }
 
 .logo-part1 {
+  font-size: 28px;
+  font-weight: 800;
   display: inline-block;
+  margin-top: 20px;
+  margin-left: 5px;
 }
 
 .logo-part2 {
   color: #680982;
+  font-weight: 300;
+  display: inline;
 }
 
 .nav-link {
   text-decoration: none;
   color: #364652;
+  font-weight: 300;
 }
 
 .nav-link.active {
   color: #680982;
+  font-weight: 350;
 }
 
 .nav-container {
+  margin: 0 170px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
+}
+
+.nav-subcontainer {
+  display: flex;
+  align-items: center;
+  width: 300px;
+  justify-content: space-between;
+  font-weight: 300;
   height: 80px;
+}
+
+.hover-nav-parent {
+  position: relative;
+  z-index: 3;
+}
+
+.hover-nav-child-1 {
+  position: absolute;
+  left: -18px;
+}
+
+.hover-nav-child-2 {
+  position: absolute;
+  left: -10px;
+}
+
+.nav-popout-clients {
+  height: 40px;
+  line-height: 40px;
+  border-bottom: 1px solid rgba(54, 70, 82, 0.5);
+  border-left: 1px solid rgba(54, 70, 82, 0.5);
+  border-right: 1px solid rgba(54, 70, 82, 0.5);
+  background-color: white;
+}
+
+.nav-popout-fixers {
+  height: 40px;
+  line-height: 40px;
+  border-bottom: 1px solid rgba(54, 70, 82, 0.5);
+  border-left: 1px solid rgba(54, 70, 82, 0.5);
+  border-right: 1px solid rgba(54, 70, 82, 0.5);
+  background-color: white;
+}
+
+.hover-nav-child-2 {
+  position: absolute;
+}
+
+.nav-popout li {
+  display: inline-block;
+  width: 75px;
+  text-align: center;
+}
+
+.nav-popout-learn-more li {
+  display: inline-block;
+  width: 75px;
+  text-align: center;
 }
 
 /* GetStarted component - placeholder rulesets */
@@ -90,8 +186,9 @@ nav ul li h1 {
   background-color: #680982;
   color: white;
   font-size: 16px;
-  width: 250px;
-  height: 100px;
+  font-family: 'Heebo', sans-serif;
+  width: 225px;
+  height: 90px;
   border: none;
   cursor: pointer;
   border-radius: 5px;

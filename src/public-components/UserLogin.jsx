@@ -96,7 +96,7 @@ const UserLogin = () => {
               checked={check}
             />
             <label htmlFor='persist'>Keep me signed in</label>
-            <button>Login</button>
+            <button className='btn'>Login</button>
           </form>
           <p>Need an account? <Link to='/user-registration'>Sign up here</Link></p>
         </div>

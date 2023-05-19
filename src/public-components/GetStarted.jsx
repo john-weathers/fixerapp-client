@@ -41,13 +41,13 @@ const GetStarted = () => {
   }
 
   return (
-    <div>
-        <NavBar onClick={handleNavClick}/>
+    <div className='learn-more'>
+        <NavBar onClick={handleNavClick} learnMore={true}/>
         
           {showCover && (
             <div className='flex-container'>
               <div className='column'>
-                <img src='/learnmore1.svg'/>
+                <img src='/learnmore1.svg' alt='Hammer, credit: https://icons8.com/icon/100418/hammer'/>
                 <button type='button' onClick={handleUserClick} className='btn'>Clients</button>
               </div>
               <div className='column'>
