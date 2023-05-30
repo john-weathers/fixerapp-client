@@ -66,12 +66,16 @@ const FixerLogin = () => {
   return (
     <>
       {!auth?.accessToken ? (
-      <div id='login'>
+      <div className='login'>
         <NavBar />
         <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
-        <h1 className='part1'>fixer<span className='part2'>app</span></h1>
-        <form onSubmit={handleSubmit}>
-          <label htmlFor='useremail'>Email Address</label>
+        {window.innerWidth <= 480 ? (
+            <h1 className='title-mobile'>Fixer login</h1>
+          ) : (
+            <h1 className='app-name-part1'>fixer<span className='app-name-part2'>app</span><span className='title-divider'> | </span><span className='title-part3'>fixer login</span></h1>
+          )}
+        <form onSubmit={handleSubmit} className='account-form'>
+          <label htmlFor='useremail' className='text-label'>Email Address</label>
           <input
             type='text'
             id='useremail'
@@ -79,26 +83,30 @@ const FixerLogin = () => {
             autoComplete='off'
             {...emailAttribs}
             required
+            className='text-field'
           />
 
-          <label htmlFor='password'>Password</label>
+          <label htmlFor='password' className='text-label'>Password</label>
           <input
             type='password'
             id='password'
             onChange={(e) => setPwd(e.target.value)}
             value={pwd}
             required
+            className='text-field'
           />
-          <input
-            type='checkbox'
-            id='persist'
-            onChange={toggleCheck}
-            checked={check}
-          />
-          <label htmlFor='persist'>Keep me signed in</label>
-          <button>Login</button>
+          <label htmlFor='persist' className='persist-label'>
+            <input
+              type='checkbox'
+              id='persist'
+              onChange={toggleCheck}
+              checked={check}
+            />
+            Keep me signed in
+          </label>
+          <button className='btn'>Login</button>
         </form>
-        <p>Need an account? <Link to='/fixer-registration'>Sign up here</Link></p>
+        <p className='account-p'>Need an account? <Link to='/fixer-registration' className='account-span'>Sign up here</Link></p>
       </div>
     ) : (
       <Navigate to={from} replace={true} />

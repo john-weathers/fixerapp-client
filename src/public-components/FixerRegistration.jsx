@@ -132,12 +132,16 @@ const FixerRegistration = () => {
           <Link to='/fixer-login'>Sign In</Link>
         </section>
       ) : (
-        <section id='registration'>
+        <section className='registration'>
           <NavBar />
           <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
-          <h1 className='part1'>fixer<span className='part2'>app</span></h1>
-          <form onSubmit={handleSubmit}>
-            <label htmlFor='useremail'>
+          {window.innerWidth <= 480 ? (
+            <h1 className='title-mobile'>Sign up | fixers</h1>
+          ) : (
+            <h1 className='app-name-part1'>fixer<span className='app-name-part2'>app</span><span className='title-divider'> | </span><span className='title-part3'>fixer sign up</span></h1>
+          )}
+          <form onSubmit={handleSubmit} className='account-form'>
+            <label htmlFor='useremail' className='text-label'>
               Email Address
               {
               /*<FontAwesomeIcon icon={faCheck} className={validEmail ? 'valid' : 'hide'} />
@@ -156,6 +160,7 @@ const FixerRegistration = () => {
               aria-describedby='uidnote'
               onFocus={() => setEmailFocus(true)}
               onBlur={() => setEmailFocus(false)}
+              className='text-field'
             />
             {
             /*<p id='uidnote' className={emailFocus && email && !validEmail ? 'instructions' : 'offscreen'}>
@@ -165,7 +170,7 @@ const FixerRegistration = () => {
             }
 
 
-            <label htmlFor='password'>
+            <label htmlFor='password' className='text-label'>
               Password
               <FontAwesomeIcon icon={faCheck} className={validPwd ? 'valid' : 'hide'} />
               <FontAwesomeIcon icon={faTimes} className={validPwd || !pwd ? 'hide' : 'invalid'} />
@@ -180,6 +185,7 @@ const FixerRegistration = () => {
               aria-describedby='pwdnote'
               onFocus={() => setPwdFocus(true)}
               onBlur={() => setPwdFocus(false)}
+              className='text-field'
             />
             <p id='pwdnote' className={pwdFocus && !validPwd ? 'instructions' : 'offscreen'}>
               <FontAwesomeIcon icon={faInfoCircle} />
@@ -190,7 +196,7 @@ const FixerRegistration = () => {
             </p>
 
 
-            <label htmlFor='confirm_pwd'>
+            <label htmlFor='confirm_pwd' className='text-label'>
               Confirm Password
               <FontAwesomeIcon icon={faCheck} className={validMatch && matchPwd ? 'valid' : 'hide'} />
               <FontAwesomeIcon icon={faTimes} className={validMatch || !matchPwd ? 'hide' : 'invalid'} />
@@ -205,6 +211,7 @@ const FixerRegistration = () => {
               aria-describedby='confirmnote'
               onFocus={() => setMatchFocus(true)}
               onBlur={() => setMatchFocus(false)}
+              className='text-field'
             />
             <p id='confirmnote' className={matchFocus && !validMatch ? 'instructions' : 'offscreen'}>
               <FontAwesomeIcon icon={faInfoCircle} />
@@ -212,7 +219,7 @@ const FixerRegistration = () => {
             </p>
 
 
-            <label htmlFor='first_name'>
+            <label htmlFor='first_name' className='text-label'>
               First Name
             </label>
             <input
@@ -225,10 +232,11 @@ const FixerRegistration = () => {
               aria-describedby='firstnamenote'
               onFocus={() => setFirstFocus(true)}
               onBlur={() => setFirstFocus(false)}
+              className='text-field'
             />
 
 
-            <label htmlFor='last_name'>
+            <label htmlFor='last_name' className='text-label'>
               Last Name
             </label>
             <input
@@ -241,10 +249,11 @@ const FixerRegistration = () => {
               aria-describedby='lastnamenote'
               onFocus={() => setLastFocus(true)}
               onBlur={() => setLastFocus(false)}
+              className='text-field'
             />
 
 
-            <label htmlFor='phone_number'>
+            <label htmlFor='phone_number' className='text-label'>
               Phone Number
             </label>
             <input
@@ -257,11 +266,12 @@ const FixerRegistration = () => {
               aria-describedby='phonenumbernote'
               onFocus={() => setPhoneFocus(true)}
               onBlur={() => setPhoneFocus(false)}
+              className='text-field'
             />
 
-            <button disabled={!validEmail || !validPwd || !validMatch || !validFirst || !validLast || !validNumber ? true : false}>Sign up</button>
+            <button disabled={!validEmail || !validPwd || !validMatch || !validFirst || !validLast || !validNumber ? true : false} className='btn'>Sign up</button>
           </form>
-          <p>Already have an account? <Link to='/fixer-login'>Sign in here</Link></p>
+          <p className='account-p'>Already have an account? <Link to='/fixer-login' className='account-span'>Sign in here</Link></p>
         </section>
       )}
     </>

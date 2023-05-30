@@ -14,32 +14,51 @@ import { faStopwatch } from '@fortawesome/free-solid-svg-icons';
 
 const Landing = () => {
   return (
-    <div id='landing'>
+    <div className='landing'>
         <NavBar />
-        <div>
-          <img src='/landing1.svg'/>
-          <h1>Professional repair service <span>on demand</span></h1>
+        <div className='section one'>
+          <div className='flex-container'>
+            <img src='/landing1-v2.jpg'/>
+            <div>
+              <h1 className='light'>Professional repair service</h1>
+              <h1 className='bold'>on demand</h1>
+            </div>
+          </div>
         </div>
-        <div>
-          <h2>Working with fixerapp</h2>
-          <ul>
-            <li><FontAwesomeIcon icon={faCalendarCheck} className='bullet'/><span className='point'>flexible hours</span></li>
-            <li><FontAwesomeIcon icon={faWrench} className='bullet'/><span className='point'>on demand jobs</span></li>
-            <li><FontAwesomeIcon icon={faCheck} className='bullet'/><span className='point'>easy to use</span></li>
-            <li><FontAwesomeIcon icon={faCreditCard} className='bullet'/><span className='point'>get paid immediately</span></li>
-          </ul>
-          <Link to='/fixer-registration' className='sign-up'>Fixer sign up</Link>
-          <img src='/landing2.svg'/>
+        <div className='background-div'>
+          <div className='section two'>
+            <div className='flex-container'>
+              <div className='flex-subcontainer'>
+                <div>
+                  <h2>Working with fixerapp</h2>
+                  <ul>
+                    <li className='icon-one'><FontAwesomeIcon icon={faCalendarCheck} size='xl' className='calendar'/><span className='span-text one'>flexible hours</span></li>
+                    <li><FontAwesomeIcon icon={faWrench} size='lg'/><span>on demand jobs</span></li>
+                    <li><FontAwesomeIcon icon={faCheck} size='lg'/><span>easy to use</span></li>
+                    <li><FontAwesomeIcon icon={faCreditCard} size='lg'/><span className='span-text'>get paid immediately</span></li>
+                  </ul>
+                </div>
+                <Link to='/fixer-registration' className='sign-up'>Fixer sign up</Link>
+              </div>
+              <img src='/landing2-v2.jpg'/>
+            </div>
+          </div>
         </div>
-        <div>
-          <img src='/landing3.svg'/>
-          <h2>Hire a professional</h2>
-          <ul>
-            <li><FontAwesomeIcon icon={faThumbsUp} className='bullet'/><span className='point'>fair and transparent pricing</span></li>
-            <li><FontAwesomeIcon icon={faCheck} className='bullet'/><span className='point'>no hassle</span></li>
-            <li><FontAwesomeIcon icon={faStopwatch} className='bullet'/><span className='point'>hire on demand or schedule at your convenience</span></li>
-          </ul>
-          <Link to='/user-registration' className='sign-up'>Client sign up</Link>
+        <div className='section three'>
+          <div className='flex-container'>
+            <img src='/landing3.jpg'/>
+            <div className='flex-subcontainer'>
+              <div>
+                <h2>Hire a professional</h2>
+                <ul>
+                  <li className='icon-one'><FontAwesomeIcon icon={faThumbsUp} size='lg'/><span>fair and transparent pricing</span></li>
+                  <li><FontAwesomeIcon icon={faCheck} size='lg'/><span>no hassle</span></li>
+                  <li><FontAwesomeIcon icon={faStopwatch} size='lg'/><span className='stopwatch-text'>hire on demand or schedule at your convenience</span></li>
+                </ul>
+              </div>
+              <Link to='/user-registration' className='sign-up'>Client sign up</Link>
+            </div>
+          </div>
         </div>
     </div>
   )

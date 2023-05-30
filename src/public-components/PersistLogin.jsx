@@ -46,7 +46,11 @@ const PersistLogin = () => {
             {!persist
                 ? <Outlet />
                 : isLoading
-                    ? <p>Loading...</p>
+                    ? (
+                        <div className='loading'>
+                            <p>Loading...</p>
+                        </div>
+                    )
                     : <Outlet />
             }
         </>

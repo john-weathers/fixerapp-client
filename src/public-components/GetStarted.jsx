@@ -40,70 +40,94 @@ const GetStarted = () => {
     setShowUserInfo(prev => !prev);
   }
 
+  // NOTE: minor issue with absolute positioning on buttons causing layout issues when images are loading
+  // I think there are a couple potential ways to alleviate this, one of which is I suspect the browser cache is being invalidated when the refresh API call is made
+  // could implement some form of cache-control, setting headers in express, but would need to make sure any solutions don't impact more critical functions
+  // additionally, need a placeholder element and/or fallback
+  // that allows the buttons to still be positioned correctly in cases where a) the image doesn't properly load or b) the image loads late
   return (
-    <div className='learn-more'>
+    <div className='learn-more-layout'>
         <NavBar onClick={handleNavClick} learnMore={true}/>
         
           {showCover && (
             <div className='flex-container'>
-              <div className='column'>
-                <img src='/learnmore1.svg' alt='Hammer, credit: https://icons8.com/icon/100418/hammer'/>
+              <div className='column clients'>
                 <button type='button' onClick={handleUserClick} className='btn'>Clients</button>
               </div>
-              <div className='column'>
-                <img src='/learnmore2.svg'/>
+              <div className='column fixers'>
                 <button type='button' onClick={handleFixerClick} className='btn'>Fixers</button>
               </div>
             </div>
           )}
 
           {showUserInfo && (
-            <div className='client-info'>
-              <h1 className='title-part1'>Getting your home repaired</h1>
-              <h1 className='title-part2'>should be easy</h1>
-              <p>Are you tired of trying to find a handyman the old fashioned way or general contractors
-              not giving you the time of day? It can be difficult to know who to trust when it comes to 
-              repairs in your home. Even if you find that person, overworked handymen may not be available 
-              on a reliable timeframe that fits your needs. This is where fixerapp comes to the rescue with a 
-              roster of qualified repair professionals in your local area. Our fixers are ready to help you on
-              your schedule. To put it simply, this is what we offer:
-              </p>
-              <ul>
-                <li><FontAwesomeIcon icon={faCalendarCheck}/><span>Service available when you need it</span></li>
-                <li><FontAwesomeIcon icon={faArrowTurnUp} rotation={90}/><span>on demand or any time in the future, at your convenience</span></li>
-                <li><FontAwesomeIcon icon={faBan}/><span>No more unnecessary phone calls to gather quotes</span></li>
-                <li><FontAwesomeIcon icon={faArrowTurnUp} rotation={90}/><span>schedule through our app with a few clicks</span></li>
-                <li><FontAwesomeIcon icon={faCheck}/><span>We only work with relaible professionals that meet our high standards</span></li>
-                <li><FontAwesomeIcon icon={faArrowTurnUp} rotation={90}/><span>worry-free hiring process with guaranteed quality service</span></li>
-              </ul>
-              <Link to='/user-registration' className='sign-up'>Client sign up</Link>
-              <p>Interested in joining our roster of fixers?</p>
-              <button type='button' onClick={handleUserClick2}>Learn more</button>
-            </div>
+            <section className='more-info'>
+              <div className='title'>
+                <h1 className='part1'>Getting your home repaired</h1>
+                <h1 className='part2'>should be easy</h1>
+              </div>
+              <article>
+                <p>Are you tired of trying to find a handyman the old fashioned way or general contractors
+                not giving you the time of day? It can be difficult to know who to trust when it comes to 
+                repairs in your home. Even if you find that person, overworked handymen may not be available 
+                on a reliable timeframe that fits your needs. This is where fixerapp comes to the rescue with a 
+                roster of qualified repair professionals in your local area. Our fixers are ready to help you on
+                your schedule. To put it simply, this is what we offer:
+                </p>
+                <ul>
+                  <li><FontAwesomeIcon icon={faCalendarCheck} size='xl' className='calendar'/><span className='calendar-text'>Service available when you need it</span></li>
+                  <li><FontAwesomeIcon icon={faArrowTurnUp} rotation={90} size='xl'/><span className='arrow-text'>on demand or any time in the future, at your convenience</span></li>
+                  <li><FontAwesomeIcon icon={faBan} size='xl'/><span>No more unnecessary phone calls to gather quotes</span></li>
+                  <li><FontAwesomeIcon icon={faArrowTurnUp} rotation={90} size='xl'/><span className='arrow-text'>schedule through our app with a few clicks</span></li>
+                  <li><FontAwesomeIcon icon={faCheck} size='xl'/><span>We only work with relaible professionals that meet our high standards</span></li>
+                  <li><FontAwesomeIcon icon={faArrowTurnUp} rotation={90} size='xl'/><span className='arrow-text'>worry-free hiring process with guaranteed quality service</span></li>
+                </ul>
+                <Link to='/user-registration' className='sign-up'>Client sign up</Link>
+                <p className='learn-more'>Interested in joining our roster of fixers?</p>
+                <div className='learn-more-button'>
+                  <button type='button' onClick={handleUserClick2}>Learn more</button>
+                </div>
+              </article>
+            </section>
           )}
 
           {showFixerInfo && (
-            <div className='fixer-info'>
-              <h1 className='title-part1'>Let us help you find clients</h1>
-              <h1 className='title-part2'>so you can <span>focus on the work</span></h1>
-              <p>Finding clients, handling phone calls, scheduling, and ensuring a steady flow of quality jobs 
-              is a lot of work! Fixerapp lets you spend less of your time on mundane tasks that aren’t paying 
-              you any money and more time on the work that matters most. Whether you use the app full-time
-              or part-time is up to you. You have complete flexibility with fixerapp to always make sure you
-              have jobs when you need them. Here's what we can offer:
-              </p>
-              <ul>
-                <li><FontAwesomeIcon icon={faCalendarCheck}/><span>Flexible hours that fit your needs</span></li>
-                <li><FontAwesomeIcon icon={faArrowTurnUp} rotation={90}/><span>take on jobs as needed to build your perfect schedule</span></li>
-                <li><FontAwesomeIcon icon={faBan}/><span>Stop wasting time on the phone, trying to figure out what will or won't be a quality job</span></li>
-                <li><FontAwesomeIcon icon={faArrowTurnUp} rotation={90}/><span>let us do the heavy lifting when it comes to matching you with clients</span></li>
-                <li><FontAwesomeIcon icon={faCreditCard}/><span>Payment is handled by us so you get your money at time of service</span></li>
-                <li><FontAwesomeIcon icon={faArrowTurnUp} rotation={90}/><span>streamlining payment lets you focus on the work and gives the client a convenient experience</span></li>
-              </ul>
-              <Link to='/fixer-registration' className='sign-up'>Fixer sign up</Link>
-              <p>Interested in the client process?</p>
-              <button type='button' onClick={handleFixerClick2}>Learn more</button>
-            </div>
+            <section className='more-info'>
+              {window.innerWidth <= 480 ? (
+                <div className='title'>
+                  <h1 className='part1 mobile'>Let us help you</h1>
+                  <h1 className='part1 mobile'>find clients</h1>
+                  <h1 className='part2-fixer'>so you can</h1>
+                  <h1 className='part3-fixer-mobile'>focus on the work</h1>
+              </div>
+              ) : (
+                <div className='title'>
+                  <h1 className='part1'>Let us help you find clients</h1>
+                  <h1 className='part2-fixer'>so you can <span>focus on the work</span></h1>
+                </div>
+              )}
+              <article>
+                <p>Finding clients, handling phone calls, scheduling, and ensuring a steady flow of quality jobs 
+                is a lot of work! Fixerapp lets you spend less of your time on mundane tasks that aren’t paying 
+                and more time on the work that matters most. Whether you use the app full-time
+                or part-time is up to you. You have complete flexibility with fixerapp to always make sure you
+                have jobs when you need them. Here's what we can offer:
+                </p>
+                <ul>
+                  <li><FontAwesomeIcon icon={faCalendarCheck} size='xl' className='calendar'/><span className='calendar-text'>Flexible hours that fit your needs</span></li>
+                  <li><FontAwesomeIcon icon={faArrowTurnUp} rotation={90} size='xl'/><span className='arrow-text'>take on jobs as needed to build your perfect schedule</span></li>
+                  <li><FontAwesomeIcon icon={faBan} size='xl'/><span>Stop wasting time on the phone, trying to figure out what will or won't be a quality job</span></li>
+                  <li><FontAwesomeIcon icon={faArrowTurnUp} rotation={90} size='xl'/><span className='arrow-text'>let us do the heavy lifting when it comes to matching you with clients</span></li>
+                  <li><FontAwesomeIcon icon={faCreditCard} size='xl'/><span className='cc-text'>Payment is handled by us so you get your money at time of service</span></li>
+                  <li><FontAwesomeIcon icon={faArrowTurnUp} rotation={90} size='xl'/><span className='arrow-text'>streamlining payment lets you focus on the work and gives the client a convenient experience</span></li>
+                </ul>
+                <Link to='/fixer-registration' className='sign-up'>Fixer sign up</Link>
+                <p className='learn-more'>Interested in the client process?</p>
+                <div className='learn-more-button'>
+                  <button type='button' onClick={handleFixerClick2}>Learn more</button>
+                </div>
+              </article>
+            </section>
           )}
         
     </div>

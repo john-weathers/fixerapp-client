@@ -10,8 +10,8 @@ const PrivateNavBar = ({ navOptions }) => {
     const logout = useLogout();
 
     return (
-        <nav id='header-private'>
-            <ul>
+        <nav className='header-private'>
+            <ul className='nav-container-private'>
                 <li>
                     <NavLink to={navOptions.homeUrl}>
                         <div className='logo'>
