@@ -3,7 +3,7 @@
 html {
   box-sizing: border-box;
   font-size: 16px;
-  scrollbar-gutter: stable;
+  /*scrollbar-gutter: stable;*/
 }
 
 *, *:before, *:after {
@@ -13,6 +13,12 @@ html {
 @font-face {
   font-family: 'Heebo';
   src: url('/Heebo-VariableFont_wght.ttf');
+  font-weight: 100 900;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/Inter-VariableFont_slnt,wght.ttf');
   font-weight: 100 900;
 }
 
@@ -32,12 +38,348 @@ img {
   height: auto;
 }
 
+/* Global/multi-component rules */
 
+.app-name-part1 {
+  font-size: 40px;
+  font-weight: 800;
+  text-align: center;
+  color: #364652;
+}
+
+.app-name-part2 {
+  color: #680982;
+  font-weight: 200;
+}
+
+.title-divider {
+  font-weight: 100;
+}
+
+.title-part3 {
+  font-size: 36px;
+  font-weight: 300;
+}
+
+.account-form {
+  width: 400px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+}
+
+.text-field {
+  width: 400px;
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid rgba(54, 70, 82, 0.65);
+  font-size: 16px;
+  color: rgba(54, 70, 82, 0.8);
+  margin-top: 8px;
+  padding-left: 16px;
+  font-family: 'Inter';
+}
+
+.text-field:focus {
+  outline: none;
+  border: 1px solid #680982;
+  box-shadow: 0 0 4px #680982;
+}
+
+label {
+  display: block;
+}
+
+input {
+  display: block;
+}
+
+.btn {
+  background-color: #680982;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  border: none;
+  cursor: pointer;
+}
+
+.account-form .btn {
+  border-radius: 4px;
+  width: 400px;
+  height: 48px;
+}
+
+.account-span {
+  text-decoration: none;
+  color: #680982;
+  font-weight: 400;
+}
+
+.account-p {
+  text-align: center;
+  color: #364652;
+  font-weight: 300;
+}
+
+.sign-up {
+  text-decoration: none;
+  background-color: #680982;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  font-family: 'Inter';
+  display: block;
+  border-radius: 4px;
+  text-align: center;
+}
+
+@media screen and (max-width: 480px) {
+  .app-name-part1 {
+    font-size: 36px;
+  }
+
+  .title-part3 {
+    font-size: 32px;
+  }
+
+  .account-form {
+    width: 100%;
+    padding-left: 12.5px;
+    padding-right: 12.5px;
+  }
+
+  .text-field {
+    width: 100%;
+  }
+
+  .account-form .btn {
+    width: 100%;
+  }
+}
+
+/* Loading
+TODO: create custom loading bar
+modifying style directly in the component probably the best way to accomplish the bar animation
+*/
+
+.loading {
+  height: 100vh;
+  position: relative;
+}
+
+.loading p {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  color: #364652;
+  font-weight: 500;
+}
 
 /* Landing */
 
+.landing .flex-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-left: 25px;
+  margin-right: 25px;
+  gap: 25px;
+}
 
-/* NavLinks - placeholder ruleset */
+.landing .section {
+  max-width: 1000px;
+  margin: 67px auto;
+}
+
+/*.landing .section.one .flex-container {
+  flex-wrap: wrap-reverse;
+}
+
+.landing .section.two .flex-container {
+  flex-wrap: wrap;
+}
+
+.landing .section.three .flex-container {
+  flex-wrap: wrap;
+}*/
+
+.landing .section.two {
+  margin: 0 auto;
+}
+
+.landing .background-div {
+  background-color: #F8F2F7;
+  padding: 67px 0;
+}
+
+.section .light {
+  font-weight: 300;
+}
+
+.section .bold {
+  font-weight: 500;
+}
+
+.landing h2 {
+  font-weight: 500;
+}
+
+.landing span {
+  font-weight: 300;
+}
+
+.landing .section li {
+  margin-bottom: 4px; 
+}
+
+.section.two span {
+  margin-left: 14px;
+}
+
+.section.two .span-text {
+  margin-left: 11px;
+}
+
+.section.two .span-text.one {
+  margin-left: 13px;
+}
+
+.section.two .calendar {
+  margin-bottom: 2px;
+}
+
+.section.three .stopwatch-text {
+  margin-left: 17px;
+}
+
+.landing .icon-one {
+  margin-top: 8px;
+}
+
+.section.three span {
+  margin-left: 14px;
+}
+
+.landing .sign-up {
+  width: 148px;
+  height: 48px;
+  line-height: 48px;
+  margin-top: 32px;
+}
+
+@media screen and (max-width: 950px) {
+  .landing .section {
+    margin: 45px auto;
+  }
+
+  .landing .background-div {
+    padding: 45px 0;
+  }
+
+  .landing .section.one .flex-container {
+    flex-direction: column-reverse;
+  }
+
+  .landing .section.two .flex-container {
+    flex-direction: column;
+    max-width: fit-content;
+    margin: 0 auto;
+  }
+
+  .landing .section.two .flex-subcontainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    width: 550px;
+  }
+
+  .landing .section .flex-subcontainer .sign-up {
+    margin: 0;
+  }
+
+  .landing .section.three .flex-container {
+    flex-direction: column;
+    max-width: 550px;
+    margin: 0 auto;
+  }
+
+  .landing .section.three .flex-subcontainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 550px;
+    gap: 20px;
+  }
+
+  .landing .section.three .flex-subcontainer div {
+    flex-basis: 50%;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .landing .section {
+    margin: 30px auto;
+  }
+
+  .landing .background-div {
+    padding: 30px 0;
+  }
+
+  .landing .section.one .flex-container div {
+    text-align: center;
+  }
+
+  .landing .section.two .flex-container {
+    margin-left: 25px;
+    margin-right: 25px;
+  }
+
+  .landing .section.three .flex-container {
+    margin-left: 25px;
+    margin-right: 25px;
+  }
+
+  .landing .section.two .flex-subcontainer {
+    display: block;
+    width: fit-content;
+  }
+
+  .landing .section.two .flex-subcontainer ul {
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .landing .section.three .flex-subcontainer {
+    display: block;
+    width: 240px;
+  }
+
+  .landing .section.three .flex-subcontainer h2 {
+    text-align: center;
+  }
+
+  .landing .section .flex-subcontainer .sign-up {
+    margin: 20px auto 0 auto;
+    width: 230px;
+    height: 52px;
+    line-height: 52px;
+  }
+}
+
+@media screen and ((max-width: 1024px) or (orientation: portrait)) {
+  /*.landing .intro {
+    gap: 10px;
+    text-align: center;
+    margin: 30px 20px 30px 20px;
+  }*/
+}
+
+/* Navigation bar - public
+TODO: media queries for small and maybe medium sized screens
+*/
 
 .header {
   margin-top: 18px;
@@ -45,27 +387,33 @@ img {
   border-bottom: 1px solid rgba(54, 70, 82, 0.5);
 }
 
-nav ul li {
+.nav-subcontainer {
   display: inline;
 }
 
 .nav-title {
   color: #364652;
   cursor: default;
+  font-weight: 500;
+}
+
+.nav-title.large {
   height: 85px;
   line-height: 85px;
 }
 
 .nav-title-active {
   color: #680982;
-  font-weight: 350;
+  font-weight: 500;
   cursor: default;
+}
+
+.nav-title-active.large {
   height: 85px;
   line-height: 85px;
 }
 
 .logo-img {
-  color: black;
   display: inline;
   vertical-align: middle;
   margin-bottom: 10px;
@@ -88,12 +436,12 @@ nav ul li {
 .nav-link {
   text-decoration: none;
   color: #364652;
-  font-weight: 300;
+  font-weight: 500;
 }
 
 .nav-link.active {
   color: #680982;
-  font-weight: 350;
+  font-weight: 500;
 }
 
 .nav-container {
@@ -108,7 +456,7 @@ nav ul li {
   align-items: center;
   width: 300px;
   justify-content: space-between;
-  font-weight: 300;
+  font-weight: 500;
   height: 80px;
 }
 
@@ -145,73 +493,418 @@ nav ul li {
   background-color: white;
 }
 
-.hover-nav-child-2 {
-  position: absolute;
-}
-
 .nav-popout li {
   display: inline-block;
   width: 75px;
   text-align: center;
 }
 
-.nav-popout-learn-more li {
-  display: inline-block;
-  width: 75px;
-  text-align: center;
+.nav-popout li .nav-link {
+  font-weight: 500;
 }
 
-/* GetStarted component - placeholder rulesets */
-.flex-container {
+@media screen and (max-width: 1280px) {
+  .nav-container {
+    margin: 0 120px;
+  }
+}
+
+@media screen and (max-width: 1050px) {
+  .nav-subcontainer {
+    justify-content: flex-end;
+    gap: 40px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .nav-container {
+    margin: 0 80px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .nav-container {
+    margin: 0 40px;
+  }
+}
+
+@media screen and (max-width: 670px) {
+  .nav-subcontainer {
+    justify-content: flex-end;
+    gap: 25px;
+    width: fit-content;
+  }
+}
+
+@media screen and (max-width: 550px) {
+  .nav-container {
+    margin: 0 15px;
+  }
+
+  .nav-subcontainer {
+    gap: 20px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .header {
+    margin-top: 10px;
+    border-top: 2px solid rgba(54, 70, 82, 0.5);
+    border-bottom: 2px solid rgba(54, 70, 82, 0.5);
+  }
+
+  .logo-img {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 14px;
+  }
+
+  .logo-part1 {
+    font-size: 28px;
+    margin-top: 12px;
+  }
+
+  .nav-subcontainer-mobile img {
+    width: 32px;
+    height: 32px;
+    display: block;
+  }
+
+  .nav-subcontainer-mobile .mobile-popout {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .mobile-popout li:not(.nav-overlay, .body-overlay) {
+    height: 50px;
+    width: 100%;
+    text-align: center;
+    line-height: 50px;
+    border-bottom: 1px solid rgba(54, 70, 82, 0.5);
+    background-color: white;
+    border-left: 1px solid rgba(54, 70, 82, 0.5);
+    border-right: 1px solid rgba(54, 70, 82, 0.5);
+  }
+
+  .mobile-popout .sub-menu .sub-one {
+    border-left: 1px solid rgba(54, 70, 82, 0.5);
+    border-right: 0.5px solid rgba(54, 70, 82, 0.5);
+  }
+
+  .mobile-popout .sub-menu .sub-two {
+    border-left: 0.5px solid rgba(54, 70, 82, 0.5);
+    border-right: 1px solid rgba(54, 70, 82, 0.5);
+  }
+
+  .nav-subcontainer-mobile a {
+    display: inline-block;
+    width: 100%;
+  }
+
+  .mobile-popout {
+    z-index: 2;
+  }
+
+  .home {
+    z-index: 3;
+  }
+
+  .nav-title-active.mobile {
+    background-color: #F8F2F7;
+  }
+
+  .mobile-popout .sub-menu {
+    display: flex;
+    width: 100%;
+  }
+
+  .mobile-popout .sub-menu li {
+    display: inline-block;
+  }
+
+  .mobile-popout .nav-overlay {
+    height: 78.273px;
+    width: 100%;
+  }
+
+  .mobile-popout .body-overlay {
+    flex-grow: 1;
+    width: 100%;
+  }
+}
+
+/* GetStarted - cover page
+TODO: look into setting cache-control header on backend to solve problem of images reloading after refresh API call is made
+consider changing fixers image
+*/
+
+.learn-more-layout .flex-container {
   display: flex;
 }
 
-.column {
+.learn-more-layout .column {
   flex: 50%;
+  height: 110vh;
   position: relative;
 }
 
-.column img {
+.learn-more-layout .column.clients {
+  background-image: url('/learnmore1.jpg');
+  background-size: cover;
+  background-position: 57%;
+}
+
+.learn-more-layout .column.fixers {
+  background-image: url('/learnmore2.jpg');
+  background-size: cover;
+  background-position: 50%;
+}
+
+.learn-more-layout .column img {
   width: 100%;
   height: auto;
   display: block;
 }
 
-.column .btn {
+.learn-more-layout .column .btn {
   position: absolute;
-  top: 75%;
+  top: 70%;
   left: 50%;
   transform: translate(-50%, -50%);
   -ms-transform: translate(-50%, -50%);
-  background-color: #680982;
-  color: white;
-  font-size: 16px;
-  font-family: 'Heebo', sans-serif;
   width: 225px;
   height: 90px;
-  border: none;
-  cursor: pointer;
   border-radius: 5px;
 }
 
-@media only screen and (max-width: 768px) {
-  .flex-container {
+@media screen and ((max-width: 768px) or (orientation: portrait)) {
+  .learn-more-layout .flex-container {
     flex-direction: column;
+    height: 120vh;
   }
 
-  .flex-container .column {
-    margin: 0;
-    padding: 0;
-    border: none;
+  .learn-more-layout .column.fixers {
+    background-position: 57% 20%;
   }
 }
 
-/* Login - placeholders */
+/* GetStarted - more info */
 
-/*#login input {
-  display: block;
+.more-info .title {
+  background-color: #F8F2F7;
+  text-align: center;
+  padding: 30px 0;
+  font-size: 22px;
 }
 
+.title .part1 {
+  font-weight: 200;
+  color: #000000;
+}
+
+.title .part2 {
+  font-weight: 700;
+  color: #290533;
+}
+
+.title .part2-fixer {
+  color: #000000;
+  font-weight: 200;
+}
+
+.title span {
+  font-weight: 700;
+  color: #290533;
+}
+
+.more-info article {
+  width: 70ch;
+  margin: 48px auto 0 auto;
+  font-size: 20px;
+}
+
+.more-info article p {
+  font-weight: 200;
+  margin-bottom: 29px;
+}
+
+.more-info article li {
+  font-weight: 200;
+}
+
+.more-info article span {
+  margin-left: 16px;
+}
+
+.more-info .arrow-text {
+  margin-left: 24px;
+}
+
+.more-info .calendar {
+  margin-left: 1px;
+}
+
+.more-info .cc-text {
+  margin-left: 14px;
+}
+
+.more-info .calendar-text {
+  margin-left: 19px;
+}
+
+.more-info li:nth-child(even) {
+  margin: 15px 0 31px 54px;
+}
+
+.more-info .sign-up {
+  width: 160px;
+  height: 64px;
+  line-height: 64px;
+  margin: 57px auto 0 auto;
+}
+
+.more-info .learn-more {
+  margin-bottom: 0;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 35px;
+  font-family: 'Inter';
+}
+
+.more-info .learn-more-button {
+  text-align: center;
+ 
+}
+
+.more-info button {
+  border: none;
+  background: none;
+  color: #680982;
+  padding: 0;
+  font-family: 'Inter';
+  cursor: pointer;
+  height: auto;
+  outline: inherit;
+  font-size: 16px;
+  font-weight: 200;
+  margin-bottom: 40px;
+}
+
+@media screen and (max-width: 860px) {
+  .more-info article {
+    width: 100%;
+    padding-left: 50px;
+    padding-right: 50px;
+  }
+}
+
+@media screen and (max-width: 670px) {
+  .more-info article {
+    padding-left: 30px;
+    padding-right: 30px;
+    margin-top: 24px;
+  }
+
+  .more-info .arrow-text {
+    margin-left: 16px;
+  }
+
+  .more-info article span {
+    margin-left: 12px;
+  }
+
+  .more-info .calendar-text {
+    margin-left: 15px;
+  }
+}
+
+@media screen and (max-width: 550px) {
+  .more-info li:nth-child(even) {
+    margin: 10px 0 20px 20px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .more-info .title {
+    width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+  } 
+  
+  .title .part3-fixer-mobile {
+    font-weight: 700;
+    color: #290533;
+  }
+}
+
+
+/* Login
+TODO: add styling for error ref (display and offscreen rules)
+media queries for smaller screens
+*/
+
+.login .app-name-part1 {
+  margin-top: 100px;
+}
+
+.login .account-form {
+  margin: 66px auto 0 auto;
+}
+
+.login .text-field {
+  margin-bottom: 42px;
+}
+
+#persist {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin: 0 16px 0 0;
+}
+
+#persist:checked {
+  accent-color: #364652
+}
+
+.persist-label {
+  display: flex;
+  align-items: center;
+  font-weight: 200;
+}
+
+.login .btn {
+  margin-top: 16px;
+}
+
+.login .account-p {
+  margin: 66px 0 34px 0;
+}
+
+@media screen and (max-width: 480px) {
+  .login .title-mobile {
+    margin-top: 20px;
+    margin-left: 12.5px;
+    font-weight: 300;
+    text-align: center;
+  }
+
+  .login .account-form {
+    margin-top: 15px;
+  }
+
+  .login .account-p {
+    margin-top: 54px;
+  }
+}
+
+/*
 #login .errmsg {
   display: flex;
 }
@@ -219,25 +912,71 @@ nav ul li {
 #login .offscreen {
   visibility: hidden;
 }
+*/
 
-.persistCheck {
-  display: flex;
-}*/
 
-/* Registration - placeholders */
+/* Registration
+TODO: media queries for smaller screens
+*/
 
-#registration .errmsg {
-  display: inline;
+.registration .app-name-part1 {
+  margin-top: 30px;
 }
 
-#registration input {
-  display: block;
+.registration .account-form {
+  margin: 40px auto 0 auto;
 }
 
-#confirm_pwd {
-  display: block;
+.registration .text-field {
+  margin-bottom: 20px;
 }
 
+.registration .btn {
+  margin-top: 60px;
+}
+
+.registration .account-p {
+  margin: 60px 0 34px 0;
+}
+
+.registration .instructions {
+  margin-bottom: 20px;
+}
+
+@media screen and (max-width: 480px) {
+  /*.registration .app-name-part1 {
+    margin-top: 25px;
+    line-height: 45px;
+    text-align: left;
+    margin-left: 12.5px;
+  }*/
+
+  .registration .title-mobile {
+    margin-top: 20px;
+    margin-left: 12.5px;
+    font-size: 32px;
+    text-align: center;
+    font-weight: 300;
+  }
+
+  .registration .account-form {
+    margin-top: 20px;
+  }
+
+  .registration .btn {
+    margin-top: 35px;
+  }
+
+  .registration .account-p {
+    margin: 35px 0 50px 0;
+  }
+
+  .registration .text-field {
+    margin-bottom: 10px;
+  }
+}
+
+/*
 #registration .offscreen {
   display: none;
 }
@@ -257,6 +996,7 @@ nav ul li {
 #registration .instructions {
   display: block;
 }
+*/
 
 /* Nav */
 
