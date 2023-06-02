@@ -18,7 +18,7 @@ const HoverNav = ({ children, title, active }) => {
                 {title}
             </div>
             {hover &&
-            <div className={title === 'Login' ? 'hover-nav-child-1' : 'hover-nav-child-2'}>
+            <div className={title === 'Login' ? 'hover-nav-child-1' : 'hover-nav-child-2 other-hover-nav'}>
                 {children}
             </div>
             }
