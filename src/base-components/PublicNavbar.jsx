@@ -6,6 +6,7 @@ import { faBars } from "@fortawesome/free-solid-svg-icons";
 
 const NavBar = ({ onClick, learnMore }) => {
   const [url, setUrl] = useState(window.location.href);
+  const [mobile, setMobile] = useState(window.innerWidth <= 480 ? true : false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showSignUp, setShowSignUp] = useState(false);
@@ -13,8 +14,29 @@ const NavBar = ({ onClick, learnMore }) => {
 
   useEffect(() => {
     // another approach could be using a scroll/wheel event to close the mobile dropdown menu
-    setMobileHeight(document.getElementsByTagName('html')[0].offsetHeight);
+    const offsetHeight = document.getElementsByTagName('html')[0].offsetHeight;
+    if (window.innerHeight > offsetHeight) {
+        setMobileHeight(window.innerHeight)
+    } else {
+        setMobileHeight(offsetHeight);
+    }
   }, [mobileOpen]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 480) {
+        setMobile(true);
+      } else {
+        setMobile(false);
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   const handleMobileClick = () => {
     setMobileOpen(false);
@@ -47,7 +69,7 @@ const NavBar = ({ onClick, learnMore }) => {
                         <h1 className='logo-part1'>fixer<span className='logo-part2'>app</span></h1>
                 </NavLink>
             </li>
-            {window.innerWidth <= 480 ? (
+            {mobile ? (
                 <li className='nav-subcontainer-mobile'>
                     <img src='/menu.svg' onClick={handleMobileMenuClick}/>
                     {mobileOpen && (

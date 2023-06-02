@@ -29,6 +29,10 @@ body, h1, h2, h3, h4, h5, h6, p, ol, ul {
   font-family: 'Heebo', sans-serif;
 }
 
+a:hover, a:visited, a:active {
+  text-decoration: none;
+}
+
 ol, ul {
   list-style: none;
 }
@@ -76,7 +80,7 @@ img {
   color: rgba(54, 70, 82, 0.8);
   margin-top: 8px;
   padding-left: 16px;
-  font-family: 'Inter';
+  font-family: 'Inter', sans-serif;
 }
 
 .text-field:focus {
@@ -127,10 +131,18 @@ input {
   color: white;
   font-size: 16px;
   font-weight: 500;
-  font-family: 'Inter';
+  font-family: 'Inter', sans-serif;
   display: block;
   border-radius: 4px;
   text-align: center;
+}
+
+.offscreen {
+  display: none;
+}
+
+.hide {
+  display: none;
 }
 
 @media screen and (max-width: 480px) {
@@ -192,18 +204,6 @@ modifying style directly in the component probably the best way to accomplish th
   max-width: 1000px;
   margin: 67px auto;
 }
-
-/*.landing .section.one .flex-container {
-  flex-wrap: wrap-reverse;
-}
-
-.landing .section.two .flex-container {
-  flex-wrap: wrap;
-}
-
-.landing .section.three .flex-container {
-  flex-wrap: wrap;
-}*/
 
 .landing .section.two {
   margin: 0 auto;
@@ -377,9 +377,7 @@ modifying style directly in the component probably the best way to accomplish th
   }*/
 }
 
-/* Navigation bar - public
-TODO: media queries for small and maybe medium sized screens
-*/
+/* Navigation bar - public */
 
 .header {
   margin-top: 18px;
@@ -425,6 +423,7 @@ TODO: media queries for small and maybe medium sized screens
   display: inline-block;
   margin-top: 20px;
   margin-left: 5px;
+  color: #364652;
 }
 
 .logo-part2 {
@@ -554,14 +553,14 @@ TODO: media queries for small and maybe medium sized screens
   }
 
   .logo-img {
-    width: 40px;
-    height: 40px;
-    margin-bottom: 14px;
+    width: 32px;
+    height: 32px;
+    margin-bottom: 12px;
   }
 
   .logo-part1 {
     font-size: 28px;
-    margin-top: 12px;
+    margin-top: 6px;
   }
 
   .nav-subcontainer-mobile img {
@@ -630,13 +629,195 @@ TODO: media queries for small and maybe medium sized screens
   }
 
   .mobile-popout .nav-overlay {
-    height: 78.273px;
+    height: 67.273px;
     width: 100%;
   }
 
   .mobile-popout .body-overlay {
     flex-grow: 1;
     width: 100%;
+  }
+}
+
+/* Navigation bar - private */
+
+.header.private .nav-container {
+  margin: 0 44px;
+  justify-content: flex-start;
+}
+
+.header.private .home {
+  margin-right: 20px;
+}
+
+.header.private .user-menu {
+  margin-left: auto;
+}
+
+.header.private .nav-title {
+  line-height: 115px;
+}
+
+.header.private .hover-nav-parent {
+  width: 54px;
+  text-align: center;
+}
+
+.header.private .hover-nav-parent .nav-title img {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.header.private .hover-nav-child-2.other-hover-nav {
+  left: -11px;
+}
+
+.header.private .hover-nav-child-2.other-hover-nav a {
+  text-decoration: none;
+  color: #364652;
+  font-weight: 500;
+}
+
+.header.private .nav-popout li {
+  background-color: white;
+  height: 40px;
+  line-height: 40px;
+  border-bottom: 1px solid rgba(54, 70, 82, 0.5);
+  border-left: 1px solid rgba(54, 70, 82, 0.5);
+  border-right: 1px solid rgba(54, 70, 82, 0.5);
+}
+
+.header.private .nav-popout .top {
+  border-top: 1px solid rgba(54, 70, 82, 0.5);
+}
+
+.header.private .hover-nav-child-2.other-hover-nav a.active {
+  text-decoration: none;
+  color: #680982;
+  font-weight: 500;
+}
+
+.header.private .logout {
+  cursor: pointer;
+  font-weight: 500;
+  color: #364652;
+}
+
+@media screen and (max-width: 1050px) {
+  .header.private .home {
+    margin-right: 15px;
+  }
+
+  .header.private .nav-subcontainer {
+    justify-content: flex-start;
+    gap: 30px;
+  }
+}
+
+@media screen and (max-width: 650px) {
+  .header.private .nav-container {
+    display: block;
+  }
+
+  .header.private .nav-subcontainer-mobile {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header.private .home {
+    display: inline-block;
+    margin-right: 0;
+  }
+
+  .header.private .user-menu {
+    margin-left: 15px;
+  }
+
+  .header.private .nav-subcontainer-mobile img {
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+  }
+
+
+  .header.private {
+    margin-top: 10px;
+    border-top: 2px solid rgba(54, 70, 82, 0.5);
+    border-bottom: 2px solid rgba(54, 70, 82, 0.5);
+  }
+
+  .header.private .nav-subcontainer-mobile .logo-img {
+    margin-bottom: 12px;
+  }
+
+  .header.private .logo-part1 {
+    font-size: 28px;
+    margin-top: 6px;
+    margin-right: 3px;
+    margin-left: 4px;
+  }
+
+  .header.private .nav-subcontainer-mobile .mobile-popout {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .header.private .mobile-popout li:not(.nav-overlay, .body-overlay) {
+    height: 50px;
+    width: 100%;
+    text-align: center;
+    line-height: 50px;
+    border-bottom: 1px solid rgba(54, 70, 82, 0.5);
+    background-color: white;
+    border-left: 1px solid rgba(54, 70, 82, 0.5);
+    border-right: 1px solid rgba(54, 70, 82, 0.5);
+  }
+
+  .header.private .mobile-popout .sub-menu .sub-one {
+    border-left: 1px solid rgba(54, 70, 82, 0.5);
+    border-right: 0.5px solid rgba(54, 70, 82, 0.5);
+  }
+
+  .header.private .mobile-popout .sub-menu .sub-two {
+    border-left: 0.5px solid rgba(54, 70, 82, 0.5);
+    border-right: 1px solid rgba(54, 70, 82, 0.5);
+  }
+
+  .header.private .nav-subcontainer-mobile a {
+    display: inline-block;
+    width: 100%;
+  }
+
+  .header.private .mobile-popout {
+    z-index: 2;
+  }
+
+  .header.private .home {
+    z-index: 3;
+  }
+
+  .header.private .mobile-popout .nav-overlay {
+    height: 67.273px;
+    width: 100%;
+  }
+
+  .header.private .mobile-popout .body-overlay {
+    flex-grow: 1;
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .header.private .nav-container {
+    margin: 0 20px;
   }
 }
 
@@ -847,7 +1028,6 @@ consider changing fixers image
 
 /* Login
 TODO: add styling for error ref (display and offscreen rules)
-media queries for smaller screens
 */
 
 .login .app-name-part1 {
@@ -915,8 +1095,8 @@ media queries for smaller screens
 */
 
 
-/* Registration
-TODO: media queries for smaller screens
+/* Registration 
+TODO: valid/invalid, on/offscreen rules
 */
 
 .registration .app-name-part1 {
@@ -944,13 +1124,6 @@ TODO: media queries for smaller screens
 }
 
 @media screen and (max-width: 480px) {
-  /*.registration .app-name-part1 {
-    margin-top: 25px;
-    line-height: 45px;
-    text-align: left;
-    margin-left: 12.5px;
-  }*/
-
   .registration .title-mobile {
     margin-top: 20px;
     margin-left: 12.5px;
@@ -998,34 +1171,276 @@ TODO: media queries for smaller screens
 }
 */
 
-/* Nav */
+/* Index */
 
-#logout {
-  text-decoration: underline;
+.index div {
+  width: fit-content;
+  margin: 30px auto;
 }
 
-#logout:hover {
-  cursor: pointer;
+.index h2 {
+  color: #364652;
+  font-weight: 900;
+  font-size: 32px;
+  text-align: center;
+  background-color: #F8F2F7;
+  padding: 40px 0;
+}
+
+.index p {
+  font-weight: 500;
+  font-size: 18px;
+}
+
+.index table {
+  font-weight: 500;
+  margin: 20px auto 0 auto;
+}
+
+.index .icon {
+  padding-right: 5px;
+  padding-top: 2px;
+  vertical-align: top;
+}
+
+@media screen and (max-width: 768px) {
+  .index div {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+
 }
 
 /* Quick Fix */
 
-.offscreen {
-  display: none;
-}
-
 .sidebar {
   position: absolute;
-  width: 20%;
-  top: 92px; /* temporary fix...this needs to somehow be positioned in relation to the nav bar */ 
-  height: 80vh;
-  padding: 20px;
-  border-right: 10px solid whitesmoke;
+  width: 27%;
   background-color: white;
+  border-radius: 20px;
+  max-width: 425px;
+  min-width: 276px;
+  max-height: 900px;
+  min-height: 454px;
+  left: 23px;
+  top: 128px;
+  height: calc(100vh - 151px);
 }
 
-.hide {
-  display: none;
+.sidebar .flex-container {
+  width: 88%;
+  
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  height: 100%;
+  margin: 0 auto;
+  padding-top: 65px;
+  padding-bottom: 65px;
+}
+
+.sidebar h2 {
+  font-weight: 300;
+}
+
+.sidebar h2:nth-child(1) {
+  color: #680982;
+}
+
+.sidebar form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.sidebar .text-field {
+  width: 100%;
+  border: 2px solid #364652;
+  color: black;
+  margin-top: 0;
+}
+
+.sidebar .text-field.dropdown {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.sidebar .text-field:focus{
+    outline: none;
+    border: 1px solid #680982;
+    box-shadow: 0 0 4px #680982;
+}
+
+.sidebar ul {
+  position: absolute;
+  top: 48px;
+  width: 100%;
+}
+
+.sidebar ul li {
+  display: block;
+  font-size: 14px;
+  padding: 1px 5px 1px 5px;
+  background-color: white;
+  border-left: 1px solid rgba(54, 70, 82, 0.8);
+  border-right: 1px solid rgba(54, 70, 82, 0.8);
+  border-bottom: 1px solid rgba(54, 70, 82, 0.8);
+}
+
+.sidebar ul li:hover {
+  background-color: #F8F2F7;
+}
+
+.sidebar ul li:hover {
+  cursor: default;
+}
+
+.sidebar .btn {
+  width: 120px;
+  height: 50px;
+  border-radius: 4px;
+}
+
+.sidebar .btn:disabled {
+  background-color: rgba(104, 9, 130, 0.2);
+  cursor: default;
+}
+
+/*@media screen and (min-width: 768px) and (max-height: 604px) {
+  .sidebar {
+    height: 454px;
+  }
+}*/
+
+@media screen and (max-width: 1100px) {
+  .sidebar h2 {
+    font-size: 20px;
+    font-weight: 300;
+  }
+}
+
+/* calc(100vw - 160px);*/
+/* (max-width: 768px) and (min-height: 650px)*/
+@media screen and (orientation: portrait) {
+  .sidebar {
+    width: 88%;
+    max-width: none;
+    min-height: 250px;
+    height: 250px;
+    border-radius: 10px;
+    left: 6%;
+  }
+
+  .sidebar h2 {
+    font-size: 18px;
+  }
+
+  .sidebar .flex-container {
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    padding-bottom: 18px;
+    gap: 16px;
+  }
+
+  .sidebar form {
+    height: fit-content;
+    gap: 20px;
+  }
+
+  .sidebar .text-field {
+    width: 90%;
+    font-size: 14px;
+  }
+
+  .sidebar ul {
+    width: 90%;
+  }
+
+  .sidebar .btn {
+    font-size: 14px;
+  }
+}
+
+@media screen and (max-width: 650px) {
+  .sidebar {
+    top: 90.273px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .sidebar {
+    width: 94%;
+    left: 3%;
+    top: 77.273px;
+    border-radius: 8px;
+    height: 220px;
+    min-height: 220px;
+    min-width: 300px;
+  }
+
+  .sidebar h2 {
+    font-weight: 400;
+  }
+
+  .sidebar .flex-container {
+    padding-top: 10px;
+    padding-bottom: 12px;
+    gap: 16px;
+    justify-content: flex-start;
+  }
+
+  .sidebar form {
+    margin-top: auto;
+    gap: 14px;
+  }
+
+  .sidebar .text-field {
+    font-weight: 400;
+  }
+
+  .sidebar .btn {
+    width: 110px;
+    height: 45px;
+    font-weight: 500;
+  }
+
+  .sidebar .btn:disabled {
+    font-weight: 600;
+  }
+}
+
+
+/* Under construction */
+
+.under-construction {
+  width: 100%;
+  margin: 0 auto;
+  font-size: 24px;
+  position: absolute;
+  top: 50%;
+  text-align: center;
+}
+
+.construction-icon {
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+@media screen and (max-width: 768px) {
+  .under-construction {
+    font-size: 20px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .under-construction {
+    font-size: 16px;
+  }
 }
 
 /* Error page - basic, revisit */

@@ -25,6 +25,8 @@ let firstUpdate = true;
 // TODO: add re-join logic to re-join the room in the event of a disconnect mid-job (socket.io)
 // could simply be state that will indicate if a rejoin necessary, set to true once room is joined
 
+// map height window.innerHeight - header (large screen 105px, smaller screens 67.273px)
+
 const QuickFixUser = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
@@ -64,7 +66,7 @@ const QuickFixUser = () => {
   const [jobId, setJobId] = useState('');
   const [fixerCancelled, setFixerCancelled] = useState(false);
   const [roomJoined, setRoomJoined] = useState(false);
-  const [active, setActive] = useOutletContext();
+  const { active, setActive, mapHeight, mobile, tablet, portrait } = useOutletContext();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -189,7 +191,15 @@ const QuickFixUser = () => {
       setErrMsg(['No fixers in your area at this time', 'Continuing to search for a match']);
       errRef.current.focus();
     }
-  }, [count])
+  }, [count]);
+
+  /*useEffect(() => {
+    if (window.innerWidth <= 650) {
+      setMapHeight(window.innerHeight - 67.273)
+    } else {
+      setMapHeight(window.innerHeight - 105)
+    }
+  }, [window.innerWidth]);*/
 
   const handleChange = (e) => {
     setCustomLocation(e.target.value);
@@ -275,54 +285,68 @@ const QuickFixUser = () => {
         minZoom='11.5'
         maxZoom='19.5'
         onMove={e => setViewState(e.viewState)}
-        style={{width: '100vw', height: '80vh'}}
+        style={{width: '100vw', height: mapHeight, minHeight: 500, minWidth: 320}}
         mapStyle='mapbox://styles/mapbox/streets-v12'
         mapboxAccessToken={MAPBOX_TOKEN}
+        padding={
+          !portrait && !mobile 
+            ? { left: window.innerWidth * 0.27 > 425 ? 425 + 23 : window.innerWidth * 0.27 > 276 ? (window.innerWidth * 0.27) + 23 : 276 + 23, top: 0 }
+            : portrait && !mobile
+              ? { left: 0, top: 250 + 23 }
+              : { left: 0, top: 220 + 23 }
+        }
+        //  ? 
       >
         {(validCustomLocation && searching) && <Marker longitude={validCustomLocation[0]} latitude={validCustomLocation[1]} />}
       </Map>
       {!requesting ? ( 
-        <div className='sidebar'>
-          {profileLoading || isError ? <h2>Welcome</h2> : <h2>Welcome {profileData.firstName}</h2>}
-          <h2>Where do you need help?</h2>
-          <div className={errMsg ? 'errmsg' : 'offscreen'}>
-            <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-            {Array.isArray(errMsg) ? (
-              <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-              <br />{errMsg[1]}</p>
-            ) : (
-              <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-            )}
-          </div>          
-          <form autoComplete='off' onSubmit={handleSubmit}>
-            <input 
-              id='address' 
-              type='text'
-              value={customLocation} 
-              placeholder='Enter property address' 
-              onChange={handleChange} 
-            />
-            {queryResponse && (
-              <ul>
-              {queryResponse.map((feature) => <li key={feature.id} onClick={() => {
-                setCustomLocation(feature.place_name);
-                setValidCustomLocation(feature.geometry.coordinates);
-                setViewState(prev => {
-                  return {
-                    ...prev,
-                    longitude: feature.geometry.coordinates[0],
-                    latitude: feature.geometry.coordinates[1],
-                  }
-                });
-                setQueryResponse([]);
-              }}>{feature.place_name}</li>)}
-              </ul>
-            )}
-            <button type='submit' disabled={validCustomLocation?.length ? false : true} >Find Fixer</button>
-          </form>
+        <div 
+          className='sidebar' 
+          onClick={() => setQueryResponse([])}
+        >
+          <div className='flex-container'>
+            {profileLoading || isError ? <h2>Welcome</h2> : <h2>Welcome {profileData.firstName}</h2>}
+            <h2>Where do you need help?</h2>
+            <div className={errMsg ? 'errmsg' : 'offscreen'}>
+              <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+              {Array.isArray(errMsg) ? (
+                <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+                <br />{errMsg[1]}</p>
+              ) : (
+                <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+              )}
+            </div>          
+            <form autoComplete='off' onSubmit={handleSubmit}>
+              <input 
+                id='address' 
+                type='text'
+                value={customLocation} 
+                placeholder='Property address' 
+                onChange={handleChange}
+                className={queryResponse?.length ? 'text-field dropdown' : 'text-field'}
+              />
+              {queryResponse && (
+                <ul>
+                {queryResponse.map((feature) => <li key={feature.id} onClick={() => {
+                  setCustomLocation(feature.place_name);
+                  setValidCustomLocation(feature.geometry.coordinates);
+                  setViewState(prev => {
+                    return {
+                      ...prev,
+                      longitude: feature.geometry.coordinates[0],
+                      latitude: feature.geometry.coordinates[1],
+                    }
+                  });
+                  setQueryResponse([]);
+                }}>{feature.place_name}</li>)}
+                </ul>
+              )}
+              <button type='submit' disabled={validCustomLocation?.length ? false : true} className='btn'>Find Fixer</button>
+            </form>
+          </div>
         </div>
       ) : requesting && !searching ? (
-        <div className='sidebar'>
+        <div className='sidebar' style={{ height: mapHeight - 46 }}>
           <div className={errMsg ? 'errmsg' : 'offscreen'}>
             <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
             {Array.isArray(errMsg) ? (
@@ -337,7 +361,7 @@ const QuickFixUser = () => {
           <button type='button' onClick={handleCancel}>Cancel</button>
         </div>
       ) : (
-        <div className='sidebar'>
+        <div className='sidebar' style={{ height: mapHeight - 46 }}>
           <div className={errMsg ? 'errmsg' : 'offscreen'}>
             <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
             {Array.isArray(errMsg) ? (
