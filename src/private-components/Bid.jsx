@@ -1,9 +1,13 @@
-import useProfile from '../hooks/useProfile';
-import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPersonDigging } from '@fortawesome/free-solid-svg-icons';
 
 const Bid = () => {
   return (
-    <div>Feature under construction</div>
+    <div className='under-construction'>
+      <FontAwesomeIcon icon={faPersonDigging} size='2xl' flip className='construction-icon'/>
+      feature under construction
+      <FontAwesomeIcon icon={faPersonDigging} size='2xl' transform='flip-h' flip className='construction-icon'/>
+    </div>
   )
 }
 export default Bid;
