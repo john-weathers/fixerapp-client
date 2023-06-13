@@ -17,18 +17,20 @@ const UserIndex = () => {
         <div>
           <p>Select a tab to get started on a new repair request or view already scheduled jobs</p>
           <table>
-            <tr>
-              <td className='icon'><FontAwesomeIcon icon={faScrewdriverWrench} size='lg'/></td>
-              <td className='description'>Quick Fix for immediate help on smaller jobs</td>
-            </tr>
-            <tr>
-              <td className='icon'><FontAwesomeIcon icon={faPenToSquare} size='lg'/></td>
-              <td className='description'>Proposals to seek help on jobs of any size</td>
-            </tr>
-            <tr>
-              <td className='icon'><FontAwesomeIcon icon={faCalendar} size='lg'/></td>
-              <td className='description'>Schedule to see upcoming jobs you've booked</td>
-            </tr>
+            <tbody>
+              <tr>
+                <td className='icon'><FontAwesomeIcon icon={faScrewdriverWrench} size='lg'/></td>
+                <td className='description'>Quick Fix for immediate help on smaller jobs</td>
+              </tr>
+              <tr>
+                <td className='icon'><FontAwesomeIcon icon={faPenToSquare} size='lg'/></td>
+                <td className='description'>Proposals to seek help on jobs of any size</td>
+              </tr>
+              <tr>
+                <td className='icon'><FontAwesomeIcon icon={faCalendar} size='lg'/></td>
+                <td className='description'>Schedule to see upcoming jobs you've booked</td>
+              </tr>
+            </tbody>
           </table>
         </div>
     </div>

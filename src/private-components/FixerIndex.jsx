@@ -17,18 +17,20 @@ const FixerIndex = () => {
         <div>
           <p>Select a tab to get started on new jobs or view scheduled work</p>
           <table>
-            <tr>
-              <td className='icon'><FontAwesomeIcon icon={faScrewdriverWrench} size='lg'/></td>
-              <td className='description'>Quick Fix to find standard repair jobs immediately</td>
-            </tr>
-            <tr>
-              <td className='icon'><FontAwesomeIcon icon={faFileInvoiceDollar} size='lg'/></td>
-              <td className='description'>Compete for more comprehensive jobs in the Bid tab</td>
-            </tr>
-            <tr>
-              <td className='icon'><FontAwesomeIcon icon={faCalendar} size='lg'/></td>
-              <td className='description'>Schedule to see upcoming jobs you've won</td>
-            </tr>
+            <tbody>
+              <tr>
+                <td className='icon'><FontAwesomeIcon icon={faScrewdriverWrench} size='lg'/></td>
+                <td className='description'>Quick Fix to find standard repair jobs immediately</td>
+              </tr>
+              <tr>
+                <td className='icon'><FontAwesomeIcon icon={faFileInvoiceDollar} size='lg'/></td>
+                <td className='description'>Compete for more comprehensive jobs in the Bid tab</td>
+              </tr>
+              <tr>
+                <td className='icon'><FontAwesomeIcon icon={faCalendar} size='lg'/></td>
+                <td className='description'>Schedule to see upcoming jobs you've won</td>
+              </tr>
+            </tbody>
           </table>
         </div>
     </div>
