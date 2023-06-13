@@ -79,7 +79,7 @@ export const router = createBrowserRouter(
         <Route element={<RequireAuth allowedRoles={[ROLES.fixer, ROLES.premiumFixer]} />}>
           <Route path='/fixers' element={<FixerHome />} >
             <Route index element={<FixerIndex />} />
-            <Route path='quick-fix' element={<QuickFix />} />
+            <Route path='quick-fix' element={<QuickFix />} /* look into Suspense for this component (minor UI issues on refresh) */ />
             <Route path='bid' element={<Bid />}/>
             <Route path='schedule' element={<FixerSchedule />}/>
             <Route path='profile' element={<FixerProfile />}/>
