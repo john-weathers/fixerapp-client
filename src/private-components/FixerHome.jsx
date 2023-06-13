@@ -7,17 +7,24 @@ import PrivateNavBar from '../base-components/PrivateNavbar';
 
 const CURRENT_URL = '/fixers/work/current';
 
+// TODO: copy additions/changes from UserHome
 const FixerHome = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
   const { data } = useRequest(axiosPrivate, CURRENT_URL);
   const [active, setActive] = useState(false);
+  const [mobile, setMobile] = useState(window.innerWidth <= 480 ? true : false);
+  const [navBreak, setNavBreak] = useState(window.innerWidth <= 650 ? true : false);
+  // not using tablet state as of yet, remove if not necessary going forward
+  const [tablet, setTablet] = useState(window.innerWidth <= 768 ? true : false);
+  const [portrait, setPortrait] = useState(window.innerHeight >= window.innerWidth ? true : false);
+  const [mapHeight, setMapHeight] = useState(window.innerWidth <= 650 ? window.innerHeight - 67.273 : window.innerHeight - 105);
 
   useEffect(() => {
     (async () => {
       await queryClient.prefetchQuery(geolocationQuery);
     })();
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (data?.jobId) {
@@ -25,7 +32,45 @@ const FixerHome = () => {
     } else {
       setActive(false);
     }
-  }, [data?.jobId])
+  }, [data?.jobId]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerHeight >= window.innerWidth) {
+        setPortrait(true);
+      } else {
+        setPortrait(false);
+      }
+
+      if (window.innerWidth <= 650) {
+        if (window.innerWidth <= 480) {
+          setMobile(true);
+          setTablet(false);
+        } else {
+          setMobile(false);
+          setTablet(true);
+        }
+        setNavBreak(true);
+        setMapHeight(window.innerHeight - 67.273);
+      } else if (window.innerWidth <= 768) {
+        setNavBreak(false);
+        setTablet(true);
+        setMobile(false);
+        setMapHeight(window.innerHeight - 105);
+      } else {
+        setNavBreak(false);
+        setMobile(false);
+        setTablet(false);
+        setMapHeight(window.innerHeight - 105);
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   return (
     <div>
@@ -37,8 +82,9 @@ const FixerHome = () => {
         midTitle: 'Bid',
         rightUrl: 'schedule',
         rightTitle: 'Schedule',
+        navBreak,
       }}/>
-      <Outlet context={[active, setActive]}/>
+      <Outlet context={{ active, setActive, mapHeight, mobile, tablet, portrait }}/>
     </div>
   )
 }

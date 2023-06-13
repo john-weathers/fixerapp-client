@@ -14,10 +14,9 @@ const UserHome = () => {
   const [active, setActive] = useState(false);
   const [mobile, setMobile] = useState(window.innerWidth <= 480 ? true : false);
   const [navBreak, setNavBreak] = useState(window.innerWidth <= 650 ? true : false);
+  // not using tablet state as of yet, remove if not necessary going forward
   const [tablet, setTablet] = useState(window.innerWidth <= 768 ? true : false);
-  const [portrait, setPortrait] = useState(window.innerHeight >= window.innerWidth ? true : false)
-  // calculating map height to fill the screen depending on the nav bar's total height (including margin/borders)
-  // considering setting a minimum map height (maybe 600-700px for non-mobile screens) so that the interface still looks good if the window is resized smaller
+  const [portrait, setPortrait] = useState(window.innerHeight >= window.innerWidth ? true : false);
   const [mapHeight, setMapHeight] = useState(window.innerWidth <= 650 ? window.innerHeight - 67.273 : window.innerHeight - 105);
 
   useEffect(() => {
@@ -84,7 +83,7 @@ const UserHome = () => {
         rightTitle: 'Schedule',
         navBreak,
       }}/>
-      <Outlet context={{active, setActive, mapHeight, mobile, tablet, portrait}}/>
+      <Outlet context={{ active, setActive, mapHeight, mobile, tablet, portrait }}/>
     </div>
   )
 }
