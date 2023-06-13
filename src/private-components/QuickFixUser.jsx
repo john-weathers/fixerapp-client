@@ -22,11 +22,7 @@ let retry = false;
 let socket;
 let firstUpdate = true;
 
-// TODO: add re-join logic to re-join the room in the event of a disconnect mid-job (socket.io)
-// could simply be state that will indicate if a rejoin necessary, set to true once room is joined
-
-// map height window.innerHeight - header (large screen 105px, smaller screens 67.273px)
-
+// TODO: update remainder of html for responsiveness
 const QuickFixUser = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
@@ -285,7 +281,7 @@ const QuickFixUser = () => {
         minZoom='11.5'
         maxZoom='19.5'
         onMove={e => setViewState(e.viewState)}
-        style={{width: '100vw', height: mapHeight, minHeight: 500, minWidth: 320}}
+        style={{ width: '100vw', height: mapHeight, minHeight: 500, minWidth: 320 }}
         mapStyle='mapbox://styles/mapbox/streets-v12'
         mapboxAccessToken={MAPBOX_TOKEN}
         padding={
@@ -295,13 +291,12 @@ const QuickFixUser = () => {
               ? { left: 0, top: 250 + 23 }
               : { left: 0, top: 220 + 23 }
         }
-        //  ? 
       >
         {(validCustomLocation && searching) && <Marker longitude={validCustomLocation[0]} latitude={validCustomLocation[1]} />}
       </Map>
       {!requesting ? ( 
         <div 
-          className='sidebar' 
+          className='sidebar quick-fix' 
           onClick={() => setQueryResponse([])}
         >
           <div className='flex-container'>
@@ -346,34 +341,38 @@ const QuickFixUser = () => {
           </div>
         </div>
       ) : requesting && !searching ? (
-        <div className='sidebar' style={{ height: mapHeight - 46 }}>
-          <div className={errMsg ? 'errmsg' : 'offscreen'}>
-            <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-            {Array.isArray(errMsg) ? (
-              <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-              <br />{errMsg[1]}</p>
-            ) : (
-              <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-            )}
-          </div>     
-          <FontAwesomeIcon icon={faSpinner} spin />
-          <h2>Submitting request...</h2>
-          <button type='button' onClick={handleCancel}>Cancel</button>
+        <div className='sidebar quick-fix'>
+          <div className='flex-container requesting'>
+            <div className={errMsg ? 'errmsg' : 'offscreen'}>
+              <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+              {Array.isArray(errMsg) ? (
+                <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+                <br />{errMsg[1]}</p>
+              ) : (
+                <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+              )}
+            </div>
+            <h2>Submitting request...</h2>     
+            <FontAwesomeIcon icon={faSpinner} spin size='2xl'/>
+            <button type='button' onClick={handleCancel} className='btn'>Cancel</button>
+          </div>
         </div>
       ) : (
-        <div className='sidebar' style={{ height: mapHeight - 46 }}>
-          <div className={errMsg ? 'errmsg' : 'offscreen'}>
-            <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-            {Array.isArray(errMsg) ? (
-              <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-              <br />{errMsg[1]}</p>
-            ) : (
-              <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-            )}
-          </div>     
-          <FontAwesomeIcon icon={faSpinner} spin />
-          <h2>Searching for fixer near you...</h2>
-          <button type='button' onClick={handleCancel}>Cancel</button>
+        <div className='sidebar quick-fix'>
+          <div className='flex-container requesting'>
+            <div className={errMsg ? 'errmsg' : 'offscreen'}>
+              <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+              {Array.isArray(errMsg) ? (
+                <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+                <br />{errMsg[1]}</p>
+              ) : (
+                <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+              )}
+            </div>
+            <h2>Searching for fixer near you...</h2>     
+            <FontAwesomeIcon icon={faSpinner} spin size='2xl'/>
+            <button type='button' onClick={handleCancel} className='btn'>Cancel</button>
+          </div>
         </div>
       )}
     </>
