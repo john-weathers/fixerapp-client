@@ -45,6 +45,7 @@ const PrivateNavBar = ({ navOptions }) => {
         setUserMenuOpen(false);
     }
 
+    /* might need to change html to avoid validateDOMNesting error (seems li on line 53 / 70 is the issue)*/
     return (
         <nav className='header private'>
             <ul className='nav-container'>
