@@ -6,9 +6,18 @@ import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
 import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { faCar } from '@fortawesome/free-solid-svg-icons';
 import { faHouse } from '@fortawesome/free-solid-svg-icons';
+import { faFlagCheckered } from '@fortawesome/free-solid-svg-icons';
+import { faUser } from '@fortawesome/free-regular-svg-icons';
+import { faPhone } from '@fortawesome/free-solid-svg-icons';
+import { faClock } from '@fortawesome/free-regular-svg-icons';
+import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { faChevronUp } from '@fortawesome/free-solid-svg-icons';
+import { faMap } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import useLocalStorage from '../hooks/useLocalStorage';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import circle from '@turf/circle';
 import bbox from '@turf/bbox';
@@ -53,6 +62,9 @@ let toId = null;
 
 let testCoords;
 
+// NOTES/TODO: add :disabled general class for .btn or specify for buttons in question
+// double check handleRevisedCost is connected to stream change properly
+
 const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, cancellation, jobDetails }) => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
@@ -96,35 +108,17 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
   const [clientName, setClientName] = useState('');
   const [jobId, setJobId] = useState('');
   const [rated, setRated] = useState(false);
-  const [active, setActive] = useOutletContext();
+  const [toggleDirections, setToggleDirections] = useState(false);
+  const [mobileToggle, setMobileToggle] = useState(false);
+  const [googleDirectionsUrl, setGoogleDirectionsUrl] = useState({
+    origin: `&origin=${jobDetails?.fixerLocation[1]},${jobDetails?.fixerLocation[0]}`,
+    destination: `&destination=${jobDetails?.userLocation[1]},${jobDetails?.userLocation[0]}`,
+  });
+  const [detailsToggle, setDetailsToggle] = useState(false);
+  const [notesToggle, setNotesToggle] = useState(false);
+  const [personalNotes, setPersonalNotes] = useLocalStorage('notes', 'Type any notes you want to help you with the job! For your eyes only.');
+  const { active, setActive, mapHeight, portrait, mobile } = useOutletContext();
   const navigate = useNavigate();
-
-  /*useEffect(() => {
-    if (jobDetails?.jobId) {
-      currentCoords = jobDetails?.fixerLocation;
-      setRoute({
-        type: 'Feature',
-        properties: {},
-        geometry: {
-          type: 'LineString',
-          coordinates: jobDetails.route.coordinates,
-        }
-      });
-      /*setGeojsonPoint({
-        type: 'FeatureCollection',
-        features: [{
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: jobDetails.fixerLocation.coordinates,
-        }
-      }]
-      })
-
-      testCoords = [jobDetails?.fixerLocation?.[0], jobDetails?.fixerLocation?.[1]];
-
-    }
-  }, [jobDetails?.jobId])*/
   
   // for production
   /*useEffect(() => {
@@ -194,7 +188,8 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
     }
   }, []);*/
 
-  useEffect(() => {
+  // for production
+  /*useEffect(() => {
     if (timeoutId && jobDetails?.trackerStage && jobDetails.trackerStage !== 'en route') {
       clearTimeout(timeoutId);
       setTimeoutId(null);
@@ -248,14 +243,52 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
       setTimeoutId(null);
     }
   }, [jobDetails?.eta, jobDetails?.trackerStage])
+  */
+
+  useEffect(() => {
+    console.log('checking if notes are short enough now!')
+    if (personalNotes.length <= 1000) {
+      setErrMsg('');
+      console.log(errMsg);
+    }
+
+  }, [personalNotes]);
+
+  useEffect(() => {
+    if (notes.length <= 1000) {
+      setErrMsg('');
+    }
+
+  }, [notes]);
+
+  useEffect(() => {
+    if (jobNotes.length <= 1000) {
+      setErrMsg('');
+    }
+
+  }, [jobNotes]);
+
+  useEffect(() => {
+    if (additionalNotes.length <= 500) {
+      setErrMsg('');
+    }
+
+  }, [additionalNotes])
 
   const handleLoad = () => {
     // const line = lineString(route);
     const boundingBox = bbox(route);
-    mapRef.current.fitBounds(boundingBox, { padding: 100 });
+    mapRef.current.fitBounds(boundingBox);
   }
 
-  // for testing purposes only
+  // this function is for testing purposes only
+  // NOTE: may add route api call to get updated routing and clean up/add more mapping features
+  // but the main reason for the location updates are for the benefit of the
+  // client to see where the fixer is at in real time, not as a mapping app
+  // for the fixer to get real time directions
+  // in reality I wouldn't think it worth it to re-invent the wheel/bloat the application/add cost 
+  // when fixers will use Google Maps or similar for real time directions
+  // the purpose of the map for the fixer is as a starting point/visual aid and again, in general, the main to benefit is to the client
   const handleTestMapClick = e => {
     const geofence = circle(jobDetails.userLocation, 0.25, { units: 'miles' });
 
@@ -429,6 +462,9 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
         rating,
       });
     queryClient.removeQueries(['request']);
+    setTimeout(() => {
+      navigate('/fixers');
+    }, 3000);
     } catch (err) {
       setRated(false);
       setErrMsg('Error submitting rating');
@@ -459,13 +495,21 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
         onLoad={handleLoad}
         onClick={handleTestMapClick}
         onMove={e => setViewState(e.viewState)}
-        style={{width: '100vw', height: '100vh'}}
+        style={{ width: '100vw', height: mapHeight, minHeight: portrait || mobile ? 500 : 700, minWidth: 320 }}
         mapStyle='mapbox://styles/mapbox/streets-v12'
         mapboxAccessToken={MAPBOX_TOKEN}
+        padding={
+          !portrait && !mobile 
+            ? { left: window.innerWidth * 0.27 > 425 ? 425 + 23 + 50 : window.innerWidth * 0.27 > 276 ? (window.innerWidth * 0.27) + 23 + 50 : 276 + 23, top: 50, right: 50, bottom: 50 }
+            : { left: 50, top: 50, right: 50, bottom: 98.5 + 23 + 50 }
+        }
       >
         
         <Marker longitude={jobDetails.userLocation[0]} latitude={jobDetails.userLocation[1]}>
           <FontAwesomeIcon icon={faHouse} size='xl' />
+        </Marker>
+        <Marker longitude={jobDetails.route.coordinates[0][0]} latitude={jobDetails.route.coordinates[0][1]}>
+          <FontAwesomeIcon icon={faFlagCheckered} size='xl' />
         </Marker>
         <Source id='fixer-location' type='geojson' data={geojsonPoint}>
           <Layer {...pointLayerStyle} />
@@ -474,7 +518,26 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
           <Layer {...routeLayerStyle} />
         </Source>
       </Map>
-      <div className='sidebar'>
+      {((portrait || mobile) && !mobileToggle) && (
+        <div className='mobile-btn show-content fixers'>
+          <button onClick={() => setMobileToggle(true)}><FontAwesomeIcon icon={faChevronUp} size='3x'/></button>
+          <h2>JOB DETAILS</h2>
+      </div>
+      )} 
+      {((portrait || mobile) && mobileToggle) && (
+        <div className='mobile-btn hide-content fixers'>
+          <button onClick={() => setMobileToggle(false)}><FontAwesomeIcon icon={faChevronDown} size='3x'/></button>
+        </div>
+      )}
+      <div 
+        className={
+        !portrait && !mobile 
+          ? 'sidebar confirmation fixers' 
+          : !mobileToggle
+            ? 'hide'
+            : 'mobile confirmation fixers'
+            }
+      >
         <div className={errMsg ? 'errmsg' : 'offscreen'}>
           <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
           {Array.isArray(errMsg) ? (
@@ -483,28 +546,87 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
           ) : (
             <p ref={errRef} aria-live='assertive'>{errMsg}</p>
           )}
-        </div>     
-        <h2>Job found at {jobDetails.userAddress}</h2>
-        <ul>
-          <li>Client: {jobDetails.firstName} {jobDetails.lastName}</li>
-        </ul>
-        <div>
-          <h3>Driving instructions</h3>
-          <ol>
-            {jobDetails.route.instructions.map((step, index) => <li key={index}>{step}</li>)}
-          </ol>
-          <p>ETA: {new Date(jobDetails.eta).toLocaleTimeString('en-US', { timeStyle: 'short' })}</p>
-          <button type='button' onClick={handleArrival}>I've arrived</button>
-          {!callToggle ? <div onClick={() => setCallToggle(true)} >Contact Client</div> : <div>{jobDetails.phoneNumber}</div>}
         </div>
-        <button type='button' onClick={handleCancel}>Cancel Job</button> {/* probably should add functionality for including and submitting cancellation reason
-        and some sort of are you sure you want to cancel popup */}
+        <div className='flex-container-mobile fixers'>
+          <h2>JOB DETAILS</h2>
+          <table>
+            <tbody>
+              <tr>
+                <td><FontAwesomeIcon icon={faUser} size='lg' className='icon'/></td>
+                <td>{jobDetails.firstName} {jobDetails.lastName}</td>
+              </tr>
+              <tr>
+                <td><FontAwesomeIcon icon={faPhone} size='lg' className='icon'/></td>
+                <td>{jobDetails.phoneNumber}</td>
+              </tr>
+              <tr>
+                <td><FontAwesomeIcon icon={faClock} size='lg' className='icon'/></td>
+                <td>ETA {new Date(jobDetails.eta).toLocaleTimeString('en-US', { timeStyle: 'short' })}</td>
+              </tr>
+              <tr>
+                <td><FontAwesomeIcon icon={faHouse} size='lg' className='icon'/></td>
+                <td>{jobDetails.userAddress}</td>
+              </tr>
+              {(!mobile && !portrait) 
+                && (
+                  <tr>
+                    <td className='chevron-td'>
+                      <div className='chevron-btn'>
+                        <button onClick={() => setToggleDirections(prev => !prev)}>
+                          {!toggleDirections 
+                            ? <FontAwesomeIcon icon={faChevronRight} size='lg' className='icon'/> 
+                            : <FontAwesomeIcon icon={mobile || portrait ? faChevronUp : faChevronDown} size='lg' className='icon'/>
+                          }
+                        </button>
+                        {toggleDirections && (
+                          <div 
+                            className='directions' 
+                            style={!portrait && !mobile 
+                              ? { width: window.innerWidth * 0.27 > 425 ? 425 * 0.86 : window.innerWidth * 0.27 > 276 ? (window.innerWidth * 0.27) * 0.86 : 276 * 0.86 }
+                              : { width: (window.innerWidth * 0.27) * 0.86 }
+                            }
+                          >
+                            <ol>
+                              {jobDetails.route.instructions.map((step, index) => <li key={index}>{step}</li>)}
+                            </ol>
+                          </div>
+                        )}{/* TODO: limit number of instruction steps (e.g., if more than 10) and add pagination */}
+                      </div>
+                    </td>
+                    <td>{!toggleDirections ? 'Show directions' : 'Hide directions'}</td>
+                  </tr>
+              )}
+              <tr>
+                <td><FontAwesomeIcon icon={faMap} size='lg' className='icon'/></td>
+                <td>
+                  <a href={`https://www.google.com/maps/dir/?api=1${googleDirectionsUrl.origin}${googleDirectionsUrl.destination}`} target='_blank'>
+                    Directions via Google Maps
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <button type='button' onClick={handleArrival} className='arrival btn'>I've arrived</button>
+          <div className='cancel'>    
+            <p className='cancel-p'>Need to cancel this job?</p>
+            <div className='cancel-button'>
+              <button type='button' onClick={handleCancel}>Click here</button>
+            </div>
+          </div>
+        </div>
       </div>
+      <button type='button' onClick={() => {
+          const line = lineString([[jobDetails.route.coordinates[0][0], jobDetails.route.coordinates[0][1]], [jobDetails.userLocation[0], jobDetails.userLocation[1]]]);
+          const boundingBox = bbox(line);
+          mapRef.current.fitBounds(boundingBox);
+        }} className='btn re-center'>
+          Re-center map
+      </button>
     </>
   )
 
   if (jobDetails?.trackerStage === 'arriving') return (
-    <div>
+    <div className='post-en-route fixers flex-container'>
       <div className={errMsg ? 'errmsg' : 'offscreen'}>
         <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
         {Array.isArray(errMsg) ? (
@@ -514,48 +636,118 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
           <p ref={errRef} aria-live='assertive'>{errMsg}</p>
         )}
       </div>
+      <div className='flex-item one'>
+        <ul>
+          <li style={{ marginBottom: !detailsToggle ? 42 :  20 }}>
+            <button type='button' onClick={() => setDetailsToggle(prev => !prev)}>
+              <FontAwesomeIcon icon={!detailsToggle ? faChevronRight : faChevronDown} size='lg' className='chevron'/><span>Job details</span>
+            </button>
+          </li>
+          {detailsToggle && (
+            <li className='job-details'>
+              <table>
+                <tbody>
+                  <tr>
+                    <td><FontAwesomeIcon icon={faUser} size='lg'/></td>
+                    <td>{jobDetails.firstName} {jobDetails.lastName}</td>
+                  </tr>
+                  <tr>
+                    <td><FontAwesomeIcon icon={faPhone} size='lg'/></td>
+                    <td>{jobDetails.phoneNumber}</td>
+                  </tr>
+                  <tr>
+                    <td><FontAwesomeIcon icon={faHouse} size='lg'/></td>
+                    <td>{jobDetails.userAddress}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </li>
+          )}
+          <li className='notes-li'>
+            <button type='button' onClick={() => setNotesToggle(prev => !prev)}>
+              <FontAwesomeIcon icon={!notesToggle ? faChevronRight : faChevronDown} size='lg' className='chevron'/><span>Personal notes</span>
+            </button>
+          </li>
+          {notesToggle && (
+            <li className='personal-notes'>
+              <textarea 
+                id='personal-notes'
+                className='on-focus'
+                value={personalNotes}
+                onChange={e => {
+                  if (personalNotes.length > 1000) {
+                    setErrMsg(`Personal notes must be 1000 characters or less, delete ${personalNotes.length - 1000} characters`);
+                    errRef.current.focus();
+                  }
+                  setPersonalNotes(e.target.value);
+                }}
+              />
+            </li>
+          )}
+        </ul>
+      </div>
       {!jobDetails?.quote?.pending ? (
-      <>
+      <div className='flex-item two'>
         <form onSubmit={handleSubmitQuote}>
-          {jobDetails?.quote?.pending === undefined  
-            ? <label htmlFor='quote'>Client quote: $</label>
-            : <label htmlFor='quote'>Updated client quote: $</label>
-          }
-          <input 
-            id='quote'
-            type='number'
-            required
-            value={quote || ''}
-            step='0.01'
-            onChange={e => setQuote(e.target.value)}
-          />
+          <h2>Client Quote</h2>
+          <label htmlFor='quote' className='left'>
+            {jobDetails?.quote?.pending === undefined ? 'Quote amount' : 'Updated quote amount'}
+            <div className='dollar-div on-focus'>
+              <div>$</div>
+              <input
+                className='left on-focus' 
+                id='quote'
+                type='number'
+                required
+                value={quote || ''}
+                step='0.01'
+                onChange={e => setQuote(e.target.value)}
+              />
+            </div>
+          </label>
           <textarea
             id='notes'
+            className='main-textarea on-focus'
             value={notes}
-            rows='30' // not sure about manually specifying this here...should consider other ways of doing this
-            cols='75'
             placeholder='Description of quote...'
             onChange={e => {
-              if (notes.length >= 1000) {
-                setErrMsg('Notes must be 1000 characters or less');
+              if (notes.length > 1000) {
+                setErrMsg(`Quote description must be 1000 characters or less, delete ${notes.length - 1000} characters`);
                 errRef.current.focus();
               }
+              console.log(notes.length);
               setNotes(e.target.value);
             }}
           >
             Describe quote details (1,000 characters or less){/* keep an eye on in the case this throws an error but don't think there's a syntax/escaping issue here */}
           </textarea>
-          <button disabled={!quote || notes.length > 1000 ? true : false }>Send quote</button>
+          <button disabled={!quote || !notes.length || notes.length > 1000 ? true : false } className='btn'>Send quote</button>
+          <div className='cancel'>    
+            <p className='cancel-p'>Need to cancel this job?</p>
+            <div className='cancel-button'>
+              <button type='button' onClick={handleCancel}>Click here</button>
+            </div>
+          </div>
         </form>
-      </>
-      ) : <p>Client reviewing quote...</p>
+      </div>
+      ) : (
+        <div className='flex-item two info-secondary'>
+            <h2>Pending</h2>
+            <p>Client reviewing quote...</p>
+            <div className='cancel'>    
+              <p className='cancel-p'>Need to cancel this job?</p>
+              <div className='cancel-button'>
+                <button type='button' onClick={handleCancel}>Click here</button>
+              </div>
+          </div>
+        </div>
+      )
       }
-      <button type='button' onClick={handleCancel}>Cancel Job</button>
     </div> 
   )
 
   if (jobDetails?.trackerStage === 'fixing') return (
-    <div>
+    <div className='post-en-route fixers flex-container'>
       <div className={errMsg ? 'errmsg' : 'offscreen'}>
         <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
         {Array.isArray(errMsg) ? (
@@ -565,59 +757,134 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
           <p ref={errRef} aria-live='assertive'>{errMsg}</p>
         )}
       </div>
+      <div className='flex-item one'>
+        <ul>
+          <li style={{ marginBottom: !detailsToggle ? 42 :  20 }}>
+            <button type='button' onClick={() => setDetailsToggle(prev => !prev)}>
+              <FontAwesomeIcon icon={!detailsToggle ? faChevronRight : faChevronDown} size='lg' className='chevron'/><span>Job details</span>
+            </button>
+          </li>
+          {detailsToggle && (
+            <li className='job-details'>
+              <table>
+                <tbody>
+                  <tr>
+                    <td><FontAwesomeIcon icon={faUser} size='lg'/></td>
+                    <td>{jobDetails.firstName} {jobDetails.lastName}</td>
+                  </tr>
+                  <tr>
+                    <td><FontAwesomeIcon icon={faPhone} size='lg'/></td>
+                    <td>{jobDetails.phoneNumber}</td>
+                  </tr>
+                  <tr>
+                    <td><FontAwesomeIcon icon={faHouse} size='lg'/></td>
+                    <td>{jobDetails.userAddress}</td>
+                  </tr>
+                  <tr>
+                    <td><FontAwesomeIcon icon={faClock} size='lg'/></td>
+                    <td>{new Date(jobDetails.workStartedAt).toLocaleTimeString('en-US', { timeStyle: 'short' })} start time</td>
+                  </tr>
+                </tbody>
+              </table>
+            </li>
+          )}
+          <li className='notes-li'>
+            <button type='button' onClick={() => setNotesToggle(prev => !prev)}>
+              <FontAwesomeIcon icon={!notesToggle ? faChevronRight : faChevronDown} size='lg' className='chevron'/><span>Personal notes</span>
+            </button>
+          </li>
+          {notesToggle && (
+            <li className='personal-notes'>
+              <textarea 
+                id='personal-notes'
+                className='on-focus'
+                value={personalNotes}
+                onChange={e => {
+                  if (personalNotes.length > 1000) {
+                    setErrMsg(`Personal notes must be 1000 characters or less, delete ${personalNotes.length - 1000} characters`);
+                    errRef.current.focus();
+                  }
+                  setPersonalNotes(e.target.value);
+                }}
+              />
+            </li>
+          )}
+        </ul>
+      </div>
       {!jobDetails?.quote?.revisedPending ? (
-        <div>
+        <div className='flex-item two main-secondary' style={{ gap: !toggleWorkScope ? 45 : 30 }}>
           {(jobDetails?.quote?.revisedPending === false && quoteMsg) && (
-            <div>
-              <FontAwesomeIcon icon={faInfoCircle} />
-              {jobDetails.quote.revisedAccepted 
-                ? <p>Revised quote accepted</p>
-                : <p>Revised quote declined<br />Submit a new revised quote if client is interested</p>
-              }
-              <button type='button' onClick={() => setQuoteMsg(false)}>Close</button>
+            <div className={jobDetails.quote.revisedAccepted ? 'quote-decision' : 'quote-decision declined'}>
+              <div className='flex-container'>
+                <FontAwesomeIcon icon={faInfoCircle} size='lg'/>
+                {jobDetails.quote.revisedAccepted 
+                  ? <p>Revised quote accepted</p>
+                  : (
+                    <div>
+                      <p>Revised quote declined</p>
+                      <p>Submit a new revised quote if client is interested</p>
+                    </div>
+                  )
+                }
+              </div>
+              <button type='button' onClick={() => setQuoteMsg(false)} className='btn'>Close</button>
             </div>
           )}
           <h2>Work started</h2>
-          <textarea
-            id='jobnotes'
-            value={jobNotes}
-            rows='30'
-            cols='75'
-            placeholder='Job notes'
-            onChange={e => {
-              if (jobNotes.length >= 1000) {
-                setErrMsg('Job notes must be 1000 characters or less');
-                errRef.current.focus();
-              }
-              setJobNotes(e.target.value);
-            }}
-          >
-            Job notes (1,000 characters or less)
-          </textarea>
-          <p>Time started: {new Date(jobDetails.workStartedAt).toLocaleTimeString('en-US', { timeStyle: 'short' })}</p>
-          {!callToggle ? <div onClick={() => setCallToggle(true)} >Contact Client</div> : <div>{jobDetails.phoneNumber}</div>}
           {!toggleWorkScope
-            ? <button type='button' onClick={() => setToggleWorkScope(true)}>Update Work Scope</button>
-            : (
+            ? (
+              <>
+                <div className='main-div'>
+                  <textarea
+                    id='jobnotes'
+                    className='main-textarea on-focus'
+                    value={jobNotes}
+                    placeholder='Job notes'
+                    onChange={e => {
+                      if (jobNotes.length > 1000) {
+                        setErrMsg('Job notes must be 1000 characters or less');
+                        errRef.current.focus();
+                      }
+                      setJobNotes(e.target.value);
+                    }}
+                  >
+                    Job notes (1,000 characters or less)
+                  </textarea>
+                  <div className='btn-div'>
+                    <button type='button' onClick={() => setToggleWorkScope(true)} className='btn'>Revise quote</button>
+                  </div>
+                </div>
+                <button type='button' onClick={handleComplete} className='btn complete'>Job complete</button>
+              </>
+            ) : (
               <form onSubmit={handleRevisedCost}>
-                <label htmlFor='scopechange'>Revised Cost: $</label>
-                <input
-                  id='scopechange'
-                  type='number'
-                  step='0.01'
-                  value={revisedCost || ''}
-                  required
-                  placeholder='Enter new total cost'
-                  onChange={e => setRevisedCost(e.target.value)}
-                />
+                <div className='quote-div'>
+                  <label htmlFor='scopechange' className='left'>
+                    Revised quote amount
+                    <div className='dollar-div on-focus'>
+                      <div>$</div>
+                      <input
+                        className='left on-focus' 
+                        id='scopechange'
+                        type='number'
+                        required
+                        value={revisedCost || ''}
+                        step='0.01'
+                        placeholder='Enter new total cost'
+                        onChange={e => setRevisedCost(e.target.value)}
+                      />
+                    </div>
+                  </label>
+                  {!mobile && <button type='button' onClick={() => setToggleWorkScope(false)} className='btn'>Cancel update</button>}
+                </div>
                 <textarea
                   id='additionalnotes'
+                  className='main-textarea on-focus'
                   value={additionalNotes}
-                  rows='30'
-                  cols='75'
+                  placeholder='Description of revised quote...'
                   onChange={e => {
-                    if (additionalNotes.length >= 500) {
-                      setErrMsg('Additional notes must be 1000 characters or less');
+                    if (additionalNotes.length > 500) {
+                      setErrMsg('Additional notes must be 500 characters or less');
                       errRef.current.focus();
                     }
                     setAdditionalNotes(e.target.value);
@@ -625,21 +892,40 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
                 >
                   Details regarding revised cost (500 characters or less)
                 </textarea>
-                <button disabled={!revisedCost || additionalNotes.length > 500 ? true : false }>Submit Revised Cost</button>
-                <button type='button' onClick={() => setToggleWorkScope(false)}>Cancel Scope Update</button>
+                {mobile ? (
+                  <div id='submit-cancel-btns'>
+                    <button id='submit-revised' disabled={!revisedCost || additionalNotes.length > 500 ? true : false } className='btn'>Submit revised quote</button>
+                    <button id='cancel-update' type='button' onClick={() => setToggleWorkScope(false)} className='btn'>Cancel update</button>
+                  </div>
+                ) : (
+                  <button id='submit-revised' disabled={!revisedCost || additionalNotes.length > 500 ? true : false } className='btn'>Submit revised quote</button>
+                )}
               </form>
             )}
-          <button type='button' onClick={handleComplete}>Job Complete</button>
+          <div className='cancel'>    
+            <p className='cancel-p'>Need to cancel this job?</p>
+            <div className='cancel-button'>
+              <button type='button' onClick={handleCancel}>Click here</button>
+            </div>
+          </div>
         </div>
       ) : (
-        <p>Client reviewing revised cost...</p>
+        <div className='flex-item two info-secondary'>
+          <h2>Pending</h2>
+          <p>Client reviewing revised cost...</p>
+          <div className='cancel'>    
+            <p className='cancel-p'>Need to cancel this job?</p>
+            <div className='cancel-button'>
+              <button type='button' onClick={handleCancel}>Click here</button>
+            </div>
+          </div>
+        </div>
       )}
-      <button type='button' onClick={handleCancel}>Cancel Job</button>
     </div>
   )
 
   if (jobDetails?.trackerStage === 'complete' || finalizing) return (
-    <div>
+    <div className='finalizing'>
       <div className={errMsg ? 'errmsg' : 'offscreen'}>
         <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
         {Array.isArray(errMsg) ? (
@@ -650,21 +936,41 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
         )}
       </div>
       {!rated ? (
-        <div>
-          <h2>Job complete!</h2>
-          <p>Rate {clientName}</p>
-          <form className='rating' onChange={handleRating}>
-            <input type='radio' id='1-star' name='rating' value='1' />
-            <input type='radio' id='2-star' name='rating' value='2' />
-            <input type='radio' id='3-star' name='rating' value='3' />
-            <input type='radio' id='4-star' name='rating' value='4' />
-            <input type='radio' id='5-star' name='rating' value='5' />
-          </form>
-        </div>
+        <>
+          <h2 className='job-complete'>Job Complete!</h2>
+          <div className='rating'>
+            <h2>Rate your experience with {clientName}</h2>
+            {!mobile ? (
+              <form onChange={handleRating}>
+                <input type='radio' id='1-star' name='rating' value='1' />
+                <input type='radio' id='2-star' name='rating' value='2' />
+                <input type='radio' id='3-star' name='rating' value='3' />
+                <input type='radio' id='4-star' name='rating' value='4' />
+                <input type='radio' id='5-star' name='rating' value='5' />
+              </form>
+            ) : (
+              <form onSubmit={handleRating}>
+                {/* TODO: need sub-flex-container for mobile
+                    probably best to add state for rating to disable button w/ out valid rating
+                    I think handleRating function should still work (need to test this out)
+                    but if any issues at all should create a separate function for mobile that uses state
+                */}
+                <div>
+                  <input type='radio' id='1-star' name='rating' value='1' />
+                  <input type='radio' id='2-star' name='rating' value='2' />
+                  <input type='radio' id='3-star' name='rating' value='3' />
+                  <input type='radio' id='4-star' name='rating' value='4' />
+                  <input type='radio' id='5-star' name='rating' value='5' />
+                </div>
+                <button className='btn'>Submit rating</button>
+              </form>
+            )}
+          </div>
+        </>
       ) : (
-        <div>
+        <div className='post-rating'>
           <h2>Thank you for your feedback!</h2>
-          <Link to='/fixers'>Return to home page</Link>
+          <p>Redirecting to home page...</p>
         </div>
       )}
     </div>
