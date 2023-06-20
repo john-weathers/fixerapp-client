@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useProfile } from '../hooks/reactQueryHooks';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import useAuth from '../hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 
 const EMAIL_REGEX = /^.{1,64}@.{1,255}$/;
@@ -8,6 +9,7 @@ const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 const NAME_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ]{1,30}$/;
 const PHONE_REGEX = /^[\+0-9]{0,4}[-\s\.]?[(]?[0-9]{1,3}[)]?[-\s\.]?[0-9]{2,4}[-\s\.]?[0-9]{2,4}[-\s\.]?[0-9]{2,4}$/;
 const PROFILE_URL = '/fixers/profile';
+const UPDATE_PROFILE_URL = '/fixers/update-profile';
 
 // useMutation to post updates to profile, onSuccess invalidate 
 const FixerProfile = () => {
@@ -20,6 +22,7 @@ const FixerProfile = () => {
   const [email, setEmail] = useState('');
   const [validEmail, setValidEmail] = useState(false);
 
+  const [newPwd, setNewPwd] = useState('');
   const [pwd, setPwd] = useState('');
   const [validPwd, setValidPwd] = useState(false);
 
@@ -41,6 +44,7 @@ const FixerProfile = () => {
   const errRef = useRef();
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
+  const { setAuth } = useAuth();
   const { isLoading, isError, data: profileData } = useProfile(axiosPrivate, PROFILE_URL);
 
   useEffect(() => {
@@ -48,9 +52,9 @@ const FixerProfile = () => {
   }, [email]);
 
   useEffect(() => {
-    setValidPwd(PWD_REGEX.test(pwd));
-    setValidMatch(pwd === matchPwd);
-  }, [pwd, matchPwd]);
+    setValidPwd(PWD_REGEX.test(newPwd));
+    setValidMatch(newPwd === matchPwd);
+  }, [newPwd, matchPwd]);
 
   useEffect(() => {
     setValidFirst(NAME_REGEX.test(firstName));
@@ -66,54 +70,112 @@ const FixerProfile = () => {
 
   useEffect(() => {
     setErrMsg('');
-  }, [email, pwd, matchPwd]);
+  }, [email, phoneNumber, firstName, lastName, newPwd, matchPwd]);
 
-  /*const handleNewEmail = e => {
+  const handleUpdate = async e => {
     e.preventDefault();
+    const data = new FormData(e.target);
+    const updateKeys = Object.keys(Object.fromEntries(data));
+    if (updateKeys.length > 1) {
+      const oldPwd = data.get('oldpwd');
+      const newPwd = data.get('newpwd');
+      if (!PWD_REGEX.test(oldPwd) || !PWD_REGEX.test(newPwd)) {
+        setErrMsg('Invalid Entry');
+        errRef.current.focus();
+        return;
+      } else {
+        try {
+          await axiosPrivate.patch(UPDATE_PROFILE_URL, {
+            updateKey: 'password',
+            updateData: {
+              oldPwd,
+              newPwd,
+            },
+          });
+          setPasswordToggle(false);
+        } catch (err) {
+          if (!err?.response) {
+            setErrMsg('No Server Response');
+          } else if (err.response?.status === 400) {
+            setErrMsg('Missing data to update password');
+          } else if (err.response?.status === 401) {
+            setErrMsg('Unauthorized');
+          } else {
+            setErrMsg('Error updating password');
+          }
+          errRef.current.focus();
+        }
+      }
+    } else {
+      const updateKey = updateKeys?.[0];
+      const updateData = data.get(updateKey);
+      let testRegex;
+      let toggleFunction;
+      switch (updateKey) {
+        case 'email':
+          testRegex = EMAIL_REGEX;
+          toggleFunction = setEmailToggle;
+          break;
+        case 'phoneNumber':
+          testRegex = PHONE_REGEX;
+          toggleFunction = setPhoneToggle;
+          break;
+        case 'first':
+          testRegex = NAME_REGEX;
+          toggleFunction = setFirstToggle;
+          break;
+        case 'last':
+          testRegex = NAME_REGEX;
+          toggleFunction = setLastToggle;
+          break;
+        default:
+          return;
+      }
 
-    if (!EMAIL_REGEX.test(email)) {
-      setErrMsg('Invalid Entry');
-      errRef.current.focus();
+      if (!testRegex.test(updateData)) {
+        setErrMsg('Invalid Entry');
+        errRef.current.focus();
+        return;
+      }
+
+      let axiosOptions;
+      if (updateKey === 'email') {
+        axiosOptions = { withCredentials: true }
+      } else {
+        axiosOptions = {}
+      }
+
+      try {
+        const response = await axiosPrivate.patch(UPDATE_PROFILE_URL, 
+          {
+            updateKey,
+            updateData: {
+              updateData,
+              pwd,
+            },
+          },
+          axiosOptions,
+        );
+        if (updateKey === 'email') {
+          const accessToken = response?.data?.accessToken;
+          setAuth({ email: updateData, accessToken });
+        }
+        queryClient.invalidateQueries({ queryKey: ['profile'], refetchType: 'all' });
+        toggleFunction(false);
+      } catch (err) {
+        if (!err?.response) {
+          setErrMsg('No Server Response');
+        } else if (err.response?.status === 400) {
+          setErrMsg(`Missing data to update ${updateKey}`);
+        } else if (err.response?.status === 401) {
+          setErrMsg('Unauthorized');
+        } else {
+          setErrMsg(`Error updating ${updateKey}`);
+        }
+        errRef.current.focus();
+      }
     }
   }
-
-  const handleNewPhone = e => {
-    e.preventDefault();
-    
-    if (!PHONE_REGEX.test(phoneNumber)) {
-      setErrMsg('Invalid Entry');
-      errRef.current.focus();
-    }
-  }
-
-  const handleNewFirst = e => {
-    e.preventDefault();
-    
-    if (!NAME_REGEX.test(firstName)) {
-      setErrMsg('Invalid Entry');
-      errRef.current.focus();
-    }
-  }
-
-  const handleNewLast = e => {
-    e.preventDefault();
-    
-    if (!NAME_REGEX.test(lastName)) {
-      setErrMsg('Invalid Entry');
-      errRef.current.focus();
-    }
-  }
-
-  const handleNewPassword = e => {
-    e.preventDefault();
-    
-    if (!PWD_REGEX.test(pwd)) {
-      setErrMsg('Invalid Entry');
-      errRef.current.focus();
-    }
-  }*/
-
-  
 
   if (isLoading) return (
     <div>
@@ -137,10 +199,11 @@ const FixerProfile = () => {
           {!emailToggle ? (
             <button type='button' onClick={() => setEmailToggle(prev => !prev)} className='destyled-btn'>Change</button>
           ) : (
-            <form onSubmit={handleNewEmail}>
+            <form onSubmit={handleUpdate}>
               <label htmlFor='new-email'>New email</label>
               <input 
                 id='new-email'
+                name='email'
                 type='text'
                 autoComplete='off'
                 onChange={(e) => setEmail(e.target.value)}
@@ -151,7 +214,7 @@ const FixerProfile = () => {
               <label>
                 Confirm your password
                 <input 
-                  type='text'
+                  type='password'
                   autoComplete='off'
                   onChange={(e) => setPwd(e.target.value)}
                   value={pwd}
@@ -160,7 +223,10 @@ const FixerProfile = () => {
                 />
               </label>
               <div className='btn-div'>
-                <button type='button' onClick={() => setEmailToggle(false)} className='btn'>Cancel</button>
+                <button type='button' onClick={() => {
+                  setEmailToggle(false);
+                  setEmail('');
+                }} className='btn'>Cancel</button>
                 <button disabled={!validEmail ? true : false} className='btn'>Save</button>
               </div>
             </form>
@@ -174,10 +240,11 @@ const FixerProfile = () => {
           {!phoneToggle ? (
             <button type='button' onClick={() => setPhoneToggle(prev => !prev)} className='destyled-btn'>Change</button>
           ) : (
-            <form onSubmit={handleNewPhone}>
+            <form onSubmit={handleUpdate}>
               <label htmlFor='new-phone'>New phone number</label>
               <input 
                 id='new-phone'
+                name='phoneNumber'
                 type='text'
                 autoComplete='off'
                 onChange={(e) => setPhoneNumber(e.target.value)}
@@ -188,7 +255,7 @@ const FixerProfile = () => {
               <label>
                 Confirm your password
                 <input 
-                  type='text'
+                  type='password'
                   autoComplete='off'
                   onChange={(e) => setPwd(e.target.value)}
                   value={pwd}
@@ -197,7 +264,10 @@ const FixerProfile = () => {
                 />
               </label>
               <div className='btn-div'>
-                <button type='button' onClick={() => setPhoneToggle(false)} className='btn'>Cancel</button>
+                <button type='button' onClick={() => {
+                  setPhoneToggle(false);
+                  setPhoneNumber('');
+                }} className='btn'>Cancel</button>
                 <button disabled={!validNumber ? true : false} className='btn'>Save</button>
               </div>
             </form>
@@ -211,10 +281,11 @@ const FixerProfile = () => {
         {!firstToggle ? (
             <button type='button' onClick={() => setFirstToggle(prev => !prev)} className='destyled-btn'>Change</button>
           ) : (
-            <form onSubmit={handleNewFirst}>
+            <form onSubmit={handleUpdate}>
               <label htmlFor='new-first'>New first name</label>
               <input 
                 id='new-first'
+                name='first'
                 type='text'
                 autoComplete='off'
                 onChange={(e) => setFirstName(e.target.value)}
@@ -225,7 +296,7 @@ const FixerProfile = () => {
               <label>
                 Confirm your password
                 <input 
-                  type='text'
+                  type='password'
                   autoComplete='off'
                   onChange={(e) => setPwd(e.target.value)}
                   value={pwd}
@@ -234,7 +305,10 @@ const FixerProfile = () => {
                 />
               </label>
               <div className='btn-div'>
-                <button type='button' onClick={() => setFirstToggle(false)} className='btn'>Cancel</button>
+                <button type='button' onClick={() => {
+                  setFirstToggle(false);
+                  setFirstName('');
+                }} className='btn'>Cancel</button>
                 <button disabled={!validFirst ? true : false} className='btn'>Save</button>
               </div>
             </form>
@@ -248,10 +322,11 @@ const FixerProfile = () => {
           {!lastToggle ? (
             <button type='button' onClick={() => setLastToggle(prev => !prev)} className='destyled-btn'>Change</button>
           ) : (
-            <form onSubmit={handleNewLast}>
+            <form onSubmit={handleUpdate}>
               <label htmlFor='new-last'>New last name</label>
               <input 
                 id='new-last'
+                name='last'
                 type='text'
                 autoComplete='off'
                 onChange={(e) => setLastName(e.target.value)}
@@ -262,7 +337,7 @@ const FixerProfile = () => {
               <label>
                 Confirm your password
                 <input 
-                  type='text'
+                  type='password'
                   autoComplete='off'
                   onChange={(e) => setPwd(e.target.value)}
                   value={pwd}
@@ -271,7 +346,10 @@ const FixerProfile = () => {
                 />
               </label>
               <div className='btn-div'>
-                <button type='button' onClick={() => setLastToggle(false)} className='btn'>Cancel</button>
+                <button type='button' onClick={() => {
+                  setLastToggle(false);
+                  setLastName('');
+                }} className='btn'>Cancel</button>
                 <button disabled={!validLast ? true : false} className='btn'>Save</button>
               </div>
             </form>
@@ -283,33 +361,56 @@ const FixerProfile = () => {
         <div className='flex-2'>
           <h3>{!passwordToggle ? 'Password' : 'Change Password'}</h3>
           {!passwordToggle ? (
-            <button type='button' onClick={() => setPasswordToggle(prev => !prev)} className='destyled-btn'>Change</button>
+            <button type='button' onClick={() => {
+              setPasswordToggle(prev => !prev);
+              setPwd('');
+              setNewPwd('');
+              setMatchPwd('');
+            }} className='destyled-btn'>Change</button>
           ) : (
-            <form onSubmit={handleNewPassword}>
-              <label htmlFor='new-password'>New password</label>
+            <form onSubmit={handleUpdate}>
+              <label htmlFor='old-password'>Old password</label>
               <input 
-                id='new-password'
-                type='text'
+                id='old-password'
+                name='oldpwd'
+                type='password'
                 autoComplete='off'
                 onChange={(e) => setPwd(e.target.value)}
                 value={pwd}
                 required
                 className='text-field'
               />
+              <label></label>
+              <label htmlFor='new-password'>New password</label>
+              <input 
+                id='new-password'
+                name='newpwd'
+                type='password'
+                autoComplete='off'
+                onChange={(e) => setNewPwd(e.target.value)}
+                value={newPwd}
+                required
+                className='text-field'
+              />
               <label>
-                Confirm your password
+                Confirm your new password
                 <input 
-                  type='text'
+                  type='password'
                   autoComplete='off'
-                  onChange={(e) => setPwd(e.target.value)}
-                  value={pwd}
+                  onChange={(e) => setMatchPwd(e.target.value)}
+                  value={matchPwd}
                   required
                   className='text-field'
                 />
               </label>
               <div className='btn-div'>
-                <button type='button' onClick={() => setPasswordToggle(false)} className='btn'>Cancel</button>
-                <button disabled={!validPwd ? true : false} className='btn'>Save</button>
+                <button type='button' onClick={() => {
+                  setPasswordToggle(false);
+                  setPwd('');
+                  setNewPwd('');
+                  setMatchPwd('');
+                }} className='btn'>Cancel</button>
+                <button disabled={!validPwd || !validMatch ? true : false} className='btn'>Save</button>
               </div>
             </form>
           )}
