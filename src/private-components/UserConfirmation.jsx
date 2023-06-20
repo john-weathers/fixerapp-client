@@ -135,14 +135,14 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
   }
 
   if (cancelled) return (
-    <div>
+    <div className='cancelled'>
       <h2>Job cancelled</h2>
       <p>Redirecting to home page...</p>
     </div>
   )
 
   if (cancellation) return ( // could list cancellation reason here in future build
-    <div>
+    <div className='cancelled'>
       <h2>The fixer has cancelled the job</h2>
       <p>Please contact us if you have any questions or concerns</p>
       <Link to='/'>Return to home page</Link>
@@ -156,7 +156,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
         ref={mapRef}
         onLoad={handleLoad}
         onMove={e => setViewState(e.viewState)}
-        style={{ width: '100vw', height: mapHeight, minHeight: 500, minWidth: 320 }}
+        style={{ width: '100vw', height: mapHeight, minHeight: 576, minWidth: 320 }}
         mapStyle='mapbox://styles/mapbox/streets-v12'
         mapboxAccessToken={MAPBOX_TOKEN}
         padding={
@@ -171,6 +171,13 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
         <Marker longitude={jobDetails.userLocation[0]} latitude={jobDetails.userLocation[1]}>
           <FontAwesomeIcon icon={faHouse} size='xl'/>
         </Marker>
+        <button type='button' onClick={() => {
+          const line = lineString([[jobDetails.userLocation[0], jobDetails.userLocation[1]], [jobDetails.fixerLocation[0], jobDetails.fixerLocation[1]]]);
+          const boundingBox = bbox(line);
+          mapRef.current.fitBounds(boundingBox);
+        }} className='btn re-center'>
+          Re-center map
+        </button>
       </Map>
       {((portrait || mobile) && !mobileToggle) && (
         <div className='mobile-btn show-content'>
@@ -235,13 +242,6 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
           </div>
         </div>
       </div>
-      <button type='button' onClick={() => {
-          const line = lineString([[jobDetails.userLocation[0], jobDetails.userLocation[1]], [jobDetails.fixerLocation[0], jobDetails.fixerLocation[1]]]);
-          const boundingBox = bbox(line);
-          mapRef.current.fitBounds(boundingBox);
-        }} className='btn re-center'>
-          Re-center map
-      </button>
     </>
   )
   /* 
