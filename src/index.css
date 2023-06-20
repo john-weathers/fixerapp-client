@@ -1541,6 +1541,10 @@ TODO: valid/invalid, on/offscreen rules
 
 /* Quick Fix - fixers */
 
+.sidebar.quick-fix.fixers {
+  min-height: 530px;
+}
+
 .sidebar.quick-fix.fixers input {
   display: inline-block;
 }
@@ -1763,14 +1767,18 @@ TODO: valid/invalid, on/offscreen rules
 
 @media screen and (orientation: portrait) and (max-width: 650px) {
   .btn.re-center {
-    top: 67.273px;
+    right: 0;
+    top: 0;
+    bottom: auto;
   }
 
 }
 
 @media screen and (orientation: portrait) and (min-width: 650px) {
   .btn.re-center {
-    top: 105px;
+    right: 0;
+    top: 0;
+    bottom: auto;
   }
 
 }
@@ -1778,6 +1786,7 @@ TODO: valid/invalid, on/offscreen rules
 @media screen and (orientation: portrait), (max-width: 480px) {
   .btn.re-center {
     right: 0;
+    top: 0;
     bottom: auto;
     border-radius: 0;
     border-bottom-left-radius: 4px;
@@ -1919,7 +1928,7 @@ TODO: valid/invalid, on/offscreen rules
   width: 233px;
   color: #364652;
   font-weight: 700;
-  border-right: 2px solid #364652;
+  border-right: 2px dotted #364652;
 }
 
 .post-en-route.flex-container.clients .quote-container .header-div h2:nth-child(2) {
@@ -2024,12 +2033,13 @@ TODO: valid/invalid, on/offscreen rules
     height: 300px;
   }
 
-  .post-en-route.flex-container.clients .quote-container div h2 {
+  .post-en-route.flex-container.clients .quote-container .header-div h2 {
     font-size: 24px;
   }
 
-  .post-en-route.flex-container.clients .quote-container div h2:nth-child(1) {
-    width: 200px;
+  .post-en-route.flex-container.clients .quote-container .header-div h2:nth-child(1) {
+    width: 205px;
+    border-right-width: 1px;
   }
 }
 
@@ -2308,14 +2318,19 @@ TODO: valid/invalid, on/offscreen rules
 }
 
 .post-en-route.flex-container.fixers .main-secondary .quote-decision.declined {
-  height: 165px;
-  width: 320px;
+  height: 205px;
+  width: 310px;
 }
 
 .post-en-route.flex-container.fixers .main-secondary .quote-decision .flex-container {
   display: flex;
   align-items: center;
   gap: 15px;
+}
+
+.post-en-route.flex-container.fixers .main-secondary .quote-decision.declined .flex-container {
+  flex-direction: column;
+  gap: 10px;
 }
 
 .post-en-route.flex-container.fixers .main-secondary .quote-decision .flex-container div {
@@ -2451,6 +2466,7 @@ TODO: valid/invalid, on/offscreen rules
   background: url('/star-filled-gold.svg') no-repeat center;
   margin: 0;
   padding: 0;
+  cursor: pointer;
 }
 
 .rating form:not(:hover) input:indeterminate,
@@ -2470,6 +2486,25 @@ TODO: valid/invalid, on/offscreen rules
 .post-rating h2 {
   color: #364652;
   margin-bottom: 30px;
+}
+
+.cancelled {
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  padding: 10px;
+}
+
+.cancelled h2 {
+  color: #364652;
+}
+
+.cancelled a {
+  text-decoration: none;
+  color: #680982;
 }
 
 @media screen and (max-width: 480px) {
