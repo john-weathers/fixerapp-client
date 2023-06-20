@@ -246,10 +246,8 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
   */
 
   useEffect(() => {
-    console.log('checking if notes are short enough now!')
     if (personalNotes.length <= 1000) {
       setErrMsg('');
-      console.log(errMsg);
     }
 
   }, [personalNotes]);
@@ -435,7 +433,8 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
       const temporaryJobId = jobDetails.jobId;
       await axiosPrivate.patch(COMPLETE_URL, {
         jobId: jobDetails.jobId,
-      }); // could have this be an emitter and leave room on back end
+        jobNotes,
+      });
       setActive(false);
       socket.emit('leave room', { jobId: temporaryJobId });
     } catch (err) {
@@ -473,14 +472,14 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
   }
 
   if (cancelled) return (
-    <div>
+    <div className='cancelled'>
       <h2>Job cancelled</h2>
       <p>Redirecting to home page...</p>
     </div>
   )
 
   if (cancellation) return ( // could list cancellation reason here in future build
-    <div>
+    <div className='cancelled'>
       <h2>The client has cancelled the job</h2>
       <p>Please contact us if you have any questions or concerns</p>
       <Link to='/fixers'>Return to home page</Link>
@@ -517,6 +516,13 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
         <Source id='route-data' type='geojson' data={route}>
           <Layer {...routeLayerStyle} />
         </Source>
+        <button type='button' onClick={() => {
+          const line = lineString([[jobDetails.route.coordinates[0][0], jobDetails.route.coordinates[0][1]], [jobDetails.userLocation[0], jobDetails.userLocation[1]]]);
+          const boundingBox = bbox(line);
+          mapRef.current.fitBounds(boundingBox);
+        }} className='btn re-center'>
+          Re-center map
+        </button>
       </Map>
       {((portrait || mobile) && !mobileToggle) && (
         <div className='mobile-btn show-content fixers'>
@@ -615,13 +621,6 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
           </div>
         </div>
       </div>
-      <button type='button' onClick={() => {
-          const line = lineString([[jobDetails.route.coordinates[0][0], jobDetails.route.coordinates[0][1]], [jobDetails.userLocation[0], jobDetails.userLocation[1]]]);
-          const boundingBox = bbox(line);
-          mapRef.current.fitBounds(boundingBox);
-        }} className='btn re-center'>
-          Re-center map
-      </button>
     </>
   )
 
@@ -715,7 +714,6 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
                 setErrMsg(`Quote description must be 1000 characters or less, delete ${notes.length - 1000} characters`);
                 errRef.current.focus();
               }
-              console.log(notes.length);
               setNotes(e.target.value);
             }}
           >
@@ -839,7 +837,8 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
                     id='jobnotes'
                     className='main-textarea on-focus'
                     value={jobNotes}
-                    placeholder='Job notes'
+                    placeholder='Description of repairs performed'
+                    required
                     onChange={e => {
                       if (jobNotes.length > 1000) {
                         setErrMsg('Job notes must be 1000 characters or less');
@@ -854,7 +853,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
                     <button type='button' onClick={() => setToggleWorkScope(true)} className='btn'>Revise quote</button>
                   </div>
                 </div>
-                <button type='button' onClick={handleComplete} className='btn complete'>Job complete</button>
+                <button type='button' onClick={handleComplete} disabled={!jobNotes ? true : false} className='btn complete'>Job complete</button>
               </>
             ) : (
               <form onSubmit={handleRevisedCost}>
