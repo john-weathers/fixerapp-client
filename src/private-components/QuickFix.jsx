@@ -309,7 +309,7 @@ const QuickFix = () => {
         minZoom='11.5'
         maxZoom='19.5'
         onMove={e => setViewState(e.viewState)}
-        style={{ width: '100vw', height: mapHeight, minHeight: 500, minWidth: 320 }}
+        style={{ width: '100vw', height: mapHeight, minHeight: 576, minWidth: 320 }}
         mapStyle='mapbox://styles/mapbox/streets-v12'
         mapboxAccessToken={MAPBOX_TOKEN}
         padding={
