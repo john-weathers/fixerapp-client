@@ -1319,7 +1319,7 @@ TODO: valid/invalid, on/offscreen rules
 .index h2 {
   color: #364652;
   font-weight: 900;
-  font-size: 32px;
+  font-size: 28px;
   text-align: center;
   background-color: #F8F2F7;
   padding: 40px 0;
@@ -1341,13 +1341,33 @@ TODO: valid/invalid, on/offscreen rules
   vertical-align: top;
 }
 
+@media screen and (max-width: 1200px) {
+  .index h2 {
+    padding: 30px 0;
+  }
+}
+
 @media screen and (max-width: 768px) {
   .index div {
     padding-left: 30px;
     padding-right: 30px;
   }
-
 }
+
+@media screen and (max-width: 650px) {
+  .index h2 {
+    padding: 20px 0;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .index h2 {
+    padding: 10px 0;
+    font-size: 24px;
+  }
+}
+
+
 
 /* Quick Fix - clients */
 
