@@ -45,13 +45,13 @@ const FixerSettings = () => {
   }
 
   if (isLoading) return (
-    <div>
+    <div className='center'>
       <h2>Fetching settings...</h2>
     </div>
   )
 
   if (isError) return (
-    <div>
+    <div className='center'>
       <h2>Error fetching settings...</h2>
     </div>
   )
@@ -60,17 +60,21 @@ const FixerSettings = () => {
     <div className='settings'>
       <h2>Settings</h2>
       <div className='flex-1'>
-        <div>
-          <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
-          <input 
-            id='extended-opt-in'
-            name='extendedOptIn'
-            type='checkbox'
-            checked={extended}
-            onChange={handleChange}
-            className='toggle-checkbox'
-          />
-          <label htmlFor='extended-opt-in'>Opt in to accepting jobs within 40 miles if none are available within 20 (additional compensation is provided for extended range jobs)</label>
+        <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
+        <div className='flex-2'>
+          <label className='toggle-checkbox'>
+            <input 
+              id='extended-opt-in'
+              name='extendedOptIn'
+              type='checkbox'
+              checked={extended}
+              onChange={handleChange}
+              className='toggle-checkbox'
+              aria-label='Accept jobs within 40 miles if none are available within 20 (additional compensation is provided for extended range jobs)'
+            />
+            <span className='toggle'></span>
+          </label>
+          <p>Accept jobs within 40 miles if none are available within 20 (additional compensation is provided for extended range jobs)</p>
         </div>
       </div>
     </div>
