@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useProfile } from '../hooks/reactQueryHooks';
+import { faCheck, faTimes, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useAuth from '../hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -11,7 +13,6 @@ const PHONE_REGEX = /^[\+0-9]{0,4}[-\s\.]?[(]?[0-9]{1,3}[)]?[-\s\.]?[0-9]{2,4}[-
 const PROFILE_URL = '/fixers/profile';
 const UPDATE_PROFILE_URL = '/fixers/update-profile';
 
-// useMutation to post updates to profile, onSuccess invalidate 
 const FixerProfile = () => {
   const [emailToggle, setEmailToggle] = useState(false);
   const [phoneToggle, setPhoneToggle] = useState(false);
@@ -25,6 +26,7 @@ const FixerProfile = () => {
   const [newPwd, setNewPwd] = useState('');
   const [pwd, setPwd] = useState('');
   const [validPwd, setValidPwd] = useState(false);
+  const [pwdFocus, setPwdFocus] = useState(false);
 
   const [matchPwd, setMatchPwd] = useState('');
   const [validMatch, setValidMatch] = useState(false);
@@ -39,7 +41,6 @@ const FixerProfile = () => {
   const [validNumber, setValidNumber] = useState(false);
 
   const [errMsg, setErrMsg] = useState('');
-  const [success, setSuccess] = useState(false);
 
   const errRef = useRef();
   const axiosPrivate = useAxiosPrivate();
@@ -191,229 +192,257 @@ const FixerProfile = () => {
 
   return (
     <div className='profile'>
-      <h2>Profile Info</h2>
+      <h2>Profile</h2>
       <div className='flex-1'>
-        <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
-        <div className='flex-2'>
-          <h3>{!emailToggle ? 'Email' : 'Change Email'}</h3>
-          {!emailToggle ? (
-            <button type='button' onClick={() => setEmailToggle(prev => !prev)} className='destyled-btn'>Change</button>
-          ) : (
-            <form onSubmit={handleUpdate}>
-              <label htmlFor='new-email'>New email</label>
-              <input 
-                id='new-email'
-                name='email'
-                type='text'
-                autoComplete='off'
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-                required
-                className='text-field'
-              />
-              <label>
-                Confirm your password
-                <input 
-                  type='password'
-                  autoComplete='off'
-                  onChange={(e) => setPwd(e.target.value)}
-                  value={pwd}
-                  required
-                  className='text-field'
-                />
-              </label>
-              <div className='btn-div'>
-                <button type='button' onClick={() => {
-                  setEmailToggle(false);
-                  setEmail('');
-                }} className='btn'>Cancel</button>
-                <button disabled={!validEmail ? true : false} className='btn'>Save</button>
-              </div>
-            </form>
-          )}
+        <div>
+          <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
+          <div className={!emailToggle ? 'flex-2' : 'flex-2 toggled'}>
+            <h3>{!emailToggle ? 'Email' : 'Change Email'}</h3>
+            {!emailToggle ? (
+              <button type='button' onClick={() => setEmailToggle(prev => !prev)} className='destyled-btn'>Change</button>
+            ) : (
+              <form onSubmit={handleUpdate}>
+                <label>
+                  New email
+                  <input 
+                    id='new-email'
+                    name='email'
+                    type='text'
+                    autoComplete='off'
+                    onChange={(e) => setEmail(e.target.value)}
+                    value={email}
+                    required
+                    className='text-field'
+                  />
+                </label>
+                <label>
+                  Confirm your password
+                  <input 
+                    type='password'
+                    autoComplete='off'
+                    onChange={(e) => setPwd(e.target.value)}
+                    value={pwd}
+                    required
+                    className='text-field'
+                  />
+                </label>
+                <div className='btn-div'>
+                  <button type='button' onClick={() => {
+                    setEmailToggle(false);
+                    setEmail('');
+                  }} className='btn secondary'>Cancel</button>
+                  <button disabled={!validEmail || !pwd ? true : false} className='btn'>Save</button>
+                </div>
+              </form>
+            )}
+          </div>
+          {!emailToggle && <p className='profile-data'>{profileData.email}</p>}
         </div>
-        <p>{profileData.email}</p>
-      </div>
-      <div className='flex-1'>
-        <div className='flex-2'>
-          <h3>{!phoneToggle ? 'Phone Number' : 'Change Phone Number'}</h3>
-          {!phoneToggle ? (
-            <button type='button' onClick={() => setPhoneToggle(prev => !prev)} className='destyled-btn'>Change</button>
-          ) : (
-            <form onSubmit={handleUpdate}>
-              <label htmlFor='new-phone'>New phone number</label>
-              <input 
-                id='new-phone'
-                name='phoneNumber'
-                type='text'
-                autoComplete='off'
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                value={phoneNumber}
-                required
-                className='text-field'
-              />
-              <label>
-                Confirm your password
-                <input 
-                  type='password'
-                  autoComplete='off'
-                  onChange={(e) => setPwd(e.target.value)}
-                  value={pwd}
-                  required
-                  className='text-field'
-                />
-              </label>
-              <div className='btn-div'>
-                <button type='button' onClick={() => {
-                  setPhoneToggle(false);
-                  setPhoneNumber('');
-                }} className='btn'>Cancel</button>
-                <button disabled={!validNumber ? true : false} className='btn'>Save</button>
-              </div>
-            </form>
-          )}
+        <div>
+          <div className={!phoneToggle ? 'flex-2' : 'flex-2 toggled'}>
+            <h3>{!phoneToggle ? 'Phone Number' : 'Change Phone Number'}</h3>
+            {!phoneToggle ? (
+              <button type='button' onClick={() => setPhoneToggle(prev => !prev)} className='destyled-btn'>Change</button>
+            ) : (
+              <form onSubmit={handleUpdate}>
+                <label>
+                  New phone number
+                  <input 
+                    id='new-phone'
+                    name='phoneNumber'
+                    type='text'
+                    autoComplete='off'
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    value={phoneNumber}
+                    required
+                    className='text-field'
+                  />
+                </label>
+                <label>
+                  Confirm your password
+                  <input 
+                    type='password'
+                    autoComplete='off'
+                    onChange={(e) => setPwd(e.target.value)}
+                    value={pwd}
+                    required
+                    className='text-field'
+                  />
+                </label>
+                <div className='btn-div'>
+                  <button type='button' onClick={() => {
+                    setPhoneToggle(false);
+                    setPhoneNumber('');
+                  }} className='btn secondary'>Cancel</button>
+                  <button disabled={!validNumber || !pwd ? true : false} className='btn'>Save</button>
+                </div>
+              </form>
+            )}
+          </div>
+          {!phoneToggle && <p className='profile-data'>{profileData.phoneNumber}</p>}
         </div>
-        <p>{profileData.phoneNumber}</p>
-      </div>
-      <div className='flex-1'>
-        <div className='flex-2'>
-        <h3>{!firstToggle ? 'First Name' : 'Change First Name'}</h3>
-        {!firstToggle ? (
-            <button type='button' onClick={() => setFirstToggle(prev => !prev)} className='destyled-btn'>Change</button>
-          ) : (
-            <form onSubmit={handleUpdate}>
-              <label htmlFor='new-first'>New first name</label>
-              <input 
-                id='new-first'
-                name='first'
-                type='text'
-                autoComplete='off'
-                onChange={(e) => setFirstName(e.target.value)}
-                value={firstName}
-                required
-                className='text-field'
-              />
-              <label>
-                Confirm your password
-                <input 
-                  type='password'
-                  autoComplete='off'
-                  onChange={(e) => setPwd(e.target.value)}
-                  value={pwd}
-                  required
-                  className='text-field'
-                />
-              </label>
-              <div className='btn-div'>
-                <button type='button' onClick={() => {
-                  setFirstToggle(false);
-                  setFirstName('');
-                }} className='btn'>Cancel</button>
-                <button disabled={!validFirst ? true : false} className='btn'>Save</button>
-              </div>
-            </form>
-          )}
+        <div>
+          <div className={!firstToggle ? 'flex-2' : 'flex-2 toggled'}>
+          <h3>{!firstToggle ? 'First Name' : 'Change First Name'}</h3>
+          {!firstToggle ? (
+              <button type='button' onClick={() => setFirstToggle(prev => !prev)} className='destyled-btn'>Change</button>
+            ) : (
+              <form onSubmit={handleUpdate}>
+                <label>
+                  New first name
+                  <input 
+                    id='new-first'
+                    name='first'
+                    type='text'
+                    autoComplete='off'
+                    onChange={(e) => setFirstName(e.target.value)}
+                    value={firstName}
+                    required
+                    className='text-field'
+                  />
+                </label>
+                <label>
+                  Confirm your password
+                  <input 
+                    type='password'
+                    autoComplete='off'
+                    onChange={(e) => setPwd(e.target.value)}
+                    value={pwd}
+                    required
+                    className='text-field'
+                  />
+                </label>
+                <div className='btn-div'>
+                  <button type='button' onClick={() => {
+                    setFirstToggle(false);
+                    setFirstName('');
+                  }} className='btn secondary'>Cancel</button>
+                  <button disabled={!validFirst || !pwd ? true : false} className='btn'>Save</button>
+                </div>
+              </form>
+            )}
+          </div>
+          {!firstToggle && <p className='profile-data'>{profileData.firstName}</p>}
         </div>
-        <p>{profileData.firstName}</p>
-      </div>
-      <div className='flex-1'>
-        <div className='flex-2'>
-          <h3>{!lastToggle ? 'Last Name' : 'Change Last Name'}</h3>
-          {!lastToggle ? (
-            <button type='button' onClick={() => setLastToggle(prev => !prev)} className='destyled-btn'>Change</button>
-          ) : (
-            <form onSubmit={handleUpdate}>
-              <label htmlFor='new-last'>New last name</label>
-              <input 
-                id='new-last'
-                name='last'
-                type='text'
-                autoComplete='off'
-                onChange={(e) => setLastName(e.target.value)}
-                value={lastName}
-                required
-                className='text-field'
-              />
-              <label>
-                Confirm your password
-                <input 
-                  type='password'
-                  autoComplete='off'
-                  onChange={(e) => setPwd(e.target.value)}
-                  value={pwd}
-                  required
-                  className='text-field'
-                />
-              </label>
-              <div className='btn-div'>
-                <button type='button' onClick={() => {
-                  setLastToggle(false);
-                  setLastName('');
-                }} className='btn'>Cancel</button>
-                <button disabled={!validLast ? true : false} className='btn'>Save</button>
-              </div>
-            </form>
-          )}
+        <div>
+          <div className={!lastToggle ? 'flex-2' : 'flex-2 toggled'}>
+            <h3>{!lastToggle ? 'Last Name' : 'Change Last Name'}</h3>
+            {!lastToggle ? (
+              <button type='button' onClick={() => setLastToggle(prev => !prev)} className='destyled-btn'>Change</button>
+            ) : (
+              <form onSubmit={handleUpdate}>
+                <label>
+                  New last name
+                  <input 
+                    id='new-last'
+                    name='last'
+                    type='text'
+                    autoComplete='off'
+                    onChange={(e) => setLastName(e.target.value)}
+                    value={lastName}
+                    required
+                    className='text-field'
+                  />
+                </label>
+                <label>
+                  Confirm your password
+                  <input 
+                    type='password'
+                    autoComplete='off'
+                    onChange={(e) => setPwd(e.target.value)}
+                    value={pwd}
+                    required
+                    className='text-field'
+                  />
+                </label>
+                <div className='btn-div'>
+                  <button type='button' onClick={() => {
+                    setLastToggle(false);
+                    setLastName('');
+                  }} className='btn secondary'>Cancel</button>
+                  <button disabled={!validLast || !pwd ? true : false} className='btn'>Save</button>
+                </div>
+              </form>
+            )}
+          </div>
+          {!lastToggle && <p className='profile-data'>{profileData.lastName}</p>}
         </div>
-        <p>{profileData.lastName}</p>
-      </div>
-      <div className='flex-1'>
-        <div className='flex-2'>
-          <h3>{!passwordToggle ? 'Password' : 'Change Password'}</h3>
-          {!passwordToggle ? (
-            <button type='button' onClick={() => {
-              setPasswordToggle(prev => !prev);
-              setPwd('');
-              setNewPwd('');
-              setMatchPwd('');
-            }} className='destyled-btn'>Change</button>
-          ) : (
-            <form onSubmit={handleUpdate}>
-              <label htmlFor='old-password'>Old password</label>
-              <input 
-                id='old-password'
-                name='oldpwd'
-                type='password'
-                autoComplete='off'
-                onChange={(e) => setPwd(e.target.value)}
-                value={pwd}
-                required
-                className='text-field'
-              />
-              <label></label>
-              <label htmlFor='new-password'>New password</label>
-              <input 
-                id='new-password'
-                name='newpwd'
-                type='password'
-                autoComplete='off'
-                onChange={(e) => setNewPwd(e.target.value)}
-                value={newPwd}
-                required
-                className='text-field'
-              />
-              <label>
-                Confirm your new password
-                <input 
-                  type='password'
-                  autoComplete='off'
-                  onChange={(e) => setMatchPwd(e.target.value)}
-                  value={matchPwd}
-                  required
-                  className='text-field'
-                />
-              </label>
-              <div className='btn-div'>
-                <button type='button' onClick={() => {
-                  setPasswordToggle(false);
-                  setPwd('');
-                  setNewPwd('');
-                  setMatchPwd('');
-                }} className='btn'>Cancel</button>
-                <button disabled={!validPwd || !validMatch ? true : false} className='btn'>Save</button>
-              </div>
-            </form>
-          )}
+        <div>
+          <div className={!passwordToggle ? 'flex-2' : 'flex-2 toggled'}>
+            <h3>{!passwordToggle ? 'Password' : 'Change Password'}</h3>
+            {!passwordToggle ? (
+              <button type='button' onClick={() => {
+                setPasswordToggle(prev => !prev);
+                setPwd('');
+                setNewPwd('');
+                setMatchPwd('');
+              }} className='destyled-btn'>Change</button>
+            ) : (
+              <form onSubmit={handleUpdate}>
+                <label>
+                  Old password
+                  <input 
+                    id='old-password'
+                    name='oldpwd'
+                    type='password'
+                    autoComplete='off'
+                    onChange={(e) => setPwd(e.target.value)}
+                    value={pwd}
+                    required
+                    className='text-field'
+                  />
+                </label>
+                <label>
+                  New password
+                  <FontAwesomeIcon icon={faCheck} className={validPwd ? 'valid' : 'hide'} />
+                  <FontAwesomeIcon icon={faTimes} className={validPwd || !newPwd ? 'hide' : 'invalid'} />
+                  <input 
+                    id='new-password'
+                    name='newpwd'
+                    type='password'
+                    autoComplete='off'
+                    onChange={(e) => setNewPwd(e.target.value)}
+                    value={newPwd}
+                    required
+                    className='text-field'
+                    aria-invalid={validPwd ? 'false' : 'true'}
+                    aria-describedby='pwdnote'
+                    onFocus={() => setPwdFocus(true)}
+                    onBlur={() => setPwdFocus(false)}
+                  />
+                </label>
+                <p id='pwdnote' className={pwdFocus && !validPwd ? 'instructions' : 'offscreen'}>
+                  <FontAwesomeIcon icon={faInfoCircle} />{' '}
+                  8 to 24 characters.<br />
+                  Must include uppercase and lowercase letters, a number and a special character.<br />
+                  Allowed special characters: <span aria-label='exclamation mark'>!</span> <span aria-label='at symbol'>@</span> 
+                  <span aria-label='hashtag'>#</span> <span aria-label='dollar sign'>$</span> <span aria-label='percent'>%</span>
+                </p>
+                <label>
+                  Confirm your new password
+                  <FontAwesomeIcon icon={faCheck} className={validMatch && matchPwd ? 'valid' : 'hide'} />
+                  <FontAwesomeIcon icon={faTimes} className={validMatch || !matchPwd ? 'hide' : 'invalid'} />
+                  <input 
+                    type='password'
+                    autoComplete='off'
+                    onChange={(e) => setMatchPwd(e.target.value)}
+                    value={matchPwd}
+                    required
+                    className='text-field'
+                  />
+                </label>
+                <div className='btn-div'>
+                  <button type='button' onClick={() => {
+                    setPasswordToggle(false);
+                    setPwd('');
+                    setNewPwd('');
+                    setMatchPwd('');
+                  }} className='btn secondary'>Cancel</button>
+                  <button disabled={!validPwd || !validMatch ? true : false} className='btn'>Save</button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </div>
