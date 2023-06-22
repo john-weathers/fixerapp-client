@@ -268,6 +268,21 @@ input {
   font-family: 'Inter', sans-serif;
 }
 
+.center {
+  width: 100%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  padding: 10px;
+}
+
+.center h2 {
+  color: #364652;
+  font-weight: 500;
+}
+
 @media screen and (max-width: 480px) {
   .app-name-part1 {
     font-size: 36px;
@@ -2581,11 +2596,12 @@ TODO: valid/invalid, on/offscreen rules
 
 .profile .flex-2 {
   display: flex;
-  gap: 5px;
+  gap: 8px;
 }
 
 .profile .flex-2.toggled {
   flex-direction: column;
+  gap: 5px;
 }
 
 .profile .flex-2 form {
@@ -2599,10 +2615,11 @@ TODO: valid/invalid, on/offscreen rules
   background: none;
   color: #680982;
   padding: 0;
-  font-family: 'Inter';
+  font-family: 'Inter', sans-serif;
   cursor: pointer;
   height: auto;
   outline: inherit;
+  font-size: 16px;
 }
 
 .profile .btn-div {
@@ -2630,9 +2647,163 @@ TODO: valid/invalid, on/offscreen rules
   font-weight: 300;
 }
 
+@media screen and (max-width: 1200px) {
+  .profile .flex-1 {
+    margin: 35px auto;
+  }
+  
+  .profile h2 {
+    padding: 30px 0;
+  }
+}
+
+@media screen and (max-width: 650px) {
+  .profile h2 {
+    padding: 20px 0;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .profile .flex-1 {
+    width: 100%;
+    padding: 0 15px;
+  }
+
+  .profile h2 {
+    padding: 10px 0;
+    font-size: 24px;
+  }
+}
+
 /* Settings */
 
+.settings .flex-1 {
+  width: fit-content;
+  padding: 0 15px;
+  margin: 50px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
 
+.settings .flex-2 {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.settings h2 {
+  text-align: center;
+  width: 100%;
+  background-color: #F8F2F7;
+  padding: 40px 0;
+  font-weight: 900;
+  color: #364652;
+  font-size: 28px;
+}
+
+.settings p {
+  font-family: 'Inter', sans-serif;
+  font-size: 17px;
+}
+
+.settings label {
+  font-size: 17px;
+}
+
+.settings .toggle-checkbox {
+  display: inline-block;
+  position: relative;
+  width: 56px;
+  height: 32px;
+}
+
+.settings input {
+  appearance: none;
+  margin: 0;
+  float: left;
+}
+
+.settings .toggle {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 30px;
+  background-color: #CCC;
+  -webkit-transition: 200ms;
+  transition: 200ms;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/*.settings .toggle:hover {
+  box-shadow: 0 0 8px #680982;
+}*/
+
+.settings .toggle:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 6px;
+  bottom: 5px;
+  border-radius: 50%;
+  background-color: white;
+  -webkit-transition: 200ms;
+  transition: 200ms;
+}
+
+.settings input:checked + .toggle {
+  background-color: #680982;
+}
+
+/*.settings input:checked + .toggle:hover {
+  box-shadow: 0 0 8px #364652;
+}*/
+
+.settings input:checked + .toggle:before {
+  -webkit-transform: translateX(22px);
+  -ms-transform: translateX(22px);
+  transform: translateX(22px);
+}
+
+@media screen and (max-width: 1200px) {
+  .settings .flex-1 {
+    width: 90%;
+    margin: 35px auto;
+  }
+  
+  .settings h2 {
+    padding: 30px 0;
+  }
+}
+
+@media screen and (max-width: 650px) {
+  .settings .flex-1 {
+    padding: 0 10px;
+  }
+
+  .settings h2 {
+    padding: 20px 0;
+  }
+
+  .settings p {
+    font-size: 16px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .settings .flex-1 {
+    padding: 0;
+  }
+
+  .settings h2 {
+    padding: 10px 0;
+    font-size: 24px;
+  }
+}
 
 /* Under construction */
 
