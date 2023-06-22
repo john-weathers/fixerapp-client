@@ -179,13 +179,13 @@ const UserProfile = () => {
   }
 
   if (isLoading) return (
-    <div>
+    <div className='center'>
       <h2>Fetching profile...</h2>
     </div>
   )
 
   if (isError) return (
-    <div>
+    <div className='center'>
       <h2>Error fetching profile...</h2>
     </div>
   )
@@ -194,8 +194,8 @@ const UserProfile = () => {
     <div className='profile'>
       <h2>Profile</h2>
       <div className='flex-1'>
+        <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
         <div>
-          <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
           <div className={!emailToggle ? 'flex-2' : 'flex-2 toggled'}>
             <h3>{!emailToggle ? 'Email' : 'Change Email'}</h3>
             {!emailToggle ? (
