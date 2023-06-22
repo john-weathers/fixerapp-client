@@ -104,6 +104,16 @@ input {
   font-family: 'Inter', sans-serif;
 }
 
+.valid {
+  margin-left: 5px;
+  color: green;
+}
+
+.invalid {
+  margin-left: 5px;
+  color: red;
+}
+
 .btn {
   background-color: #680982;
   color: white;
@@ -2544,6 +2554,83 @@ TODO: valid/invalid, on/offscreen rules
     border-radius: 4px;
   }
 }
+
+/* Profile */
+
+.profile .flex-1 {
+  width: 400px;
+  margin: 50px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.profile h2 {
+  text-align: center;
+  width: 100%;
+  background-color: #F8F2F7;
+  padding: 40px 0;
+  font-weight: 900;
+  color: #364652;
+  font-size: 28px;
+}
+
+.profile h3 {
+  font-weight: 500;
+}
+
+.profile .flex-2 {
+  display: flex;
+  gap: 5px;
+}
+
+.profile .flex-2.toggled {
+  flex-direction: column;
+}
+
+.profile .flex-2 form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profile .flex-2 .destyled-btn {
+  border: none;
+  background: none;
+  color: #680982;
+  padding: 0;
+  font-family: 'Inter';
+  cursor: pointer;
+  height: auto;
+  outline: inherit;
+}
+
+.profile .btn-div {
+  align-self: flex-end;
+  display: flex;
+  gap: 20px;
+}
+
+.profile .btn {
+  width: 75px;
+  height: 35px;
+  font-size: 14px;
+  border-radius: 2px;
+}
+
+.profile .btn:disabled {
+  background-color: rgba(104, 9, 130, 0.2);
+}
+
+.profile .btn.secondary {
+  background-color: #364652;
+}
+
+.profile .profile-data {
+  font-weight: 300;
+}
+
+/* Settings */
 
 
 
