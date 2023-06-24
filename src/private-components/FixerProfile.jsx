@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { useProfile } from '../hooks/reactQueryHooks';
-import { faCheck, faTimes, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faTimes, faInfoCircle, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useAuth from '../hooks/useAuth';
@@ -41,6 +42,7 @@ const FixerProfile = () => {
   const [validNumber, setValidNumber] = useState(false);
 
   const [errMsg, setErrMsg] = useState('');
+  const { scrollY } = useOutletContext();
 
   const errRef = useRef();
   const axiosPrivate = useAxiosPrivate();
@@ -192,9 +194,12 @@ const FixerProfile = () => {
 
   return (
     <div className='profile'>
+      <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
+          <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
+      </div>  
       <h2>Profile</h2>
       <div className='flex-1'>
-        <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
         <div>
           <div className={!emailToggle ? 'flex-2' : 'flex-2 toggled'}>
             <h3>{!emailToggle ? 'Email' : 'Change Email'}</h3>

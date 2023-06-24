@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from 'react';
 import useAuth from '../hooks/useAuth';
 import { Link, useLocation, Navigate } from 'react-router-dom';
+import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useInput from '../hooks/useInput';
 import useToggle from '../hooks/useToggle';
 import NavBar from '../base-components/PublicNavbar';
@@ -10,6 +12,8 @@ const LOGIN_URL = '/user/auth';
 
 const UserLogin = () => {
   const { auth, setAuth } = useAuth();
+
+  const [mobile, setMobile] = useState(window.innerWidth <= 480 ? true : false);
 
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
@@ -30,6 +34,22 @@ const UserLogin = () => {
   useEffect(() => {
     setErrMsg('');
   }, [email, pwd]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 480) {
+        setMobile(true);
+      } else {
+        setMobile(false);
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,8 +88,11 @@ const UserLogin = () => {
       {!auth?.accessToken ? (
         <div className='login'>
           <NavBar />
-          <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
-          {window.innerWidth <= 480 ? (
+          <div className={errMsg ? 'errmsg' : 'offscreen'}>
+            <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
+            <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
+          </div>    
+          {mobile ? (
             <h1 className='title-mobile'>Client login</h1>
           ) : (
             <h1 className='app-name-part1'>fixer<span className='app-name-part2'>app</span><span className='title-divider'> | </span><span className='title-part3'>client login</span></h1>

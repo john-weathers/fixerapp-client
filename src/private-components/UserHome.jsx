@@ -18,6 +18,7 @@ const UserHome = () => {
   const [tablet, setTablet] = useState(window.innerWidth <= 768 ? true : false);
   const [portrait, setPortrait] = useState(window.innerHeight >= window.innerWidth ? true : false);
   const [mapHeight, setMapHeight] = useState(window.innerWidth <= 650 ? window.innerHeight - 67.273 : window.innerHeight - 105);
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -64,10 +65,16 @@ const UserHome = () => {
       }
     }
 
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    }
+
     window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', handleScroll);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
     }
   }, []);
 
@@ -83,7 +90,7 @@ const UserHome = () => {
         rightTitle: 'Schedule',
         navBreak,
       }}/>
-      <Outlet context={{ active, setActive, mapHeight, mobile, tablet, portrait }}/>
+      <Outlet context={{ active, setActive, mapHeight, mobile, tablet, portrait, scrollY }}/>
     </div>
   )
 }

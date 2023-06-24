@@ -43,7 +43,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
   const [notesToggle, setNotesToggle] = useState(false);
   const [personalNotes, setPersonalNotes] = useLocalStorage('notes', 'Type any notes you want that you find helpful! For your eyes only.');
   const [rated, setRated] = useState(false);
-  const { active, setActive, mapHeight, portrait, mobile } = useOutletContext();
+  const { active, setActive, mapHeight, portrait, mobile, scrollY } = useOutletContext();
   const [mobileToggle, setMobileToggle] = useState(false);
   const navigate = useNavigate();
 
@@ -151,6 +151,15 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
 
   if (jobDetails?.trackerStage === 'en route') return (
     <>
+      <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
+        {Array.isArray(errMsg) ? (
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg[0]}
+          <br />{errMsg[1]}</p>
+        ) : (
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
+        )}
+      </div>  
       <Map
         {...viewState}
         ref={mapRef}
@@ -199,15 +208,6 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
             : 'mobile confirmation'
             }
       >
-        <div className={errMsg ? 'errmsg' : 'offscreen'}>
-          <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-          {Array.isArray(errMsg) ? (
-            <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-            <br />{errMsg[1]}</p>
-          ) : (
-            <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-          )}
-        </div>
         <div className='flex-container-mobile'>
           <h2>JOB DETAILS</h2>
           <table>
@@ -259,15 +259,15 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
 
   if (jobDetails?.trackerStage === 'arriving') return (
     <div className='post-en-route clients flex-container'>
-      <div className={errMsg ? 'errmsg' : 'offscreen'}>
-        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+      <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
         {Array.isArray(errMsg) ? (
-          <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg[0]}
           <br />{errMsg[1]}</p>
         ) : (
-          <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
         )}
-      </div>
+      </div>  
       <div className='flex-item one'>
         <ul>
           <li style={{ marginBottom: !detailsToggle ? 42 :  20 }}>
@@ -374,6 +374,15 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
   // deal with updated quote potentially coming in
   if (jobDetails?.trackerStage === 'fixing') return (
     <div className='post-en-route clients flex-container'>
+      <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
+        {Array.isArray(errMsg) ? (
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg[0]}
+          <br />{errMsg[1]}</p>
+        ) : (
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
+        )}
+      </div>  
       <div className='flex-item one'>
         <ul>
           <li style={{ marginBottom: !detailsToggle ? 42 :  20 }}>
@@ -465,15 +474,15 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
 
   if (jobDetails?.trackerStage === 'complete' || finalizing) return (
     <div className='finalizing'>
-      <div className={errMsg ? 'errmsg' : 'offscreen'}>
-        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+      <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
         {Array.isArray(errMsg) ? (
-          <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg[0]}
           <br />{errMsg[1]}</p>
         ) : (
-          <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
         )}
-      </div>
+      </div>  
       {!rated ? (
         <>
           <h2 className='job-complete'>Job Complete!</h2>

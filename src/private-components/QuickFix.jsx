@@ -18,6 +18,7 @@ const geocodingService = mbxGeocoding({ accessToken: MAPBOX_TOKEN });
 const PROFILE_URL = '/fixers/profile';
 const FIND_WORK_URL = '/fixers/work/find';
 const CURRENT_URL = '/fixers/work/current';
+let count = 0;
 let retryAttempts = 2;
 let retry = false;
 let socket;
@@ -48,7 +49,6 @@ const QuickFix = () => {
   const [toggleLocation, setToggleLocation] = useState(false);
   const [searching, setSearching] = useState(false);
   const [intervalId, setIntervalId] = useState(null);
-  const [count, setCount] = useState(0);
   const [viewState, setViewState] = useState(() => {
     if (currentLocation?.length) {
       return {
@@ -242,7 +242,7 @@ const QuickFix = () => {
         setSearching(false);
         return;
       }
-      setCount(prev => prev + 1);
+      count += 1;
     }
     const interval = setInterval(async () => {
       try {
@@ -273,9 +273,10 @@ const QuickFix = () => {
         retryAttempts = 2;
         retry = false;
       } catch (err) {
-        setCount(prev => prev + 1);
-        if (count > 15) {
+        count += 1;
+        if (count > 7) {
           setErrMsg(['No jobs in your area at this time', 'Continuing to search for a match']);
+          count = 0;
         }
       }
     }, 4000);
@@ -284,7 +285,7 @@ const QuickFix = () => {
   
   const handleCancel = () => {
     setSearching(false);
-    setCount(0);
+    count = 0;
     clearInterval(intervalId);
     setIntervalId(null);
     retryAttempts = 2;
@@ -302,8 +303,24 @@ const QuickFix = () => {
     jobDetails={jobDetails}
   />;
 
+  /* 
+  <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
+      <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
+      <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
+  </div> 
+  */
+
   return (
     <>
+      <div className={errMsg ? 'errmsg' : 'offscreen'}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
+        {Array.isArray(errMsg) ? (
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg[0]}
+          <br />{errMsg[1]}</p>
+        ) : (
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
+        )}
+      </div>  
       <Map
         {...viewState}
         minZoom='11.5'
@@ -330,16 +347,7 @@ const QuickFix = () => {
         >
           <div className='flex-container main'>
             {profileLoading || isError ? <h2>Welcome</h2> : <h2>Welcome {profileData.firstName}</h2>}
-            <h2>Choose your work area</h2>
-            <div className={errMsg ? 'errmsg' : 'offscreen'}>
-              <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-              {Array.isArray(errMsg) ? (
-                <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-                <br />{errMsg[1]}</p>
-              ) : (
-                <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-              )}
-            </div>          
+            <h2>Choose your work area</h2>        
             <form autoComplete='off' onSubmit={handleSubmit} className='flex-container sub-1'>
               {mobile || portrait ? (
                 <div className='flex-container sub-2'>
@@ -409,16 +417,7 @@ const QuickFix = () => {
       ) : (
         <div className='sidebar quick-fix fixers'>
           <div className='flex-container requesting'>
-            <div className={errMsg ? 'errmsg' : 'offscreen'}>
-              <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-              {Array.isArray(errMsg) ? (
-                <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-                <br />{errMsg[1]}</p>
-              ) : (
-                <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-              )}
-            </div>
-            <h2>Searching for work near you...</h2>     
+            <h2 className='secondary'>Searching for work near you...</h2>     
             <FontAwesomeIcon icon={faSpinner} spin size='2xl'/>
             <button type='button' onClick={handleCancel} className='btn'>Cancel</button>
           </div>

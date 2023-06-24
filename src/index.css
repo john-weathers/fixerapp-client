@@ -283,6 +283,42 @@ input {
   font-weight: 500;
 }
 
+.login .account-p {
+  margin: 66px 0 34px 0;
+}
+
+.errmsg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  width: 280px;
+  height: 160px;
+  padding: 0 5px;
+  text-align: center;
+  background-color: white;
+  border: 3px solid #364652;
+  border-radius: 4px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% - 25px));
+  z-index: 2;
+}
+
+.errmsg .errmsg-p {
+  font-weight: 700;
+  color: #364652;
+  font-size: 16px;
+}
+
+.errmsg .x-close {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+  color: #364652;
+}
+
 @media screen and (max-width: 480px) {
   .app-name-part1 {
     font-size: 36px;
@@ -1195,14 +1231,11 @@ TODO: add styling for error ref (display and offscreen rules)
   display: flex;
   align-items: center;
   font-weight: 200;
+  width: fit-content;
 }
 
 .login .btn {
   margin-top: 16px;
-}
-
-.login .account-p {
-  margin: 66px 0 34px 0;
 }
 
 @media screen and (max-width: 480px) {
@@ -1412,6 +1445,10 @@ TODO: valid/invalid, on/offscreen rules
 
 .sidebar.quick-fix h2:nth-child(1) {
   color: #680982;
+}
+
+.sidebar.quick-fix h2.secondary {
+  color: #364652;
 }
 
 .sidebar form {
@@ -2307,6 +2344,10 @@ TODO: valid/invalid, on/offscreen rules
   border-bottom: none;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
+}
+
+.post-en-route.flex-container.fixers .main-secondary .main-textarea:focus + .btn-div {
+  box-shadow: 0 0 4px #680982;
 }
 
 .post-en-route.flex-container.fixers .main-secondary .btn-div {

@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { faCheck, faTimes, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faTimes, faInfoCircle, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import NavBar from '../base-components/PublicNavbar';
 import axios from '../api/axios';
@@ -16,6 +16,8 @@ const REGISTER_URL = '/user/register';
 const UserRegistration = () => {
   const userRef = useRef();
   const errRef = useRef();
+
+  const [mobile, setMobile] = useState(window.innerWidth <= 480 ? true : false);
 
   const [email, setEmail] = useState('');
   const [validEmail, setValidEmail] = useState(false);
@@ -42,6 +44,7 @@ const UserRegistration = () => {
   const [phoneFocus, setPhoneFocus] = useState(false);
 
   const [errMsg, setErrMsg] = useState('');
+  const [scrollY, setScrollY] = useState(0);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
@@ -72,6 +75,28 @@ const UserRegistration = () => {
   useEffect(() => {
     setErrMsg('');
   }, [email, pwd, matchPwd]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 480) {
+        setMobile(true);
+      } else {
+        setMobile(false);
+      }
+    }
+
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    }
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -134,8 +159,11 @@ const UserRegistration = () => {
       ) : (
         <section className='registration'>
           <NavBar />
-          <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
-          {window.innerWidth <= 480 ? (
+          <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
+            <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
+            <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
+          </div> 
+          {mobile ? (
             <h1 className='title-mobile'>Sign up | clients</h1>
           ) : (
             <h1 className='app-name-part1'>fixer<span className='app-name-part2'>app</span><span className='title-divider'> | </span><span className='title-part3'>client sign up</span></h1>
@@ -214,7 +242,7 @@ const UserRegistration = () => {
               className='text-field'
             />
             <p id='confirmnote' className={matchFocus && !validMatch ? 'instructions' : 'offscreen'}>
-              <FontAwesomeIcon icon={faInfoCircle} />
+              <FontAwesomeIcon icon={faInfoCircle} />{' '}
               Must match the first password input field.
             </p>
 

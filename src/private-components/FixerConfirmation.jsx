@@ -117,7 +117,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
   const [detailsToggle, setDetailsToggle] = useState(false);
   const [notesToggle, setNotesToggle] = useState(false);
   const [personalNotes, setPersonalNotes] = useLocalStorage('notes', 'Type any notes you want to help you with the job! For your eyes only.');
-  const { active, setActive, mapHeight, portrait, mobile } = useOutletContext();
+  const { active, setActive, mapHeight, portrait, mobile, scrollY } = useOutletContext();
   const navigate = useNavigate();
   
   // for production
@@ -488,6 +488,15 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
 
   if (jobDetails?.trackerStage === 'en route') return (
     <>
+      <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
+        {Array.isArray(errMsg) ? (
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg[0]}
+          <br />{errMsg[1]}</p>
+        ) : (
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
+        )}
+      </div>  
       <Map
         {...viewState}
         ref={mapRef}
@@ -544,15 +553,6 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
             : 'mobile confirmation fixers'
             }
       >
-        <div className={errMsg ? 'errmsg' : 'offscreen'}>
-          <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-          {Array.isArray(errMsg) ? (
-            <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-            <br />{errMsg[1]}</p>
-          ) : (
-            <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-          )}
-        </div>
         <div className='flex-container-mobile fixers'>
           <h2>JOB DETAILS</h2>
           <table>
@@ -626,15 +626,15 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
 
   if (jobDetails?.trackerStage === 'arriving') return (
     <div className='post-en-route fixers flex-container'>
-      <div className={errMsg ? 'errmsg' : 'offscreen'}>
-        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+      <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
         {Array.isArray(errMsg) ? (
-          <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg[0]}
           <br />{errMsg[1]}</p>
         ) : (
-          <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
         )}
-      </div>
+      </div> 
       <div className='flex-item one'>
         <ul>
           <li style={{ marginBottom: !detailsToggle ? 42 :  20 }}>
@@ -746,15 +746,15 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
 
   if (jobDetails?.trackerStage === 'fixing') return (
     <div className='post-en-route fixers flex-container'>
-      <div className={errMsg ? 'errmsg' : 'offscreen'}>
-        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+      <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
         {Array.isArray(errMsg) ? (
-          <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg[0]}
           <br />{errMsg[1]}</p>
         ) : (
-          <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
         )}
-      </div>
+      </div>  
       <div className='flex-item one'>
         <ul>
           <li style={{ marginBottom: !detailsToggle ? 42 :  20 }}>
@@ -925,15 +925,15 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
 
   if (jobDetails?.trackerStage === 'complete' || finalizing) return (
     <div className='finalizing'>
-      <div className={errMsg ? 'errmsg' : 'offscreen'}>
-        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
+      <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
         {Array.isArray(errMsg) ? (
-          <p ref={errRef} aria-live='assertive'>{errMsg[0]}
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg[0]}
           <br />{errMsg[1]}</p>
         ) : (
-          <p ref={errRef} aria-live='assertive'>{errMsg}</p>
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
         )}
-      </div>
+      </div>  
       {!rated ? (
         <>
           <h2 className='job-complete'>Job Complete!</h2>

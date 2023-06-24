@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useProfile } from '../hooks/reactQueryHooks';
+import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -58,9 +60,12 @@ const UserSettings = () => {
 
   return (
     <div className='settings'>
+      <div className={errMsg ? 'errmsg' : 'offscreen'}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
+        <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
+      </div>
       <h2>Settings</h2>
       <div className='flex-1'>
-        <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
         <div className='flex-2'>
           <label className='toggle-checkbox'>
             <input 

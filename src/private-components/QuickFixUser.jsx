@@ -189,14 +189,6 @@ const QuickFixUser = () => {
     }
   }, [count]);
 
-  /*useEffect(() => {
-    if (window.innerWidth <= 650) {
-      setMapHeight(window.innerHeight - 67.273)
-    } else {
-      setMapHeight(window.innerHeight - 105)
-    }
-  }, [window.innerWidth]);*/
-
   const handleChange = (e) => {
     setCustomLocation(e.target.value);
     if (customLocation.length > 5) {
@@ -276,6 +268,15 @@ const QuickFixUser = () => {
   // TODO: move Mapbox logo to different area?
   return (
     <>
+      <div className={errMsg ? 'errmsg' : 'offscreen'}>
+        <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
+        {Array.isArray(errMsg) ? (
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg[0]}
+          <br />{errMsg[1]}</p>
+        ) : (
+          <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
+        )}
+      </div>  
       <Map
         {...viewState}
         minZoom='11.5'
@@ -301,16 +302,7 @@ const QuickFixUser = () => {
         >
           <div className='flex-container'>
             {profileLoading || isError ? <h2>Welcome</h2> : <h2>Welcome {profileData.firstName}</h2>}
-            <h2>Where do you need help?</h2>
-            <div className={errMsg ? 'errmsg' : 'offscreen'}>
-              <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-              {Array.isArray(errMsg) ? (
-                <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-                <br />{errMsg[1]}</p>
-              ) : (
-                <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-              )}
-            </div>          
+            <h2>Where do you need help?</h2>        
             <form autoComplete='off' onSubmit={handleSubmit}>
               <input 
                 id='address' 
@@ -343,16 +335,7 @@ const QuickFixUser = () => {
       ) : requesting && !searching ? (
         <div className='sidebar quick-fix'>
           <div className='flex-container requesting'>
-            <div className={errMsg ? 'errmsg' : 'offscreen'}>
-              <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-              {Array.isArray(errMsg) ? (
-                <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-                <br />{errMsg[1]}</p>
-              ) : (
-                <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-              )}
-            </div>
-            <h2>Submitting request...</h2>     
+            <h2 className='secondary'>Submitting request...</h2>     
             <FontAwesomeIcon icon={faSpinner} spin size='2xl'/>
             <button type='button' onClick={handleCancel} className='btn'>Cancel</button>
           </div>
@@ -360,16 +343,7 @@ const QuickFixUser = () => {
       ) : (
         <div className='sidebar quick-fix'>
           <div className='flex-container requesting'>
-            <div className={errMsg ? 'errmsg' : 'offscreen'}>
-              <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' />
-              {Array.isArray(errMsg) ? (
-                <p ref={errRef} aria-live='assertive'>{errMsg[0]}
-                <br />{errMsg[1]}</p>
-              ) : (
-                <p ref={errRef} aria-live='assertive'>{errMsg}</p>
-              )}
-            </div>
-            <h2>Searching for fixer near you...</h2>     
+            <h2 className='secondary'>Searching for fixer near you...</h2>     
             <FontAwesomeIcon icon={faSpinner} spin size='2xl'/>
             <button type='button' onClick={handleCancel} className='btn'>Cancel</button>
           </div>
