@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useProfile } from '../hooks/reactQueryHooks';
-import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import { faCircleXmark, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import { useQueryClient } from '@tanstack/react-query';
@@ -47,8 +47,8 @@ const UserSettings = () => {
   }
 
   if (isLoading) return (
-    <div className='center'>
-      <h2>Fetching settings...</h2>
+    <div className='loading'>
+      <FontAwesomeIcon icon={faSpinner} spin size='3x'/>
     </div>
   )
 

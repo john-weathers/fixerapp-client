@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useProfile } from '../hooks/reactQueryHooks';
-import { faCheck, faTimes, faInfoCircle, faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faTimes, faInfoCircle, faCircleXmark, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import useAuth from '../hooks/useAuth';
@@ -181,8 +181,8 @@ const FixerProfile = () => {
   }
 
   if (isLoading) return (
-    <div className='center'>
-      <h2>Fetching profile...</h2>
+    <div className='loading'>
+      <FontAwesomeIcon icon={faSpinner} spin size='3x'/>
     </div>
   )
 

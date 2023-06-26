@@ -1,7 +1,9 @@
 import { Outlet } from "react-router-dom";
 import { useState, useEffect } from "react";
 import useRefreshToken from '../hooks/useRefreshToken';
-import { useRefresh } from "../hooks/reactQueryHooks";
+import { useRefresh } from '../hooks/reactQueryHooks';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAuth from '../hooks/useAuth';
 import useLocalStorage from "../hooks/useLocalStorage";
 
@@ -48,10 +50,9 @@ const PersistLogin = () => {
                 : isLoading
                     ? (
                         <div className='loading'>
-                            <p>Loading...</p>
+                            <FontAwesomeIcon icon={faSpinner} spin size='3x'/>
                         </div>
-                    )
-                    : <Outlet />
+                    ) : <Outlet />
             }
         </>
     )

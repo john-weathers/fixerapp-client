@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import useAuth from '../hooks/useAuth';
 import { Link, Navigate, useLocation } from 'react-router-dom';
-import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+import { faCircleXmark, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useInput from '../hooks/useInput';
 import useToggle from '../hooks/useToggle';
@@ -81,7 +81,11 @@ const FixerLogin = () => {
 
   if (auth?.accessToken) return <Navigate to={from} replace={true} />
 
-  if (loading) return <p>Loading...</p>
+  if (loading) return (
+    <div className='loading'>
+      <FontAwesomeIcon icon={faSpinner} spin size='3x'/>
+    </div>
+  )
 
   return (
     <>

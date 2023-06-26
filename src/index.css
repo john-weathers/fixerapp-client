@@ -349,18 +349,12 @@ modifying style directly in the component probably the best way to accomplish th
 */
 
 .loading {
-  height: 100vh;
-  position: relative;
-}
-
-.loading p {
   position: absolute;
+  display: inline-block;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 24px;
   color: #364652;
-  font-weight: 500;
 }
 
 /* Landing */
