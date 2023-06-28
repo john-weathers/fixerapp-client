@@ -14,11 +14,11 @@ const NavBar = ({ onClick, learnMore }) => {
 
   useEffect(() => {
     // another approach could be using a scroll/wheel event to close the mobile dropdown menu
-    const offsetHeight = document.getElementsByTagName('html')[0].offsetHeight;
-    if (window.innerHeight > offsetHeight) {
+    const scrollHeight = document.body.scrollHeight;
+    if (window.innerHeight >= scrollHeight) {
         setMobileHeight(window.innerHeight)
     } else {
-        setMobileHeight(offsetHeight);
+        setMobileHeight(scrollHeight);
     }
   }, [mobileOpen]);
 
