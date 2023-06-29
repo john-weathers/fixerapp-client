@@ -8,20 +8,20 @@ export const profileQuery = (axios, url) => ({
     return data;
   },
   staleTime: Infinity,
-  cacheTime: 1000 * 60 * 30, // may need to revisit...I could see infinity being a more logical choice here.
+  cacheTime: 1000 * 60 * 30,
 });
 
 export const useProfile = (axios, url) => {
   return useQuery(profileQuery(axios, url));
 }
 
-export const prefetchProfile = async (client, axios, url) => {
+/*export const prefetchProfile = async (client, axios, url, setErrMsg) => {
   try {
     await client.prefetchQuery(profileQuery(axios, url));
   } catch (err) {
-    console.log(err);
+    setErrMsg(err.message);
   }
-}
+}*/
 
 export const geolocationQuery = {
   queryKey: ['location', 'current'],
@@ -47,11 +47,11 @@ export const useGeolocation = () => {
   return useQuery(geolocationQuery);
 }
 
-/*export const prefetchGeolocation = async (client) => {
+/*export const prefetchGeolocation = async (client, setErrMsg) => {
   try {
     await client.prefetchQuery(geolocationQuery);
   } catch (err) {
-    console.log(err);
+    setErrMsg(err.message);
   }
 }*/
 
@@ -61,7 +61,7 @@ const requestQuery = (axios, url) => ({
     const { data } = await axios.get(url);
     return data;
   },
-  staleTime: 0, // NOTE: keep on eye on staleTime and adjust if needed
+  staleTime: 0,
   retry: 0,
 });
 
@@ -89,7 +89,7 @@ const refreshQuery = (auth, persist, refresh, setAuth) => ({
       return null;
     }
   },
-  retry: 0, // current setup seems to be functioning properly but might think about amending this to 1 or 2 if helpful
+  retry: 0,
   staleTime: 0,
 })
 

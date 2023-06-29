@@ -1,16 +1,8 @@
 import NavBar from '../base-components/PublicNavbar';
-import { Link } from "react-router-dom";
-import { faCalendarCheck } from '@fortawesome/free-regular-svg-icons';
+import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWrench } from '@fortawesome/free-solid-svg-icons';
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
-import { faCreditCard } from '@fortawesome/free-regular-svg-icons';
-import { faThumbsUp } from '@fortawesome/free-regular-svg-icons';
-import { faStopwatch } from '@fortawesome/free-solid-svg-icons';
-
-// TODO NEXT: need refresher on CSS flexbox and grid
-// not sure if flexbox is best or even needed in these scenario (or grid for that matter)
-// layout I'm envisioning is a sort of two column on desktop that goes down to one for mobile
+import { faCalendarCheck, faCreditCard, faThumbsUp } from '@fortawesome/free-regular-svg-icons';
+import { faWrench, faCheck, faStopwatch } from '@fortawesome/free-solid-svg-icons';
 
 const Landing = () => {
   return (

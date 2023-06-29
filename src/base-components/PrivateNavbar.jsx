@@ -1,10 +1,6 @@
 import { useState, useEffect } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
-import { faCircleUser } from '@fortawesome/free-regular-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { NavLink } from 'react-router-dom';
 import HoverNav from './HoverNav';
-import { faHouse } from '@fortawesome/free-solid-svg-icons';
-import { faHammer } from '@fortawesome/free-solid-svg-icons';
 import useLogout from '../hooks/useLogout';
 
 const PrivateNavBar = ({ navOptions }) => {
@@ -14,7 +10,6 @@ const PrivateNavBar = ({ navOptions }) => {
     const logout = useLogout();
     
     useEffect(() => {
-    // another approach could be using a scroll/wheel event to close the mobile dropdown menu
     const scrollHeight = document.body.scrollHeight;
     if (window.innerHeight >= scrollHeight) {
         setMobileHeight(window.innerHeight)
@@ -45,7 +40,6 @@ const PrivateNavBar = ({ navOptions }) => {
         setUserMenuOpen(false);
     }
 
-    /* might need to change html to avoid validateDOMNesting error (seems li on line 53 / 70 is the issue)*/
     return (
         <nav className='header private'>
             <ul className='nav-container'>
@@ -116,8 +110,6 @@ const PrivateNavBar = ({ navOptions }) => {
                         </li>
                     </>
                 )}
-                
-                
             </ul>
         </nav>
   )

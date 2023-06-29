@@ -23,7 +23,6 @@ let retryAttempts = 2;
 let retry = false;
 let socket;
 
-// TODO: copy additions/changes from QuickFixUser
 const QuickFix = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
@@ -88,11 +87,11 @@ const QuickFix = () => {
         socket.io.opts.extraHeaders = {
           'Authorization': `Bearer ${newAccessToken}`,
         }
-        socket.connect(); // should work, but if issues occur might solve them to disconnect before connecting
+        socket.connect();
       } else if (err.message === 'Unauthorized') {
         navigate('/unauthorized', { replace: true, state: { from: location } });
       } else {
-        console.log(err.message); // need to see cases that might come up...may or may not make sense to setErrMsg in this case
+        setErrMsg(err.message);
       }
     });
 
@@ -122,7 +121,6 @@ const QuickFix = () => {
   }, []);
 
   useEffect(() => {
-    console.log('effect hook firing');
     if (geolocationResult.isSuccess && geolocationResult?.data?.longitude && geolocationResult?.data?.longitude !== viewState.longitude) {
       setViewState(prev => ({
         ...prev,
@@ -161,7 +159,6 @@ const QuickFix = () => {
     setToggleLocation(false);
     try {
       const data = await queryClient.fetchQuery(geolocationQuery);
-      console.log(data);
       if (data) {
         setCurrentLocation([data.longitude, data.latitude]);
         setViewState(prev => ({
@@ -173,7 +170,7 @@ const QuickFix = () => {
         setErrMsg('Could not get location data');
       }
     } catch (err) {
-      console.log(err);
+      setErrMsg(err.message);
     }
   }
 
@@ -295,20 +292,12 @@ const QuickFix = () => {
     setValidCustomLocation(null);
   }
 
-  // using jobDetails rather than something like isSuccess because a failed fetch, even after we have data set, seems to cause isSuccess to revert to false
   if (jobDetails?.jobId || finalizing || userCancelled) return <FixerConfirmation 
     socket={socket} 
     finalizing={{ finalizing, setFinalizing }} 
     cancellation={userCancelled} 
     jobDetails={jobDetails}
   />;
-
-  /* 
-  <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
-      <FontAwesomeIcon onClick={() => setErrMsg('')} icon={faCircleXmark} aria-label='close error message' className='x-close' size='xl' />
-      <p ref={errRef} aria-live='assertive' className='errmsg-p'>{errMsg}</p>
-  </div> 
-  */
 
   return (
     <>

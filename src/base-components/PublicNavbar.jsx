@@ -1,8 +1,6 @@
-import { useState, useEffect, useRef } from "react";
-import { NavLink, Outlet } from "react-router-dom"
+import { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom"
 import HoverNav from './HoverNav';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars } from "@fortawesome/free-solid-svg-icons";
 
 const NavBar = ({ onClick, learnMore }) => {
   const [url, setUrl] = useState(window.location.href);
@@ -13,7 +11,6 @@ const NavBar = ({ onClick, learnMore }) => {
   const [mobileHeight, setMobileHeight] = useState(null);
 
   useEffect(() => {
-    // another approach could be using a scroll/wheel event to close the mobile dropdown menu
     const scrollHeight = document.body.scrollHeight;
     if (window.innerHeight >= scrollHeight) {
         setMobileHeight(window.innerHeight)

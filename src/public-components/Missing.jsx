@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 const Missing = () => {
     return (
-        <article>
+        <article className='center'>
             <h1>Oops!</h1>
             <p>Page Not Found</p>
             <div>

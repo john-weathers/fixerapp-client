@@ -1,14 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import NavBar from '../base-components/PublicNavbar';
-import { faCalendarCheck } from '@fortawesome/free-regular-svg-icons';
-import { faCheck } from '@fortawesome/free-solid-svg-icons';
-import { faArrowTurnUp } from '@fortawesome/free-solid-svg-icons';
-import { faBan } from '@fortawesome/free-solid-svg-icons';
-import { faCreditCard } from '@fortawesome/free-regular-svg-icons';
+import { faCalendarCheck, faCreditCard } from '@fortawesome/free-regular-svg-icons';
+import { faCheck, faArrowTurnUp, faBan } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-// css cover image for each (vertical split for large screens), display=none for opposite onclick...button at bottom to see opposite
 const GetStarted = () => {
   const [showUserInfo, setShowUserInfo] = useState(false);
   const [showFixerInfo, setShowFixerInfo] = useState(false);
@@ -39,12 +35,7 @@ const GetStarted = () => {
     setShowFixerInfo(prev => !prev);
     setShowUserInfo(prev => !prev);
   }
-
-  // NOTE: minor issue with absolute positioning on buttons causing layout issues when images are loading
-  // I think there are a couple potential ways to alleviate this, one of which is I suspect the browser cache is being invalidated when the refresh API call is made
-  // could implement some form of cache-control, setting headers in express, but would need to make sure any solutions don't impact more critical functions
-  // additionally, need a placeholder element and/or fallback
-  // that allows the buttons to still be positioned correctly in cases where a) the image doesn't properly load or b) the image loads late
+  
   return (
     <div className='learn-more-layout'>
         <NavBar onClick={handleNavClick} learnMore={true}/>

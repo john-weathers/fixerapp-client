@@ -1,8 +1,7 @@
 import { useProfile } from '../hooks/reactQueryHooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendar } from '@fortawesome/free-regular-svg-icons';
+import { faCalendar, faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import { faScrewdriverWrench } from '@fortawesome/free-solid-svg-icons';
-import { faPenToSquare } from '@fortawesome/free-regular-svg-icons';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
 
 const PROFILE_URL = '/users/profile';

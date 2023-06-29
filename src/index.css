@@ -3,7 +3,6 @@
 html {
   box-sizing: border-box;
   font-size: 16px;
-  /*scrollbar-gutter: stable;*/
 }
 
 *, *:before, *:after {
@@ -42,12 +41,7 @@ img {
   height: auto;
 }
 
-/* Global/multi-component rules
-NOTE: will ideally have more planned global styles in the future (such as .btn) that are reusable and maybe less of the 'multi-component' type rules that
-may only apply to, for example, two components
-
-additionally, think it might be preferable to move the components' styling to separate CSS files
-*/
+/* Global/multi-component rules */
 
 .app-name-part1 {
   font-size: 40px;
@@ -343,10 +337,7 @@ input {
   }
 }
 
-/* Loading
-TODO: create custom loading bar
-modifying style directly in the component probably the best way to accomplish the bar animation
-*/
+/* Loading */
 
 .loading {
   position: absolute;
@@ -535,14 +526,6 @@ modifying style directly in the component probably the best way to accomplish th
     height: 52px;
     line-height: 52px;
   }
-}
-
-@media screen and ((max-width: 1024px) or (orientation: portrait)) {
-  /*.landing .intro {
-    gap: 10px;
-    text-align: center;
-    margin: 30px 20px 30px 20px;
-  }*/
 }
 
 /* Navigation bar - public */
@@ -989,10 +972,7 @@ modifying style directly in the component probably the best way to accomplish th
   }
 }
 
-/* GetStarted - cover page
-TODO: look into setting cache-control header on backend to solve problem of images reloading after refresh API call is made
-consider changing fixers image
-*/
+/* GetStarted - cover page */
 
 .learn-more-layout .flex-container {
   display: flex;
@@ -1194,9 +1174,7 @@ consider changing fixers image
 }
 
 
-/* Login
-TODO: add styling for error ref (display and offscreen rules)
-*/
+/* Login */
 
 .login .app-name-part1 {
   margin-top: 100px;
@@ -1249,20 +1227,7 @@ TODO: add styling for error ref (display and offscreen rules)
   }
 }
 
-/*
-#login .errmsg {
-  display: flex;
-}
-
-#login .offscreen {
-  visibility: hidden;
-}
-*/
-
-
-/* Registration 
-TODO: valid/invalid, on/offscreen rules
-*/
+/* Registration */
 
 .registration .app-name-part1 {
   margin-top: 30px;
@@ -1313,28 +1278,6 @@ TODO: valid/invalid, on/offscreen rules
     margin-bottom: 10px;
   }
 }
-
-/*
-#registration .offscreen {
-  display: none;
-}
-
-#registration .valid {
-  color: green;
-}
-
-#registration .hide {
-  display: none;
-}
-
-#registration .invalid {
-  color: red;
-}
-
-#registration .instructions {
-  display: block;
-}
-*/
 
 /* Index */
 
@@ -1508,12 +1451,6 @@ TODO: valid/invalid, on/offscreen rules
   cursor: default;
 }
 
-/*@media screen and (min-width: 768px) and (max-height: 604px) {
-  .sidebar {
-    height: 454px;
-  }
-}*/
-
 @media screen and (max-width: 1100px) {
   .sidebar h2 {
     font-size: 20px;
@@ -1521,8 +1458,6 @@ TODO: valid/invalid, on/offscreen rules
   }
 }
 
-/* calc(100vw - 160px);*/
-/* (max-width: 768px) and (min-height: 650px)*/
 @media screen and (orientation: portrait) {
   .sidebar {
     width: 88%;
@@ -2793,10 +2728,6 @@ TODO: valid/invalid, on/offscreen rules
   -webkit-tap-highlight-color: transparent;
 }
 
-/*.settings .toggle:hover {
-  box-shadow: 0 0 8px #680982;
-}*/
-
 .settings .toggle:before {
   position: absolute;
   content: "";
@@ -2813,10 +2744,6 @@ TODO: valid/invalid, on/offscreen rules
 .settings input:checked + .toggle {
   background-color: #680982;
 }
-
-/*.settings input:checked + .toggle:hover {
-  box-shadow: 0 0 8px #364652;
-}*/
 
 .settings input:checked + .toggle:before {
   -webkit-transform: translateX(22px);
@@ -2886,13 +2813,4 @@ TODO: valid/invalid, on/offscreen rules
   .under-construction {
     font-size: 16px;
   }
-}
-
-/* Error page - basic, revisit */
-#error-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
 }

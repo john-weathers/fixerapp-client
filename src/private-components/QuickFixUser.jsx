@@ -22,7 +22,6 @@ let retry = false;
 let socket;
 let firstUpdate = true;
 
-// TODO: update remainder of html for responsiveness
 const QuickFixUser = () => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
@@ -83,23 +82,22 @@ const QuickFixUser = () => {
         socket.io.opts.extraHeaders = {
           'Authorization': `Bearer ${newAccessToken}`,
         }
-        socket.connect(); // should work, but if issues occur might solve them to disconnect before connecting
+        socket.connect();
       } else if (err.message === 'Unauthorized') {
         navigate('/unauthorized', { replace: true, state: { from: location } });
       } else {
-        console.log(err.message); // need to see cases that might come up...may or may not make sense to setErrMsg in this case
+        setErrMsg(err.message);
       }
     });
 
     socket.on('job update', (updatedDetails) => {
-      console.log(`IS FIRST UPDATE: ${firstUpdate}`);
       if (firstUpdate) {
         setActive(true);
         setRequesting(false);
         setSearching(false);
         clearInterval(intervalId);
         // force a fetch if it's the first update from the watcher function to grab all the job details
-        queryClient.invalidateQueries({ queryKey: ['request'], refetchType: 'all' }); // not sure refetchType: 'all' is necessary here...need to find out more in testing
+        queryClient.invalidateQueries({ queryKey: ['request'], refetchType: 'all' });
         firstUpdate = false;
       } else {
         if (updatedDetails.currentStatus === 'cancelled') {
@@ -115,8 +113,6 @@ const QuickFixUser = () => {
           firstUpdate = true;
         }
         // subsequent updates can overwrite old cache data
-        console.log(`job update: ${updatedDetails}`);
-        console.log(`FINALIZING STATUS: ${finalizing}`);
         queryClient.setQueryData(['request'], oldData => {
           return {
             ...oldData,
@@ -138,7 +134,6 @@ const QuickFixUser = () => {
   }, []);
 
   useEffect(() => {
-    console.log('effect hook firing');
     if (geolocationResult.isSuccess && geolocationResult?.data?.longitude && geolocationResult?.data?.longitude !== viewState.longitude) {
       setViewState(prev => ({
         ...prev,
@@ -146,7 +141,7 @@ const QuickFixUser = () => {
         latitude: geolocationResult.data.latitude,
       }));
     }
-  }, [geolocationResult.isSuccess]) // should not have a problem here with an unwanted firing of useEffect after initial isSuccess === true, but keep an eye on in testing
+  }, [geolocationResult.isSuccess]);
 
   useEffect(() => {
     clearInterval(intervalId);
@@ -250,12 +245,11 @@ const QuickFixUser = () => {
     setCount(0);
     setCustomLocation('');
     setValidCustomLocation(null);
-    socket.emit('cancel request', (response) => { // I don't think an acknowledgement without data will cause an issue, but keep an eye on
+    socket.emit('cancel request', (response) => {
       if (response.status !== 'No content') setErrMsg('Error deleting request');
     })
   }
 
-  // using jobDetails rather than something like isSuccess because a failed fetch, even after we have data set, seems to cause isSuccess to revert to false
   if (jobDetails?.jobId || finalizing || fixerCancelled) return <UserConfirmation 
     socket={socket} 
     finalizing={finalizing} 
@@ -265,7 +259,6 @@ const QuickFixUser = () => {
     jobId={jobId}
   />
 
-  // TODO: move Mapbox logo to different area?
   return (
     <>
       <div className={errMsg ? 'errmsg' : 'offscreen'}>

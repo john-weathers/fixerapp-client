@@ -16,7 +16,6 @@ import FixerLogin from './public-components/FixerLogin';
 import PersistLogin from './public-components/PersistLogin';
 import RequireAuthRoot from './public-components/RequireAuthRoot';
 import RequireAuth from './public-components/RequireAuth';
-import DemoApp from './public-components/DemoApp';
 import Unauthorized from './public-components/Unauthorized';
 import UserHome from './private-components/UserHome';
 import UserIndex from './private-components/UserIndex';
@@ -57,37 +56,28 @@ export const router = createBrowserRouter(
         <Route path='fixer-login' element={<FixerLogin />} />
         <Route path='user-registration' element={<UserRegistration />} />
         <Route path='fixer-registration' element={<FixerRegistration />} />
-        <Route path='how-it-works' element={<DemoApp />} />
         <Route path='unauthorized' element={<Unauthorized />} />
 
       <Route element={<PersistLogin userRoles={[ROLES.user, ROLES.premiumUser]} fixerRoles={[ROLES.fixer, ROLES.premiumFixer]} />}>
         <Route element={<RequireAuthRoot userRoles={[ROLES.user, ROLES.premiumUser]} fixerRoles={[ROLES.fixer, ROLES.premiumFixer]} />}>
           <Route path='/' element={<UserHome />} >
             <Route index element={<UserIndex />} />
-            <Route path='quick-fix' element={<QuickFixUser />} /*loader action={appLoader}*/ />
+            <Route path='quick-fix' element={<QuickFixUser />} />
             <Route path='proposals' element={<Proposals />} />
             <Route path='schedule' element={<UserSchedule />} />
             <Route path='profile' element={<UserProfile />}/>
             <Route path='settings' element={<UserSettings />}/>
-            {
-            /*<Route path='planning-tool' loader action />
-            <Route path='settings' element={<UserSettings loader action />}/>*/
-            }
           </Route>
         </Route>
 
         <Route element={<RequireAuth allowedRoles={[ROLES.fixer, ROLES.premiumFixer]} />}>
           <Route path='/fixers' element={<FixerHome />} >
             <Route index element={<FixerIndex />} />
-            <Route path='quick-fix' element={<QuickFix />} /* look into Suspense for this component (minor UI issues on refresh) */ />
+            <Route path='quick-fix' element={<QuickFix />} />
             <Route path='bid' element={<Bid />}/>
             <Route path='schedule' element={<FixerSchedule />}/>
             <Route path='profile' element={<FixerProfile />}/>
             <Route path='settings' element={<FixerSettings />}/>
-            {
-            /*<Route path='schedule' loader action />
-            <Route path='settings' element={<FixerSettings />} loader action />*/
-            }
           </Route>
         </Route>
 

@@ -1,26 +1,16 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate, Link, useOutletContext } from 'react-router-dom';
-import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks';
 import Map, { Marker } from 'react-map-gl';
-import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
-import { faCar } from '@fortawesome/free-solid-svg-icons';
-import { faHouse } from '@fortawesome/free-solid-svg-icons';
-import { faScrewdriverWrench } from '@fortawesome/free-solid-svg-icons';
-import { faPhone } from '@fortawesome/free-solid-svg-icons';
-import { faStar } from '@fortawesome/free-solid-svg-icons';
-import { faClock } from '@fortawesome/free-regular-svg-icons';
-import { faChevronUp } from '@fortawesome/free-solid-svg-icons';
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faCircleXmark, faClock } from '@fortawesome/free-regular-svg-icons';
+import { faCar, faHouse, faScrewdriverWrench, faPhone, faStar, faChevronUp, faChevronDown, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import useLocalStorage from '../hooks/useLocalStorage';
 import bbox from '@turf/bbox';
 import { lineString } from '@turf/helpers';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
-const CURRENT_URL = '/users/request/current';
 const QUOTE_DECISION_URL = '/users/request/quote';
 const REVISED_QUOTE_DECISION_URL = '/users/request/revised-quote'
 const RATING_URL = '/users/request/rate-fixer';
@@ -28,7 +18,6 @@ const RATING_URL = '/users/request/rate-fixer';
 const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId, fixerName }) => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
-  // const { data: jobDetails } = useRequest(axiosPrivate, CURRENT_URL);
   const [cancelled, setCancelled] = useState(false);
   const mapRef = useRef();
   const errRef = useRef();
@@ -38,7 +27,6 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
     latitude: jobDetails?.userLocation[1],
     zoom: 12,
   });
-  const [callToggle, setCallToggle] = useState(false);
   const [detailsToggle, setDetailsToggle] = useState(false);
   const [notesToggle, setNotesToggle] = useState(false);
   const [personalNotes, setPersonalNotes] = useLocalStorage('notes', 'Type any notes you want that you find helpful! For your eyes only.');
@@ -52,14 +40,6 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
     const boundingBox = bbox(line);
     mapRef.current.fitBounds(boundingBox);
   }
-
-  /* padding={
-    !portrait && !mobile 
-    ? { left: window.innerWidth * 0.27 > 425 ? 425 + 23 : window.innerWidth * 0.27 > 276 ? (window.innerWidth * 0.27) + 23 : 276 + 23, top: 0 }
-    : portrait && !mobile
-      ? { left: 0, top: 250 + 23 }
-      : { left: 0, top: 220 + 23 }
-}*/
 
   const handleAccept = async () => {
     await axiosPrivate.patch(QUOTE_DECISION_URL, {
@@ -92,7 +72,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
   const handleCancel = () => {
     setActive(false);
     socket.emit('cancel job', {
-      jobId: jobDetails.jobId, // add cancellation reason once the functionality is incorporated
+      jobId: jobDetails.jobId,
     }, (response) => {
       if (response.status === 'NOK') {
         setActive(true);
@@ -116,8 +96,6 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
       return;
     }
     setRated(true);
-    console.log(jobId);
-    console.log(fixerName);
     try {
       await axiosPrivate.patch(RATING_URL, {
         jobId,
@@ -141,7 +119,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
     </div>
   )
 
-  if (cancellation) return ( // could list cancellation reason here in future build
+  if (cancellation) return (
     <div className='cancelled'>
       <h2>The fixer has cancelled the job</h2>
       <p>Please contact us if you have any questions or concerns</p>
@@ -244,18 +222,6 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
       </div>
     </>
   )
-  /* 
-  { padding: !portrait && !mobile 
-            ? { 
-                left: window.innerWidth * 0.27 > 425 ? 425 + 23 + 200 : window.innerWidth * 0.27 > 276 ? (window.innerWidth * 0.27) + 23 + 200 : 276 + 23 + 200,
-                top: 200,
-                right: 200, 
-                bottom: 200 }
-              : portrait && !mobile
-              ? { left: 200, top: 250 + 23 + 200, right: 200, bottom: 200 }
-              : { left: 200, top: 220 + 23 + 200, right: 200, bottom: 200 }
-          }
-  */
 
   if (jobDetails?.trackerStage === 'arriving') return (
     <div className='post-en-route clients flex-container'>
@@ -371,7 +337,6 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
     </div>
   )
 
-  // deal with updated quote potentially coming in
   if (jobDetails?.trackerStage === 'fixing') return (
     <div className='post-en-route clients flex-container'>
       <div className={errMsg ? 'errmsg' : 'offscreen'} style={{ top: scrollY ? `calc(50% + ${scrollY}px)` : '50%' }}>
@@ -498,11 +463,6 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
               </form>
             ) : (
               <form onSubmit={handleRating}>
-                {/* TODO: need sub-flex-container for mobile
-                    probably best to add state for rating to disable button w/ out valid rating
-                    I think handleRating function should still work (need to test this out)
-                    but if any issues at all should create a separate function for mobile that uses state
-                */}
                 <div>
                   <input type='radio' id='1-star' name='rating' value='1' />
                   <input type='radio' id='2-star' name='rating' value='2' />

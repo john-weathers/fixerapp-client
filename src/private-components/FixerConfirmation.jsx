@@ -1,22 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link, useOutletContext } from 'react-router-dom';
-import { useProfile, useGeolocation, useRequest } from '../hooks/reactQueryHooks';
 import Map, { Marker, Source, Layer } from 'react-map-gl';
-import { faCircleXmark } from '@fortawesome/free-regular-svg-icons';
-import { faInfoCircle } from '@fortawesome/free-solid-svg-icons';
-import { faCar } from '@fortawesome/free-solid-svg-icons';
-import { faHouse } from '@fortawesome/free-solid-svg-icons';
-import { faFlagCheckered } from '@fortawesome/free-solid-svg-icons';
-import { faUser } from '@fortawesome/free-regular-svg-icons';
-import { faPhone } from '@fortawesome/free-solid-svg-icons';
-import { faClock } from '@fortawesome/free-regular-svg-icons';
-import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import { faChevronUp } from '@fortawesome/free-solid-svg-icons';
-import { faMap } from '@fortawesome/free-regular-svg-icons';
+import { faCircleXmark, faUser, faClock, faMap } from '@fortawesome/free-regular-svg-icons';
+import { faInfoCircle, faHouse, faFlagCheckered, faPhone, faChevronRight, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useAxiosPrivate from '../hooks/useAxiosPrivate';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import useLocalStorage from '../hooks/useLocalStorage';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 import circle from '@turf/circle';
@@ -24,9 +13,7 @@ import bbox from '@turf/bbox';
 import { lineString } from '@turf/helpers';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAP_SECRET_TOKEN;
-const CURRENT_URL = '/fixers/work/current';
 const ARRIVAL_URL = '/fixers/work/arrival';
-const DIRECTIONS_URL = '/fixers/work/directions';
 const QUOTE_URL = '/fixers/work/quote';
 const REVISED_COST_URL = '/fixers/work/revise-cost';
 const COMPLETE_URL = '/fixers/work/complete';
@@ -62,13 +49,9 @@ let toId = null;
 
 let testCoords;
 
-// NOTES/TODO: add :disabled general class for .btn or specify for buttons in question
-// double check handleRevisedCost is connected to stream change properly
-
 const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, cancellation, jobDetails }) => {
   const axiosPrivate = useAxiosPrivate();
   const queryClient = useQueryClient();
-  // const { isSuccess, data: jobDetails } = useRequest(axiosPrivate, CURRENT_URL);
   const [cancelled, setCancelled] = useState(false);
   const mapRef = useRef();
   const errRef = useRef();
@@ -79,7 +62,6 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
     latitude: jobDetails?.fixerLocation?.[1],
     zoom: 12,
   });
-  const [callToggle, setCallToggle] = useState(false);
   const [route, setRoute] = useState({
     type: 'Feature',
     properties: {},
@@ -120,7 +102,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
   const { active, setActive, mapHeight, portrait, mobile, scrollY } = useOutletContext();
   const navigate = useNavigate();
   
-  // for production
+  // plan on including this or similar if app were launched commercially (i.e., not in demo mode)
   /*useEffect(() => {
     const geofence = circle(jobDetails.userLocation, 0.25, { units: 'miles' });
 
@@ -160,8 +142,6 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
           }
         }]
         });
-        console.log(geojsonPoint);
-        console.log(`new coordinates are: ${newCoords}`);
         socket.emit('update location', {
           location: newCoords,
           jobId: jobDetails.jobId,
@@ -170,35 +150,29 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
     }
 
     const error = err => {
-      setErrMsg('Failed to get location data'); // might want more sophisticated error handling here
+      setErrMsg('Failed to get location data');
       errRef.current.focus();
     }
 
     if (jobDetails?.trackerStage === 'en route' && !watchId) {
-      console.log('setting watch')
       const id = navigator.geolocation.watchPosition(success, error, { timeout: 5000 });
       watchId = id;
-      console.log(`watch id is ${watchId}`);
     }
     
     return () => {
-      console.log(`clearing watch: ${watchId}`);
       navigator.geolocation.clearWatch(watchId);
       watchId = null;
     }
   }, []);*/
 
-  // for production
+  // plan on including this or similar if app were launched commercially (i.e., not in demo mode)
   /*useEffect(() => {
     if (timeoutId && jobDetails?.trackerStage && jobDetails.trackerStage !== 'en route') {
       clearTimeout(timeoutId);
       setTimeoutId(null);
     }
     if (jobDetails?.eta && jobDetails?.trackerStage === 'en route') {
-      console.log(`eta is ${jobDetails.eta}`);
       let etaTimeout = new Date(jobDetails.eta) - new Date();
-
-      console.log(`eta timeout is ${etaTimeout}`);
 
       if (etaTimeout < 0) {
         etaTimeout = 30000;
@@ -209,7 +183,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
         try {
           const directionsResponse = await axiosPrivate.patch(DIRECTIONS_URL, {
             jobId: jobDetails.jobId,
-            location: currentCoords, // not sure if this will be stale. if it is, change to regular let variable
+            location: currentCoords,
           });
           setRoute({
             type: 'Feature',
@@ -279,14 +253,8 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
     mapRef.current.fitBounds(boundingBox);
   }
 
-  // this function is for testing purposes only
-  // NOTE: may add route api call to get updated routing and clean up/add more mapping features
-  // but the main reason for the location updates are for the benefit of the
-  // client to see where the fixer is at in real time, not as a mapping app
-  // for the fixer to get real time directions
-  // in reality I wouldn't think it worth it to re-invent the wheel/bloat the application/add cost 
-  // when fixers will use Google Maps or similar for real time directions
-  // the purpose of the map for the fixer is as a starting point/visual aid and again, in general, the main to benefit is to the client
+  // this function is for demo purposes
+  // may add further functionality on the mapping side but not it's not a huge priority as it's not primary goal of the application
   const handleTestMapClick = e => {
     const geofence = circle(jobDetails.userLocation, 0.25, { units: 'miles' });
 
@@ -295,7 +263,6 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
     if (booleanPointInPolygon(testCoords, geofence)) {
       socket.emit('arriving', jobDetails.jobId, async (response) => {
         if (response.status === 'OK') {
-          // navigator.geolocation.clearWatch(watchId);
           watchId = null;
           clearTimeout(timeoutId);
           setTimeoutId(null);
@@ -304,7 +271,6 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
             await axiosPrivate.patch(ARRIVAL_URL, {
               jobId: jobDetails.jobId,
             });
-            // navigator.geolocation.clearWatch(watchId);
             watchId = null;
             clearTimeout(timeoutId);
             setTimeoutId(null);
@@ -325,8 +291,6 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
         }
       }]
       });
-      console.log(geojsonPoint);
-      console.log(`new coordinates are: ${testCoords}`);
       socket.emit('update location', {
         location: testCoords,
         jobId: jobDetails.jobId,
@@ -338,7 +302,6 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
   const handleArrival = () => {
     socket.emit('arriving', jobDetails.jobId, async (response) => {
       if (response.status === 'OK') {
-        console.log(`CLEARING WATCH: ${watchId}`);
         navigator.geolocation.clearWatch(watchId);
         watchId = null;
         clearTimeout(timeoutId);
@@ -385,7 +348,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
   const handleCancel = () => {
     setActive(false);
     socket.emit('cancel job', {
-      jobId: jobDetails.jobId, // add cancellation reason once the functionality is incorporated
+      jobId: jobDetails.jobId,
     }, (response) => {
       if (response.status === 'NOK') {
         setActive(true);
@@ -453,8 +416,6 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
       return;
     }
     setRated(true);
-    console.log(jobId);
-    console.log(rating);
     try {
       await axiosPrivate.patch(RATING_URL, {
         jobId,
@@ -478,7 +439,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
     </div>
   )
 
-  if (cancellation) return ( // could list cancellation reason here in future build
+  if (cancellation) return (
     <div className='cancelled'>
       <h2>The client has cancelled the job</h2>
       <p>Please contact us if you have any questions or concerns</p>
@@ -596,7 +557,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
                               {jobDetails.route.instructions.map((step, index) => <li key={index}>{step}</li>)}
                             </ol>
                           </div>
-                        )}{/* TODO: limit number of instruction steps (e.g., if more than 10) and add pagination */}
+                        )}
                       </div>
                     </td>
                     <td>{!toggleDirections ? 'Show directions' : 'Hide directions'}</td>
@@ -717,7 +678,7 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
               setNotes(e.target.value);
             }}
           >
-            Describe quote details (1,000 characters or less){/* keep an eye on in the case this throws an error but don't think there's a syntax/escaping issue here */}
+            Describe quote details (1,000 characters or less)
           </textarea>
           <button disabled={!quote || !notes.length || notes.length > 1000 ? true : false } className='btn'>Send quote</button>
           <div className='cancel'>    
@@ -949,11 +910,6 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
               </form>
             ) : (
               <form onSubmit={handleRating}>
-                {/* TODO: need sub-flex-container for mobile
-                    probably best to add state for rating to disable button w/ out valid rating
-                    I think handleRating function should still work (need to test this out)
-                    but if any issues at all should create a separate function for mobile that uses state
-                */}
                 <div>
                   <input type='radio' id='1-star' name='rating' value='1' />
                   <input type='radio' id='2-star' name='rating' value='2' />

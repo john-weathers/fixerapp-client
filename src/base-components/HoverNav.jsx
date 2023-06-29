@@ -3,11 +3,6 @@ import { useState } from 'react';
 const HoverNav = ({ children, title, active }) => {
     const [hover, setHover] = useState(false);
 
-    // main div parent for positioning purposes (position: relative)
-    // child div (position: absolute)
-    // ul flexbox container
-    // if this is too clumsy, can remove some elements (ul maybe) and have the div below as the flexbox container to the NavLink components
-
     return (
         <div 
         onMouseOver={() => setHover(prev => !prev)}

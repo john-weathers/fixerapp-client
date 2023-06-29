@@ -11,8 +11,6 @@ const NAME_REGEX = /^[A-Za-zÀ-ÖØ-öø-ÿ]{1,30}$/;
 const PHONE_REGEX = /^[\+0-9]{0,4}[-\s\.]?[(]?[0-9]{1,3}[)]?[-\s\.]?[0-9]{2,4}[-\s\.]?[0-9]{2,4}[-\s\.]?[0-9]{2,4}$/;
 const REGISTER_URL = '/fixer/register';
 
-// ENSURE ALL CONSOLE.LOGS ARE REMOVED PRIOR TO PRODUCTION
-
 const FixerRegistration = () => {
   const userRef = useRef();
   const errRef = useRef();
@@ -127,7 +125,6 @@ const FixerRegistration = () => {
         },
       );
       
-      console.log(response?.data); // remove before production
       setSuccess(true);
       setEmail('');
       setPwd('');
