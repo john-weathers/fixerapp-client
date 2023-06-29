@@ -77,10 +77,11 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
       if (response.status === 'NOK') {
         setActive(true);
         setErrMsg('Job cancellation failed');
+        errRef.current.focus();
       } else {
         setCancelled(true);
-        queryClient.removeQueries(['request']);
         setTimeout(() => {
+          queryClient.removeQueries(['request']);
           navigate('/');
         }, 3000)
       }
@@ -194,10 +195,12 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
                 <td><FontAwesomeIcon icon={faCar} size='lg' className='icon'/></td>
                 <td>{jobDetails.fixerName}</td>
               </tr>
-              <tr>
-                <td><FontAwesomeIcon icon={faStar} size='lg' className='icon'/></td>
-                <td>{jobDetails.fixerRating}</td>
-              </tr>
+              {jobDetails?.fixerRating && (
+                <tr>
+                  <td><FontAwesomeIcon icon={faStar} size='lg' className='icon'/></td>
+                  <td>{jobDetails.fixerRating}</td>
+                </tr>
+              )}
               <tr>
                 <td><FontAwesomeIcon icon={faPhone} size='lg' className='icon'/></td>
                 <td>{jobDetails.phoneNumber}</td>
