@@ -223,6 +223,7 @@ const QuickFixUser = () => {
       if (response?.status === 'Created') {
         setSearching(true);
         setRoomJoined(true);
+        firstUpdate = true;
       } else if (response?.status === 'Missing location data') {
         setRequesting(false);
         clearInterval(intervalId);
