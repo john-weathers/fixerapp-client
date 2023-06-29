@@ -44,7 +44,7 @@ const PrivateNavBar = ({ navOptions }) => {
         <nav className='header private'>
             <ul className='nav-container'>
                 {(navOptions.navBreak) ? (
-                    <li className='nav-subcontainer-mobile'>
+                    <div className='nav-subcontainer-mobile'>
                         <img src='/menu.svg' onClick={handleMobileMenuClick}/>
                         {mobileOpen && (
                         <ul className='mobile-popout' style={mobileHeight ? { height: mobileHeight } : { height: '100%' }}>
@@ -81,7 +81,7 @@ const PrivateNavBar = ({ navOptions }) => {
                             <li className='body-overlay' onClick={handleUMClick}></li>
                         </ul>    
                         )}
-                    </li>
+                    </div>
                 ) : (
                     <>
                         <li className='home'>
