@@ -251,6 +251,7 @@ const QuickFix = () => {
         setRoomJoined(true);
         setActive(true);
         queryClient.setQueryData(['request'], searchResponse.data);
+        setSearching(false);
         while (retryAttempts) {
           socket.emit('work found', async (response) => {
             if (response?.status === 'NOK') {
@@ -269,6 +270,7 @@ const QuickFix = () => {
         }
         retryAttempts = 2;
         retry = false;
+        count = 0;
       } catch (err) {
         count += 1;
         if (count > 7) {
