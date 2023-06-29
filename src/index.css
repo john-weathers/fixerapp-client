@@ -272,9 +272,14 @@ input {
   padding: 10px;
 }
 
-.center h2 {
+.center h1, center h2 {
   color: #364652;
   font-weight: 500;
+}
+
+.center a {
+  text-decoration: none;
+  color: #680982;
 }
 
 .login .account-p {
