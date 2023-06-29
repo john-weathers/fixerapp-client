@@ -356,8 +356,8 @@ const FixerConfirmation = ({ socket, finalizing: { finalizing, setFinalizing }, 
         errRef.current.focus();
       } else {
         setCancelled(true);
-        queryClient.removeQueries(['request']);
         setTimeout(() => {
+          queryClient.removeQueries(['request']);
           navigate('/fixers');
         }, 3000)
       }
