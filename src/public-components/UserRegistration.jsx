@@ -149,7 +149,7 @@ const UserRegistration = () => {
   return (
     <>
       {success ? (
-        <section>
+        <section className='center'>
           <h1>Success!</h1>
           <Link to='/user-login'>Sign In</Link>
         </section>

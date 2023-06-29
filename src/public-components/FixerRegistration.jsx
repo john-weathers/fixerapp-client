@@ -149,7 +149,7 @@ const FixerRegistration = () => {
   return (
     <>
       {success ? (
-        <section>
+        <section className='center'>
           <h1>Success!</h1>
           <Link to='/fixer-login'>Sign In</Link>
         </section>
