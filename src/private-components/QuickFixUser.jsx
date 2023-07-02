@@ -66,7 +66,7 @@ const QuickFixUser = () => {
   const location = useLocation();
 
   useEffect(() => {
-    socket = io('http://localhost:8000/user', {
+    socket = io('https://fixerapp-api.onrender.com/user', {
       extraHeaders: {
         'Authorization': `Bearer ${auth.accessToken}`,
       }
