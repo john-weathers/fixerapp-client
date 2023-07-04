@@ -1,5 +1,5 @@
 import axios from 'axios';
-const BASE_URL = 'https://fixerapp-api.onrender.com';
+const BASE_URL = 'https://api.fixerapp.johnweathers.dev'
 
 export default axios.create({
     baseURL: BASE_URL
