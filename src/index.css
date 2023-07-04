@@ -1018,7 +1018,7 @@ input {
   border-radius: 5px;
 }
 
-@media screen and ((max-width: 768px) or (orientation: portrait)) {
+@media screen and (max-width: 768px), (orientation: portrait) {
   .learn-more-layout .flex-container {
     flex-direction: column;
     height: 120vh;
