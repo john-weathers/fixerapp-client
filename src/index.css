@@ -1637,8 +1637,11 @@ input {
 
 @media screen and (orientation: portrait), (max-width: 480px) {
   .sidebar.quick-fix.fixers {
-    min-height: none;
-    height: fit-content;
+    min-height: 0;
+    /*height: fit-content;*/
+    height: auto;
+    min-height: fit-content;
+    max-height: fit-content;
   }
 
   .sidebar.quick-fix.fixers .requesting {
