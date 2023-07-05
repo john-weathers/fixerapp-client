@@ -12,6 +12,8 @@ const RequireAuthRoot = ({ userRoles, fixerRoles }) => {
 
     const roles = decoded?.userInfo?.roles || [];
 
+    console.log(roles);
+
     return (
         roles.find(role => userRoles?.includes(role))
             ? <Outlet />

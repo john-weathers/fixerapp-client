@@ -240,7 +240,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
       <div className='flex-item one'>
         <ul>
           <li style={{ marginBottom: !detailsToggle ? 42 :  20 }}>
-            <button type='button' onClick={() => setDetailsToggle(prev => !prev)}>
+            <button type='button' onClick={() => setDetailsToggle(prev => !prev)} className='menu-btn'>
               <FontAwesomeIcon icon={!detailsToggle ? faChevronRight : faChevronDown} size='lg' className='chevron'/><span>Job details</span>
             </button>
           </li>
@@ -265,7 +265,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
             </li>
           )}
           <li className='notes-li'>
-            <button type='button' onClick={() => setNotesToggle(prev => !prev)}>
+            <button type='button' onClick={() => setNotesToggle(prev => !prev)} className='menu-btn'>
               <FontAwesomeIcon icon={!notesToggle ? faChevronRight : faChevronDown} size='lg' className='chevron'/><span>Personal notes</span>
             </button>
           </li>
@@ -354,7 +354,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
       <div className='flex-item one'>
         <ul>
           <li style={{ marginBottom: !detailsToggle ? 42 :  20 }}>
-            <button type='button' onClick={() => setDetailsToggle(prev => !prev)}>
+            <button type='button' onClick={() => setDetailsToggle(prev => !prev)} className='menu-btn'>
               <FontAwesomeIcon icon={!detailsToggle ? faChevronRight : faChevronDown} size='lg' className='chevron'/><span>Job details</span>
             </button>
           </li>
@@ -379,7 +379,7 @@ const UserConfirmation = ({ socket, finalizing, cancellation, jobDetails, jobId,
             </li>
           )}
           <li className='notes-li'>
-            <button type='button' onClick={() => setNotesToggle(prev => !prev)}>
+            <button type='button' onClick={() => setNotesToggle(prev => !prev)} className='menu-btn'>
               <FontAwesomeIcon icon={!notesToggle ? faChevronRight : faChevronDown} size='lg' className='chevron'/><span>Personal notes</span>
             </button>
           </li>

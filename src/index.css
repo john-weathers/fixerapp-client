@@ -167,6 +167,10 @@ input {
   font-family: 'Inter', sans-serif;
 }
 
+.menu-btn {
+  color: black;
+}
+
 .post-en-route.flex-container {
   display: flex;
   min-height: calc(100vh - 105px);
