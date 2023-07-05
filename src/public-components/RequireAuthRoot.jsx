@@ -12,6 +12,11 @@ const RequireAuthRoot = ({ userRoles, fixerRoles }) => {
 
     const roles = decoded?.userInfo?.roles || [];
 
+    if (auth?.accessToken) {
+        console.log('access token available');
+    } else {
+        console.log('no access token');
+    }
     console.log(roles);
 
     return (
