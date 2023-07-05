@@ -2,6 +2,14 @@ import axios from '../api/axios';
 import useAuth from './useAuth';
 import useLocalStorage from './useLocalStorage';
 
+const timeout = () => {
+    return new Promise((res, rej) => {
+      setTimeout(() => {
+        res('timeout over');
+      }, 3000)
+    })
+}
+
 const useRefreshToken = () => {
     const { setAuth } = useAuth();
     const [userType] = useLocalStorage('userType', null);
@@ -32,6 +40,7 @@ const useRefreshToken = () => {
                         accessToken: response.data.accessToken
                     }
                 });
+                await timeout();
             }
     
             if (response) return response.data.accessToken;
