@@ -2,11 +2,12 @@ import axios from '../api/axios';
 import useAuth from './useAuth';
 import useLocalStorage from './useLocalStorage';
 
+// test to find potential shorter timeout that will still work with iOS
 const timeout = () => {
     return new Promise((res, rej) => {
       setTimeout(() => {
         res('timeout over');
-      }, 3000)
+      }, 2000)
     })
 }
 
