@@ -187,12 +187,10 @@ const FixerRegistration = () => {
               onBlur={() => setEmailFocus(false)}
               className='text-field'
             />
-            {
-            /*<p id='uidnote' className={emailFocus && email && !validEmail ? 'instructions' : 'offscreen'}>
-              <FontAwesomeIcon icon={faInfoCircle} />
+            <p id='uidnote' className={emailFocus && email && !validEmail ? 'instructions' : 'offscreen'}>
+              <FontAwesomeIcon icon={faInfoCircle} />{' '}
               Enter a valid email address.
-            </p>*/
-            }
+            </p>
 
 
             <label htmlFor='password' className='text-label'>
@@ -259,6 +257,10 @@ const FixerRegistration = () => {
               onBlur={() => setFirstFocus(false)}
               className='text-field'
             />
+            <p id='firstnamenote' className={firstFocus && firstName && !validFirst ? 'instructions' : 'offscreen'}>
+              <FontAwesomeIcon icon={faInfoCircle} />{' '}
+              Alphabet characters only.
+            </p>
 
 
             <label htmlFor='last_name' className='text-label'>
@@ -276,6 +278,10 @@ const FixerRegistration = () => {
               onBlur={() => setLastFocus(false)}
               className='text-field'
             />
+            <p id='lastnamenote' className={lastFocus && lastName && !validLast ? 'instructions' : 'offscreen'}>
+              <FontAwesomeIcon icon={faInfoCircle} />{' '}
+              Alphabet characters only.
+            </p>
 
 
             <label htmlFor='phone_number' className='text-label'>
@@ -293,6 +299,10 @@ const FixerRegistration = () => {
               onBlur={() => setPhoneFocus(false)}
               className='text-field'
             />
+            <p id='phonenote' className={phoneFocus && phoneNumber && !validNumber ? 'instructions' : 'offscreen'}>
+              <FontAwesomeIcon icon={faInfoCircle} />{' '}
+              Enter a valid phone number.
+            </p>
 
             <button disabled={!validEmail || !validPwd || !validMatch || !validFirst || !validLast || !validNumber ? true : false} className='btn'>Sign up</button>
           </form>
